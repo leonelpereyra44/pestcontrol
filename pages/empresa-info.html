@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información de la Empresa - Sistema de Control de Plagas</title>
+    <link rel="stylesheet" href="../css/empresa-info.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏢 Información de la Empresa</h1>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Loading inicial -->
+        <div id="loadingInitial" class="loading">
+            <div class="spinner"></div>
+            <p>Cargando información...</p>
+        </div>
+
+        <!-- Contenido principal -->
+        <div id="mainContent" class="content-card" style="display: none;">
+            
+            <!-- Información Básica -->
+            <section class="section">
+                <h2>📋 Información Básica</h2>
+                <form id="empresaBasicForm" onsubmit="saveBasicInfo(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="empresaNombre">Nombre de la Empresa *</label>
+                            <input type="text" id="empresaNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="empresaCuit">CUIT/RUT</label>
+                            <input type="text" id="empresaCuit">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="empresaDireccion">Dirección</label>
+                            <input type="text" id="empresaDireccion">
+                        </div>
+                        <div class="form-group">
+                            <label for="empresaTelefono">Teléfono</label>
+                            <input type="tel" id="empresaTelefono">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">💾 Guardar Información Básica</button>
+                </form>
+            </section>
+
+            <hr>
+
+            <!-- Documentos de la Empresa -->
+            <section class="section">
+                <h2>📄 Documentos de la Empresa</h2>
+                
+                <!-- Logo -->
+                <div class="document-item">
+                    <div class="document-info">
+                        <h3>🖼️ Logo de la Empresa</h3>
+                        <p>Formatos: PNG, JPG (máx. 5MB)</p>
+                        <div id="logoPreview" class="preview-container"></div>
+                    </div>
+                    <div class="document-actions">
+                        <input type="file" id="logoInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadLogo(event)">
+                        <button class="btn btn-primary" onclick="document.getElementById('logoInput').click()">
+                            📤 Subir Logo
+                        </button>
+                        <button class="btn btn-danger" id="deleteLogo" onclick="deleteDocument('logo')" style="display: none;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sello Oficial -->
+                <div class="document-item">
+                    <div class="document-info">
+                        <h3>🔖 Sello Oficial</h3>
+                        <p>Formatos: PNG (con transparencia recomendado) (máx. 5MB)</p>
+                        <div id="selloPreview" class="preview-container"></div>
+                    </div>
+                    <div class="document-actions">
+                        <input type="file" id="selloInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadSello(event)">
+                        <button class="btn btn-primary" onclick="document.getElementById('selloInput').click()">
+                            📤 Subir Sello
+                        </button>
+                        <button class="btn btn-danger" id="deleteSello" onclick="deleteDocument('sello')" style="display: none;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Certificado de Habilitación -->
+                <div class="document-item">
+                    <div class="document-info">
+                        <h3>📜 Certificado de Habilitación</h3>
+                        <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
+                        <div id="habilitacionPreview" class="preview-container"></div>
+                    </div>
+                    <div class="document-actions">
+                        <input type="file" id="habilitacionInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadHabilitacion(event)">
+                        <button class="btn btn-primary" onclick="document.getElementById('habilitacionInput').click()">
+                            📤 Subir Certificado
+                        </button>
+                        <button class="btn btn-danger" id="deleteHabilitacion" onclick="deleteDocument('habilitacion')" style="display: none;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Certificado SENASA -->
+                <div class="document-item">
+                    <div class="document-info">
+                        <h3>🏛️ Certificado SENASA / Regulatorio</h3>
+                        <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
+                        <div id="senasaPreview" class="preview-container"></div>
+                    </div>
+                    <div class="document-actions">
+                        <input type="file" id="senasaInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadSenasa(event)">
+                        <button class="btn btn-primary" onclick="document.getElementById('senasaInput').click()">
+                            📤 Subir Certificado
+                        </button>
+                        <button class="btn btn-danger" id="deleteSenasa" onclick="deleteDocument('senasa')" style="display: none;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- Firmas y Sellos de Trabajadores -->
+            <section class="section">
+                <h2>✍️ Firmas y Sellos de Trabajadores</h2>
+                <p style="color: #666; margin-bottom: 20px;">Gestiona las firmas y sellos personales de cada trabajador que usarán para firmar los controles.</p>
+                
+                <div id="workersLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando trabajadores...</p>
+                </div>
+
+                <div id="workersContainer" style="display: none;">
+                    <!-- Se llenará dinámicamente con los trabajadores -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../ts/auth.js"></script>
+    
+    <script>
+        let currentWorkerInfo = null
+        let currentEmpresa = null
+
+        // Cargar al inicio
+        window.addEventListener('DOMContentLoaded', async () => {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            currentWorkerInfo = await window.authUtils.getWorkerProfile()
+            
+            if (!currentWorkerInfo) {
+                alert('❌ No se pudo cargar información del worker')
+                window.location.href = '../index.html'
+                return
+            }
+
+            // Verificar que sea admin o supervisor
+            if (currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor') {
+                alert('❌ Solo administradores pueden acceder a esta página')
+                window.location.href = '../index.html'
+                return
+            }
+            
+            await loadEmpresaInfo()
+        })
+
+        async function loadEmpresaInfo() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('empresa')
+                    .select('*')
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+                    .single()
+
+                if (error) throw error
+
+                currentEmpresa = data
+
+                // Llenar formulario básico
+                document.getElementById('empresaNombre').value = data.nombre || ''
+                document.getElementById('empresaCuit').value = data.cuit || ''
+                document.getElementById('empresaDireccion').value = data.direccion || ''
+                document.getElementById('empresaTelefono').value = data.telefono || ''
+
+                // Mostrar previews de documentos existentes
+                await showDocumentPreviews()
+
+                document.getElementById('loadingInitial').style.display = 'none'
+                document.getElementById('mainContent').style.display = 'block'
+
+            } catch (error) {
+                console.error('Error cargando empresa:', error)
+                alert('Error al cargar información: ' + error.message)
+            }
+        }
+
+        async function showDocumentPreviews() {
+            if (currentEmpresa.logo_url) {
+                await showPreview('logo', currentEmpresa.logo_url)
+            }
+            if (currentEmpresa.sello_url) {
+                await showPreview('sello', currentEmpresa.sello_url)
+            }
+            if (currentEmpresa.certificado_habilitacion_url) {
+                await showPreview('habilitacion', currentEmpresa.certificado_habilitacion_url)
+            }
+            if (currentEmpresa.certificado_senasa_url) {
+                await showPreview('senasa', currentEmpresa.certificado_senasa_url)
+            }
+        }
+
+        async function showPreview(type, filePath) {
+            const container = document.getElementById(`${type}Preview`)
+            const deleteBtn = document.getElementById(`delete${type.charAt(0).toUpperCase() + type.slice(1)}`)
+            
+            if (!filePath) {
+                console.log(`No hay archivo para ${type}`)
+                return
+            }
+
+            console.log(`Mostrando preview de ${type}, path:`, filePath)
+            
+            try {
+                // Verificar si el archivo existe primero
+                const { data: listData, error: listError } = await supabaseClient.storage
+                    .from('empresas')
+                    .list(filePath.substring(0, filePath.lastIndexOf('/')))
+
+                if (listError) {
+                    console.error('Error listando archivos:', listError)
+                }
+
+                const { data, error } = await supabaseClient.storage
+                    .from('empresas')
+                    .createSignedUrl(filePath, 3600) // 1 hora
+
+                if (error) {
+                    console.error(`Error obteniendo URL firmada para ${type}:`, error)
+                    throw error
+                }
+
+                if (!data || !data.signedUrl) {
+                    throw new Error('No se pudo generar la URL firmada')
+                }
+
+                console.log(`URL firmada generada para ${type}:`, data.signedUrl)
+
+                const fileExtension = filePath.split('.').pop().toLowerCase()
+                
+                if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                    container.innerHTML = `
+                        <img src="${data.signedUrl}" alt="${type}" class="preview-image">
+                        <a href="${data.signedUrl}" target="_blank" class="preview-link">Ver imagen completa</a>
+                    `
+                } else if (fileExtension === 'pdf') {
+                    container.innerHTML = `
+                        <div class="pdf-preview">📄 PDF</div>
+                        <a href="${data.signedUrl}" target="_blank" class="preview-link">Ver PDF</a>
+                    `
+                }
+
+                if (deleteBtn) {
+                    deleteBtn.style.display = 'inline-block'
+                }
+
+            } catch (error) {
+                console.error(`Error mostrando preview de ${type}:`, error)
+                container.innerHTML = `<p style="color: #e74c3c; font-size: 12px;">⚠️ Error: ${error.message}</p>`
+            }
+        }
+
+        async function saveBasicInfo(event) {
+            event.preventDefault()
+
+            const empresaData = {
+                nombre: document.getElementById('empresaNombre').value,
+                cuit: document.getElementById('empresaCuit').value,
+                direccion: document.getElementById('empresaDireccion').value,
+                telefono: document.getElementById('empresaTelefono').value
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('empresa')
+                    .update(empresaData)
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+
+                if (error) throw error
+
+                alert('✅ Información básica guardada exitosamente')
+                await loadEmpresaInfo()
+
+            } catch (error) {
+                console.error('Error guardando información:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== FUNCIONES DE UPLOAD ==========
+
+        async function uploadLogo(event) {
+            await uploadFile(event, 'logo', 'logo_url')
+        }
+
+        async function uploadSello(event) {
+            await uploadFile(event, 'sello', 'sello_url')
+        }
+
+        async function uploadHabilitacion(event) {
+            await uploadFile(event, 'habilitacion', 'certificado_habilitacion_url')
+        }
+
+        async function uploadSenasa(event) {
+            await uploadFile(event, 'senasa', 'certificado_senasa_url')
+        }
+
+        async function uploadFile(event, type, dbColumn) {
+            const file = event.target.files[0]
+            if (!file) return
+
+            // Validar tamaño
+            const maxSize = type === 'logo' || type === 'sello' ? 5 * 1024 * 1024 : 10 * 1024 * 1024
+            if (file.size > maxSize) {
+                alert(`❌ El archivo es demasiado grande. Máximo: ${maxSize / 1024 / 1024}MB`)
+                return
+            }
+
+            const loadingMsg = document.createElement('div')
+            loadingMsg.className = 'upload-loading'
+            loadingMsg.innerHTML = '<div class="spinner"></div><p>Subiendo archivo...</p>'
+            document.body.appendChild(loadingMsg)
+
+            try {
+                // Si existe un archivo anterior, eliminarlo primero
+                const oldFilePath = currentEmpresa[dbColumn]
+                if (oldFilePath) {
+                    console.log('Eliminando archivo anterior:', oldFilePath)
+                    const { error: deleteError } = await supabaseClient.storage
+                        .from('empresas')
+                        .remove([oldFilePath])
+                    
+                    if (deleteError) {
+                        console.warn('No se pudo eliminar archivo anterior:', deleteError)
+                    }
+                }
+
+                // Generar nombre único
+                const fileExtension = file.name.split('.').pop()
+                const fileName = `${currentWorkerInfo.empresa_id}/${type}/${Date.now()}.${fileExtension}`
+
+                console.log('Subiendo archivo:', fileName)
+
+                // Subir a Storage
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('empresas')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false // Cambiado a false para evitar sobrescribir
+                    })
+
+                if (uploadError) throw uploadError
+
+                console.log('Archivo subido exitosamente:', uploadData)
+
+                // Actualizar URL en la base de datos
+                const updateData = {}
+                updateData[dbColumn] = uploadData.path // Usar uploadData.path en lugar de fileName
+
+                const { error: updateError } = await supabaseClient
+                    .from('empresa')
+                    .update(updateData)
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+
+                if (updateError) throw updateError
+
+                alert('✅ Archivo subido exitosamente')
+                await loadEmpresaInfo()
+
+            } catch (error) {
+                console.error('Error subiendo archivo:', error)
+                alert('❌ Error subiendo archivo: ' + error.message)
+            } finally {
+                document.body.removeChild(loadingMsg)
+                event.target.value = '' // Reset input
+            }
+        }
+
+        async function deleteDocument(type) {
+            const typeMap = {
+                'logo': 'logo_url',
+                'sello': 'sello_url',
+                'habilitacion': 'certificado_habilitacion_url',
+                'senasa': 'certificado_senasa_url'
+            }
+
+            if (!confirm('¿Estás seguro de eliminar este documento?')) {
+                return
+            }
+
+            const dbColumn = typeMap[type]
+            const filePath = currentEmpresa[dbColumn]
+
+            try {
+                // Eliminar de Storage
+                const { error: storageError } = await supabaseClient.storage
+                    .from('empresas')
+                    .remove([filePath])
+
+                if (storageError) throw storageError
+
+                // Actualizar DB
+                const updateData = {}
+                updateData[dbColumn] = null
+
+                const { error: updateError } = await supabaseClient
+                    .from('empresa')
+                    .update(updateData)
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+
+                if (updateError) throw updateError
+
+                alert('✅ Documento eliminado exitosamente')
+                await loadEmpresaInfo()
+
+            } catch (error) {
+                console.error('Error eliminando documento:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== FUNCIONES PARA GESTIÓN DE TRABAJADORES ==========
+
+        let allWorkers = []
+
+        async function loadWorkers() {
+            try {
+                document.getElementById('workersLoading').style.display = 'block'
+                document.getElementById('workersContainer').style.display = 'none'
+
+                const { data, error } = await supabaseClient
+                    .from('worker')
+                    .select('*')
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+                    .order('nombre')
+
+                if (error) throw error
+
+                allWorkers = data || []
+
+                document.getElementById('workersLoading').style.display = 'none'
+                document.getElementById('workersContainer').style.display = 'block'
+
+                renderWorkers()
+
+            } catch (error) {
+                console.error('Error cargando trabajadores:', error)
+                document.getElementById('workersLoading').style.display = 'none'
+                alert('Error al cargar trabajadores: ' + error.message)
+            }
+        }
+
+        function renderWorkers() {
+            const container = document.getElementById('workersContainer')
+            
+            if (allWorkers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No hay trabajadores registrados</p>'
+                return
+            }
+
+            container.innerHTML = allWorkers.map(worker => `
+                <div class="worker-card">
+                    <div class="worker-header">
+                        <div style="flex: 1;">
+                            <h3>${worker.nombre} ${worker.apellido || ''}</h3>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                                <p style="color: #666; font-size: 14px; margin: 0;">
+                                    ${worker.mail}
+                                </p>
+                                <span style="color: #ccc;">•</span>
+                                <div class="puesto-editable" style="display: flex; align-items: center; gap: 5px;">
+                                    <span id="puestoText_${worker.worker_id}" 
+                                          class="puesto-text" 
+                                          onclick="${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? `editarPuesto('${worker.worker_id}')` : ''}"
+                                          style="cursor: ${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? 'pointer' : 'default'}; color: #667eea; font-size: 14px; font-weight: 500;">
+                                        ${worker.puesto || 'Sin puesto'}
+                                    </span>
+                                    ${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? 
+                                        `<button onclick="editarPuesto('${worker.worker_id}')" class="btn-edit-puesto" title="Editar puesto">✏️</button>` 
+                                        : ''}
+                                    <input 
+                                        type="text" 
+                                        id="puestoInput_${worker.worker_id}" 
+                                        class="puesto-input" 
+                                        value="${worker.puesto || ''}"
+                                        placeholder="Ej: Técnico de fumigación"
+                                        onblur="guardarPuesto('${worker.worker_id}')"
+                                        onkeypress="if(event.key==='Enter') guardarPuesto('${worker.worker_id}')"
+                                        style="display: none;"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 14px; color: #666; font-weight: 500;">Rol:</label>
+                            <select 
+                                id="rolSelect_${worker.worker_id}" 
+                                class="rol-select"
+                                onchange="cambiarRol('${worker.worker_id}', this.value)"
+                                ${currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor' ? 'disabled' : ''}
+                            >
+                                <option value="operador" ${worker.rol === 'operador' ? 'selected' : ''}>Operador</option>
+                                <option value="supervisor" ${worker.rol === 'supervisor' ? 'selected' : ''}>Supervisor</option>
+                                <option value="admin" ${worker.rol === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="worker-documents">
+                        <!-- Firma -->
+                        <div class="worker-doc-item">
+                            <div class="worker-doc-info">
+                                <strong>✍️ Firma Digital</strong>
+                                <div id="workerFirma_${worker.worker_id}" class="worker-preview"></div>
+                            </div>
+                            <div class="worker-doc-actions">
+                                <input type="file" id="firmaInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'firma')">
+                                <button class="btn btn-primary btn-small" onclick="document.getElementById('firmaInput_${worker.worker_id}').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-small" id="deleteFirma_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'firma')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sello -->
+                        <div class="worker-doc-item">
+                            <div class="worker-doc-info">
+                                <strong>🔖 Sello Personal</strong>
+                                <div id="workerSello_${worker.worker_id}" class="worker-preview"></div>
+                            </div>
+                            <div class="worker-doc-actions">
+                                <input type="file" id="selloInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'sello')">
+                                <button class="btn btn-primary btn-small" onclick="document.getElementById('selloInput_${worker.worker_id}').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-small" id="deleteSello_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'sello')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+
+            // Mostrar previews de documentos existentes
+            allWorkers.forEach(async worker => {
+                if (worker.firma_url) {
+                    await showWorkerPreview(worker.worker_id, 'firma', worker.firma_url)
+                }
+                if (worker.sello_url) {
+                    await showWorkerPreview(worker.worker_id, 'sello', worker.sello_url)
+                }
+            })
+        }
+
+        async function showWorkerPreview(workerId, type, filePath) {
+            const container = document.getElementById(`worker${type.charAt(0).toUpperCase() + type.slice(1)}_${workerId}`)
+            const deleteBtn = document.getElementById(`delete${type.charAt(0).toUpperCase() + type.slice(1)}_${workerId}`)
+            
+            try {
+                const { data, error } = await supabaseClient.storage
+                    .from('workers')
+                    .createSignedUrl(filePath, 3600)
+
+                if (error) throw error
+
+                container.innerHTML = `<img src="${data.signedUrl}" alt="${type}" class="worker-preview-img">`
+                
+                if (deleteBtn) {
+                    deleteBtn.style.display = 'inline-block'
+                }
+
+            } catch (error) {
+                console.error(`Error mostrando preview de ${type}:`, error)
+                container.innerHTML = `<p style="color: #999; font-size: 12px;">Error cargando preview</p>`
+            }
+        }
+
+        async function uploadWorkerDoc(event, workerId, type) {
+            const file = event.target.files[0]
+            if (!file) return
+
+            // Validar tamaño (máx 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('❌ El archivo es demasiado grande. Máximo: 5MB')
+                return
+            }
+
+            const loadingMsg = document.createElement('div')
+            loadingMsg.className = 'upload-loading'
+            loadingMsg.innerHTML = '<div class="spinner"></div><p>Subiendo archivo...</p>'
+            document.body.appendChild(loadingMsg)
+
+            try {
+                const fileExtension = file.name.split('.').pop()
+                const fileName = `${workerId}/${type}/${Date.now()}.${fileExtension}`
+
+                // Subir a Storage
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('workers')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    })
+
+                if (uploadError) throw uploadError
+
+                // Actualizar URL en la base de datos
+                const updateData = {}
+                updateData[`${type}_url`] = fileName
+
+                const { error: updateError } = await supabaseClient
+                    .from('worker')
+                    .update(updateData)
+                    .eq('worker_id', workerId)
+
+                if (updateError) throw updateError
+
+                alert('✅ Archivo subido exitosamente')
+                await loadWorkers()
+
+            } catch (error) {
+                console.error('Error subiendo archivo:', error)
+                alert('❌ Error subiendo archivo: ' + error.message)
+            } finally {
+                document.body.removeChild(loadingMsg)
+                event.target.value = ''
+            }
+        }
+
+        async function deleteWorkerDoc(workerId, type) {
+            if (!confirm('¿Estás seguro de eliminar este documento?')) {
+                return
+            }
+
+            const worker = allWorkers.find(w => w.worker_id === workerId)
+            const filePath = worker[`${type}_url`]
+
+            try {
+                // Eliminar de Storage
+                const { error: storageError } = await supabaseClient.storage
+                    .from('workers')
+                    .remove([filePath])
+
+                if (storageError) throw storageError
+
+                // Actualizar DB
+                const updateData = {}
+                updateData[`${type}_url`] = null
+
+                const { error: updateError } = await supabaseClient
+                    .from('worker')
+                    .update(updateData)
+                    .eq('worker_id', workerId)
+
+                if (updateError) throw updateError
+
+                alert('✅ Documento eliminado exitosamente')
+                await loadWorkers()
+
+            } catch (error) {
+                console.error('Error eliminando documento:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== FUNCIÓN PARA CAMBIAR ROL ==========
+        
+        async function cambiarRol(workerId, nuevoRol) {
+            // Validar que el usuario actual sea admin o supervisor
+            if (currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor') {
+                alert('❌ No tienes permisos para cambiar roles')
+                await loadWorkers() // Recargar para revertir el cambio visual
+                return
+            }
+
+            // Confirmar el cambio
+            const worker = allWorkers.find(w => w.worker_id === workerId)
+            if (!worker) return
+
+            const confirmMsg = `¿Cambiar el rol de ${worker.nombre} ${worker.apellido || ''} a "${nuevoRol}"?`
+            if (!confirm(confirmMsg)) {
+                // Revertir el select al valor anterior
+                document.getElementById(`rolSelect_${workerId}`).value = worker.rol
+                return
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('worker')
+                    .update({ rol: nuevoRol })
+                    .eq('worker_id', workerId)
+
+                if (error) throw error
+
+                alert(`✅ Rol actualizado exitosamente a "${nuevoRol}"`)
+                await loadWorkers() // Recargar lista de trabajadores
+
+            } catch (error) {
+                console.error('Error actualizando rol:', error)
+                alert('❌ Error actualizando rol: ' + error.message)
+                // Revertir el select al valor anterior
+                document.getElementById(`rolSelect_${workerId}`).value = worker.rol
+            }
+        }
+
+        // ========== FUNCIONES PARA EDITAR PUESTO ==========
+
+        function editarPuesto(workerId) {
+            // Validar permisos
+            if (currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor') {
+                return
+            }
+
+            const textElement = document.getElementById(`puestoText_${workerId}`)
+            const inputElement = document.getElementById(`puestoInput_${workerId}`)
+            
+            if (textElement && inputElement) {
+                textElement.style.display = 'none'
+                inputElement.style.display = 'inline-block'
+                inputElement.focus()
+                inputElement.select()
+            }
+        }
+
+        async function guardarPuesto(workerId) {
+            const inputElement = document.getElementById(`puestoInput_${workerId}`)
+            const textElement = document.getElementById(`puestoText_${workerId}`)
+            
+            if (!inputElement || !textElement) return
+
+            const nuevoPuesto = inputElement.value.trim()
+            const worker = allWorkers.find(w => w.worker_id === workerId)
+            
+            if (!worker) return
+
+            // Si no cambió, solo ocultar el input
+            if (nuevoPuesto === (worker.puesto || '')) {
+                inputElement.style.display = 'none'
+                textElement.style.display = 'inline'
+                return
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('worker')
+                    .update({ puesto: nuevoPuesto || null })
+                    .eq('worker_id', workerId)
+
+                if (error) throw error
+
+                // Actualizar el texto mostrado
+                textElement.textContent = nuevoPuesto || 'Sin puesto'
+                textElement.style.display = 'inline'
+                inputElement.style.display = 'none'
+
+                // Actualizar el array local
+                worker.puesto = nuevoPuesto
+
+                // Mostrar mensaje de éxito (pequeño y discreto)
+                const msg = document.createElement('span')
+                msg.textContent = '✓'
+                msg.style.cssText = 'color: #27ae60; font-size: 16px; margin-left: 5px;'
+                textElement.parentNode.appendChild(msg)
+                setTimeout(() => msg.remove(), 2000)
+
+            } catch (error) {
+                console.error('Error actualizando puesto:', error)
+                alert('❌ Error actualizando puesto: ' + error.message)
+                // Revertir al valor anterior
+                inputElement.value = worker.puesto || ''
+                inputElement.style.display = 'none'
+                textElement.style.display = 'inline'
+            }
+        }
+
+        // Cargar trabajadores al cargar la página
+        window.addEventListener('DOMContentLoaded', async () => {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            currentWorkerInfo = await window.authUtils.getWorkerProfile()
+            
+            if (!currentWorkerInfo) {
+                alert('❌ No se pudo cargar información del worker')
+                window.location.href = '../index.html'
+                return
+            }
+
+            if (currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor') {
+                alert('❌ Solo administradores pueden acceder a esta página')
+                window.location.href = '../index.html'
+                return
+            }
+            
+            await loadEmpresaInfo()
+            await loadWorkers()
+        })
+    </script>
+</body>
+</html>

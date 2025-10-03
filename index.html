@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .welcome-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        .login-prompt {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .login-prompt a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        .login-prompt a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PCP - Sistema de Gestión</h1>
+        <div class="user-info" id="userInfo">
+            <div class="loading">Cargando...</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="authContent">
+            <div class="loading">Verificando sesión...</div>
+        </div>
+    </div>
+
+    <!-- Incluir Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Incluir nuestro sistema de autenticación -->
+    <script src="ts/auth.js"></script>
+    <!-- Incluir funciones multi-tenant -->
+    <script src="ts/multi-tenant.js"></script>
+
+    <script>
+        // Esperar a que se inicialice la autenticación
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Esperar un poco para que se inicialice la autenticación
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            const userInfoContainer = document.getElementById('userInfo')
+            const authContent = document.getElementById('authContent')
+            
+            if (window.authUtils && window.authUtils.isLoggedIn()) {
+                // Usuario autenticado
+                const user = window.authUtils.getCurrentUser()
+                
+                // Obtener información del worker y empresa
+                try {
+                    const workerProfile = await window.authUtils.getWorkerProfile()
+                    
+                    if (workerProfile) {
+                        // Mostrar información completa del worker y empresa
+                        userInfoContainer.innerHTML = `
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">${workerProfile.nombre}</div>
+                                <div style="font-size: 12px; color: #ccc;">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
+                            </div>
+                            <button onclick="logout()" style="
+                                padding: 8px 16px;
+                                background-color: #dc3545;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                margin-left: 10px;
+                            ">Cerrar Sesión</button>
+                        `
+                    } else {
+                        // Fallback si no se encuentra el perfil del worker
+                        userInfoContainer.innerHTML = `
+                            <span>Bienvenido, ${user.email}</span>
+                            <button onclick="logout()" style="
+                                padding: 8px 16px;
+                                background-color: #dc3545;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                margin-left: 10px;
+                            ">Cerrar Sesión</button>
+                        `
+                    }
+                } catch (error) {
+                    console.error('Error cargando perfil:', error)
+                    // Fallback básico
+                    userInfoContainer.innerHTML = `
+                        <span>Bienvenido, ${user.email}</span>
+                        <button onclick="logout()" style="
+                            padding: 8px 16px;
+                            background-color: #dc3545;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            margin-left: 10px;
+                        ">Cerrar Sesión</button>
+                    `
+                }
+                
+                // Mostrar contenido principal
+                try {
+                    const workerProfile = await window.authUtils.getWorkerProfile()
+                    
+                    if (workerProfile) {
+                        // Verificar si es super admin sin empresa
+                        if (workerProfile.is_super_admin && !workerProfile.empresa_id) {
+                            // Super Admin SIN empresa - Panel especial
+                            userInfoContainer.innerHTML = `
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold;">👑 ${workerProfile.nombre}</div>
+                                    <div style="font-size: 12px; color: #ccc;">Super Administrador</div>
+                                </div>
+                                <button onclick="logout()" style="
+                                    padding: 8px 16px;
+                                    background-color: #dc3545;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    margin-left: 10px;
+                                ">Cerrar Sesión</button>
+                            `
+                            
+                            authContent.innerHTML = `
+                                <div class="welcome-card">
+                                    <h2>👑 Panel de Super Administrador</h2>
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 10px; margin: 20px 0; color: white;">
+                                        <h3 style="margin: 0 0 10px 0;">Bienvenido, ${workerProfile.nombre}</h3>
+                                        <p style="margin: 0; opacity: 0.9;">Tienes acceso total al sistema para gestionar todas las empresas</p>
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; cursor: pointer;" onclick="window.location.href='pages/super-admin.html'">
+                                            <div style="font-size: 3rem; margin-bottom: 15px;">🏢</div>
+                                            <h3 style="margin: 0 0 10px 0;">Gestión de Empresas</h3>
+                                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">Ver todas las empresas, crear nuevas y generar invitaciones</p>
+                                            <div style="margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block; font-weight: bold;">
+                                                → Acceder al Panel
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; border: 2px solid #e0e0e0;">
+                                            <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                                            <h3 style="margin: 0 0 10px 0; color: #333;">Estadísticas del Sistema</h3>
+                                            <p style="margin: 0; color: #666; font-size: 14px;">Próximamente: Dashboard con métricas globales del sistema</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 10px; border-left: 4px solid #ffc107;">
+                                        <p style="margin: 0;"><strong>💡 Nota:</strong> Como Super Admin, no estás asociado a ninguna empresa específica. Tu función es gestionar el sistema completo y crear nuevas empresas.</p>
+                                    </div>
+                                </div>
+                            `
+                            return
+                        }
+                        
+                        // Worker normal con empresa
+                        userInfoContainer.innerHTML = `
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">${workerProfile.nombre}</div>
+                                <div style="font-size: 12px; color: #ccc;">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
+                            </div>
+                            <button onclick="logout()" style="
+                                padding: 8px 16px;
+                                background-color: #dc3545;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                margin-left: 10px;
+                            ">Cerrar Sesión</button>
+                        `
+                        
+                        authContent.innerHTML = `
+                            <div class="welcome-card">
+                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                                    <h3 style="margin: 0 0 10px 0; color: #4CAF50;">Tu Información</h3>
+                                    <p><strong>Nombre:</strong> ${workerProfile.nombre}</p>
+                                    <p><strong>Email:</strong> ${user.email}</p>
+                                    <p><strong>Empresa:</strong> ${workerProfile.empresa.nombre}</p>
+                                    <p><strong>Puesto:</strong> ${workerProfile.puesto}</p>
+                                </div>
+                                
+                                <h3>Funcionalidades disponibles:</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
+                                    <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+                                        <h4 style="margin: 0 0 10px 0;">🏢 Gestión de Clientes</h4>
+                                        <p style="margin: 0; font-size: 14px;">Administra clientes y sus plantas/ubicaciones</p>
+                                        <a href="pages/clientes.html" style="display: inline-block; margin-top: 10px; color: #4CAF50; text-decoration: none; font-weight: bold;">→ Ir a Clientes</a>
+                                    </div>
+                                    <div style="background: #fff3e0; padding: 15px; border-radius: 6px; border-left: 4px solid #FF9800; cursor: pointer;" onclick="window.location.href='pages/controles.html'">
+                                        <h4 style="margin: 0 0 10px 0;">🐛 Controles de Plagas</h4>
+                                        <p style="margin: 0; font-size: 14px;">Registra y seguimiento de controles</p>
+                                        <a href="pages/controles.html" style="display: inline-block; margin-top: 10px; color: #FF9800; text-decoration: none; font-weight: bold;">→ Gestionar Controles</a>
+                                    </div>
+                                    <div style="background: #fce4ec; padding: 15px; border-radius: 6px; border-left: 4px solid #E91E63; cursor: pointer;" onclick="window.location.href='pages/productos.html'">
+                                        <h4 style="margin: 0 0 10px 0;">📦 Productos</h4>
+                                        <p style="margin: 0; font-size: 14px;">Gestión de inventario y productos</p>
+                                        <a href="pages/productos.html" style="display: inline-block; margin-top: 10px; color: #E91E63; text-decoration: none; font-weight: bold;">→ Gestionar Inventario</a>
+                                    </div>
+                                    ${workerProfile.rol === 'admin' || workerProfile.rol === 'supervisor' ? `
+                                    <div style="background: #f3e5f5; padding: 15px; border-radius: 6px; border-left: 4px solid #9C27B0;">
+                                        <h4 style="margin: 0 0 10px 0;">👥 Gestión de Usuarios</h4>
+                                        <p style="margin: 0; font-size: 14px;">Invitar nuevos trabajadores</p>
+                                        <a href="pages/admin-invitaciones.html" style="display: inline-block; margin-top: 10px; color: #9C27B0; text-decoration: none; font-weight: bold;">→ Gestionar Invitaciones</a>
+                                    </div>
+                                    <div style="background: #e3f2fd; padding: 15px; border-radius: 6px; border-left: 4px solid #2196F3;">
+                                        <h4 style="margin: 0 0 10px 0;">🏢 Información de Empresa</h4>
+                                        <p style="margin: 0; font-size: 14px;">Logo, sellos y certificados</p>
+                                        <a href="pages/empresa-info.html" style="display: inline-block; margin-top: 10px; color: #2196F3; text-decoration: none; font-weight: bold;">→ Gestionar Documentos</a>
+                                    </div>
+                                    ` : ''}
+                                    ${workerProfile.is_super_admin ? `
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 6px; border-left: 4px solid #5a67d8; position: relative; overflow: hidden;">
+                                        <div style="position: absolute; top: -10px; right: -10px; font-size: 60px; opacity: 0.1;">👑</div>
+                                        <h4 style="margin: 0 0 10px 0; color: white;">👑 Super Admin Panel</h4>
+                                        <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.9);">Gestión central de todas las empresas</p>
+                                        <a href="pages/super-admin.html" style="display: inline-block; margin-top: 10px; color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px;">→ Acceder al Panel</a>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div style="margin-top: 30px; padding: 15px; background: #fff8e1; border-radius: 6px; border: 1px solid #ffcc02;">
+                                    <p style="margin: 0;"><strong>💡 Nota:</strong> Todas las funcionalidades están limitadas a los datos de tu empresa (${workerProfile.empresa.nombre})</p>
+                                </div>
+                            </div>
+                        `
+                    } else {
+                        authContent.innerHTML = `
+                            <div class="welcome-card">
+                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                                <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
+                                <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border: 1px solid #ffeaa7; margin: 20px 0;">
+                                    <p><strong>⚠️ Configuración Pendiente:</strong> No se encontró tu perfil de trabajador. Por favor contacta al administrador para completar la configuración de tu cuenta.</p>
+                                </div>
+                            </div>
+                        `
+                    }
+                } catch (error) {
+                    console.error('Error cargando perfil para dashboard:', error)
+                    authContent.innerHTML = `
+                        <div class="welcome-card">
+                            <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                            <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
+                            <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 1px solid #f5c6cb; margin: 20px 0;">
+                                <p><strong>⚠️ Error:</strong> Hubo un problema cargando tu información. Por favor intenta recargar la página.</p>
+                            </div>
+                        </div>
+                    `
+                }
+            } else {
+                // Usuario no autenticado
+                userInfoContainer.innerHTML = `
+                    <div>No autenticado</div>
+                `
+                
+                authContent.innerHTML = `
+                    <div class="login-prompt">
+                        <h2>Acceso Requerido</h2>
+                        <p>Para acceder al sistema de gestión, necesitas iniciar sesión o crear una cuenta.</p>
+                        
+                        <div style="margin-top: 2rem;">
+                            <a href="pages/login.html">Iniciar Sesión</a>
+                            <a href="pages/info-invitaciones.html">Información sobre Registro</a>
+                        </div>
+                    </div>
+                `
+            }
+        })
+
+        // Función para cerrar sesión
+        async function logout() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                const result = await window.authUtils.logout()
+                if (result.success) {
+                    window.location.reload()
+                }
+            }
+        }
+    </script>
+</body>
+</html>

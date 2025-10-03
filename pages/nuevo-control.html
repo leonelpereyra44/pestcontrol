@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Control de Plagas</title>
+    <link rel="stylesheet" href="../css/clientes.css">
+    <link rel="stylesheet" href="../css/controles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <button class="wizard-toggle" id="wizardToggle" aria-label="Menú de navegación">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <div class="header-title">
+                    <h1>📋 Nuevo Control de Plagas</h1>
+                    <p class="current-step-text">Paso <span id="currentStepNumber">1</span> de 5: <span id="currentStepName">Información General</span></p>
+                </div>
+            </div>
+            <a href="controles.html" class="btn btn-secondary btn-back-header">
+                ← Volver
+            </a>
+        </div>
+        
+        <!-- Wizard Steps (Collapsible) -->
+        <div class="wizard-steps" id="wizardSteps">
+            <div class="wizard-overlay" id="wizardOverlay"></div>
+            <div class="wizard-menu" id="wizardMenu">
+                <div class="wizard-menu-header">
+                    <h3>Pasos del Control</h3>
+                    <button class="wizard-close" id="wizardClose">✕</button>
+                </div>
+                <div class="wizard-step" data-step="1">
+                    <span class="wizard-step-number">1</span>
+                    <span class="wizard-step-title">Información General</span>
+                    <span class="wizard-step-status">✓</span>
+                </div>
+                <div class="wizard-step" data-step="2">
+                    <span class="wizard-step-number">2</span>
+                    <span class="wizard-step-title">Productos</span>
+                    <span class="wizard-step-status"></span>
+                </div>
+                <div class="wizard-step" data-step="3">
+                    <span class="wizard-step-number">3</span>
+                    <span class="wizard-step-title">Puntos de Control</span>
+                    <span class="wizard-step-status"></span>
+                </div>
+                <div class="wizard-step" data-step="4">
+                    <span class="wizard-step-number">4</span>
+                    <span class="wizard-step-title">Observaciones</span>
+                    <span class="wizard-step-status"></span>
+                </div>
+                <div class="wizard-step" data-step="5">
+                    <span class="wizard-step-number">5</span>
+                    <span class="wizard-step-title">Sello</span>
+                    <span class="wizard-step-status"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 1: Información General -->
+        <div class="step-content active" data-step="1">
+            <h2>Información General del Control</h2>
+            
+            <div class="form-row">
+                <div class="form-group required">
+                    <label for="clienteId">Cliente</label>
+                    <select id="clienteId" required>
+                        <option value="">Seleccione un cliente</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="plantaId">Planta</label>
+                    <select id="plantaId">
+                        <option value="">Sin planta específica</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group required">
+                    <label for="tecnicoId">Técnico Responsable</label>
+                    <select id="tecnicoId" required>
+                        <option value="">Seleccione un técnico</option>
+                    </select>
+                </div>
+                
+                <div class="form-group required">
+                    <label for="fechaControl">Fecha del Control</label>
+                    <input type="date" id="fechaControl" required>
+                </div>
+            </div>
+            
+            <!-- Preview del sello del técnico -->
+            <div id="selloPreviewContainer" style="display: none;" class="sello-preview-card">
+                <div class="sello-preview-header">
+                    <h3>Sello del Técnico Seleccionado</h3>
+                </div>
+                <div class="sello-preview-content">
+                    <div id="selloPreviewPlaceholder" class="sello-placeholder">
+                        Seleccione un técnico para ver su sello
+                    </div>
+                    <img id="selloPreviewImg" style="display: none;" alt="Sello del técnico">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group required">
+                    <label for="tipoControl">Tipo de Control</label>
+                    <select id="tipoControl" required>
+                        <option value="">Seleccione tipo</option>
+                        <option value="preventivo">Preventivo</option>
+                        <option value="correctivo">Correctivo</option>
+                        <option value="especial">Especial</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Productos -->
+        <div class="step-content" data-step="2">
+            <h2>Productos Utilizados</h2>
+            
+            <p class="alert alert-info">
+                💡 Agregue los productos que utilizó en este control. Puede dejar esta sección vacía si no aplicó productos.
+            </p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="productoSelect">Producto</label>
+                    <select id="productoSelect">
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cantidadProducto">Cantidad</label>
+                    <input type="number" id="cantidadProducto" step="0.01" min="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="unidadProducto">Unidad</label>
+                    <input type="text" id="unidadProducto" readonly>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="agregarProducto()">
+                + Agregar Producto
+            </button>
+            
+            <div id="productosAgregados" style="margin-top: 2rem;">
+                <p style="color: #999; font-style: italic;">No se han agregado productos</p>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="wizard.prevStep()">
+                    ← Anterior
+                </button>
+                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Puntos de Control -->
+        <div class="step-content" data-step="3">
+            <h2>Puntos de Control</h2>
+            
+            <p class="alert alert-info">
+                💡 Registre los puntos de control revisados. Puede dejar esta sección vacía si no revisó puntos específicos.
+            </p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numeroPunto">Número de Punto *</label>
+                    <input type="number" id="numeroPunto" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoPlaga">Tipo de Plaga *</label>
+                    <select id="tipoPlaga">
+                        <option value="">Seleccione tipo</option>
+                        <option value="roedores">Roedores</option>
+                        <option value="voladores">Voladores</option>
+                        <option value="rastreros">Rastreros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoDispositivo">Tipo de Dispositivo</label>
+                    <input type="text" id="tipoDispositivo" placeholder="Ej: Cebadero, Trampa">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ubicacionPunto">Ubicación</label>
+                    <input type="text" id="ubicacionPunto" placeholder="Descripción de la ubicación">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estadoPunto">Estado *</label>
+                    <select id="estadoPunto">
+                        <option value="">Seleccione estado</option>
+                        <option value="ok">OK</option>
+                        <option value="con_actividad">Con Actividad</option>
+                        <option value="faltante">Faltante</option>
+                        <option value="reemplazado">Reemplazado</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="accionRealizada">Acción Realizada</label>
+                <textarea id="accionRealizada" rows="3" placeholder="Describa la acción realizada en este punto"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" onclick="agregarPunto()">
+                + Agregar Punto
+            </button>
+            
+            <div id="puntosAgregados" style="margin-top: 2rem;">
+                <p style="color: #999; font-style: italic;">No se han agregado puntos de control</p>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="wizard.prevStep()">
+                    ← Anterior
+                </button>
+                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Observaciones -->
+        <div class="step-content" data-step="4">
+            <h2>Observaciones Generales</h2>
+            
+            <div class="form-group">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" rows="8" placeholder="Ingrese observaciones generales del control, hallazgos importantes, recomendaciones, etc."></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="wizard.prevStep()">
+                    ← Anterior
+                </button>
+                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 5: Sello -->
+        <div class="step-content" data-step="5">
+            <h2>Sello del Técnico</h2>
+            
+            <div class="alert alert-info">
+                📌 El sello se carga automáticamente según el técnico responsable seleccionado en el Paso 1.
+            </div>
+            
+            <div class="sello-container">
+                <div id="selloTecnicoPlaceholder" class="sello-placeholder">
+                    <p>👤 Seleccione un técnico para ver su sello</p>
+                </div>
+                <img id="selloTecnicoImg" style="display: none;" alt="Sello del técnico">
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="wizard.prevStep()">
+                    ← Anterior
+                </button>
+                <button class="btn btn-primary" onclick="guardarControl()">
+                    💾 Guardar Control
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../ts/auth.js"></script>
+    
+    <!-- Módulos -->
+    <script src="../js/controles/data-loader.js"></script>
+    <script src="../js/controles/sello-manager.js"></script>
+    <script src="../js/controles/wizard-manager.js"></script>
+    <script src="../js/controles/productos-manager.js"></script>
+    <script src="../js/controles/puntos-manager.js"></script>
+    <script src="../js/controles/control-manager.js"></script>
+    
+    <!-- Script Principal -->
+    <script>
+        // Usar el cliente de Supabase del auth.js
+        const supabase = window.supabaseClient;
+        
+        // Variables globales
+        let workerProfile = null;
+        let dataLoader = null;
+        let selloManager = null;
+        let wizard = null;
+        let productosManager = null;
+        let puntosManager = null;
+        let controlManager = null;
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Esperar a que auth.js se inicialice completamente
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                console.log('🚀 Iniciando aplicación...');
+                
+                // Verificar que authUtils esté disponible
+                if (!window.authUtils) {
+                    console.error('❌ authUtils no está disponible');
+                    alert('Error: Sistema de autenticación no disponible');
+                    return;
+                }
+                
+                console.log('✅ Dependencias cargadas correctamente');
+                
+                // Verificar autenticación
+                workerProfile = await window.authUtils.getWorkerProfile();
+                
+                if (!workerProfile) {
+                    console.warn('⚠️ Usuario no autenticado');
+                    alert('❌ Debes iniciar sesión primero');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                console.log('✅ Usuario autenticado:', workerProfile);
+                
+                // Inicializar managers
+                dataLoader = new DataLoader(supabase, workerProfile);
+                selloManager = new SelloManager(supabase);
+                wizard = new WizardManager();
+                productosManager = new ProductosManager();
+                puntosManager = new PuntosManager();
+                controlManager = new ControlManager(supabase, workerProfile);
+                
+                console.log('✅ Managers inicializados');
+                
+                // Cargar datos iniciales
+                await inicializarFormulario();
+                
+                // Configurar event listeners
+                configurarEventListeners();
+                
+                console.log('✅ Aplicación lista');
+                
+            } catch (error) {
+                console.error('❌ Error en inicialización:', error);
+                alert('Error al iniciar la aplicación: ' + error.message);
+            }
+        });
+        
+        /**
+         * Inicializar formulario con datos
+         */
+        async function inicializarFormulario() {
+            try {
+                // Cargar clientes
+                const clientes = await dataLoader.cargarClientes();
+                llenarSelect('clienteId', clientes, 'cliente_id', 'nombre');
+                
+                // Cargar técnicos
+                const tecnicos = await dataLoader.cargarTecnicos();
+                llenarSelect('tecnicoId', tecnicos, 'worker_id', (t) => `${t.nombre}${t.puesto ? ' - ' + t.puesto : ''}`);
+                
+                // Cargar productos
+                const productos = await dataLoader.cargarProductos();
+                llenarSelect('productoSelect', productos, 'producto_id', (p) => `${p.nombre} (${p.tipo})`);
+                
+                // Establecer fecha actual
+                document.getElementById('fechaControl').valueAsDate = new Date();
+                
+                console.log('✅ Formulario inicializado');
+                
+            } catch (error) {
+                console.error('❌ Error inicializando formulario:', error);
+                throw error;
+            }
+        }
+        
+        /**
+         * Configurar event listeners
+         */
+        function configurarEventListeners() {
+            // Cliente cambia -> cargar plantas
+            document.getElementById('clienteId').addEventListener('change', async (e) => {
+                const clienteId = e.target.value;
+                if (clienteId) {
+                    const plantas = await dataLoader.cargarPlantas(clienteId);
+                    llenarSelect('plantaId', plantas, 'planta_id', 'nombre', true);
+                }
+            });
+            
+            // Técnico cambia -> cargar sello
+            document.getElementById('tecnicoId').addEventListener('change', async (e) => {
+                const tecnicoId = e.target.value;
+                if (tecnicoId) {
+                    await selloManager.cargarSello(tecnicoId);
+                } else {
+                    selloManager.limpiar();
+                }
+            });
+            
+            // Producto cambia -> actualizar unidad
+            document.getElementById('productoSelect').addEventListener('change', (e) => {
+                const select = e.target;
+                const option = select.options[select.selectedIndex];
+                const productos = dataLoader.supabase ? null : []; // Obtener del data loader si es necesario
+                
+                // Buscar producto seleccionado para obtener unidad
+                const productoId = select.value;
+                if (productoId) {
+                    // Por ahora usar dataset del option
+                    const unidad = option.dataset.unidad || '';
+                    document.getElementById('unidadProducto').value = unidad;
+                }
+            });
+            
+            console.log('✅ Event listeners configurados');
+        }
+        
+        /**
+         * Llenar un select con opciones
+         */
+        function llenarSelect(selectId, items, valueKey, textKey, keepFirst = false) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // Mantener primera opción si es necesario
+            if (!keepFirst) {
+                const firstOption = select.options[0];
+                select.innerHTML = '';
+                if (firstOption) {
+                    select.appendChild(firstOption);
+                }
+            } else {
+                // Limpiar opciones excepto la primera
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+            }
+            
+            // Agregar items
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valueKey];
+                option.textContent = typeof textKey === 'function' ? textKey(item) : item[textKey];
+                
+                // Guardar unidad como dataset si es un producto
+                if (item.unidad_medida) {
+                    option.dataset.unidad = item.unidad_medida;
+                }
+                
+                select.appendChild(option);
+            });
+        }
+        
+        /**
+         * Agregar producto a la lista
+         */
+        function agregarProducto() {
+            try {
+                const productoSelect = document.getElementById('productoSelect');
+                const cantidad = document.getElementById('cantidadProducto').value;
+                const unidad = document.getElementById('unidadProducto').value;
+                
+                if (!productoSelect.value) {
+                    alert('⚠️ Seleccione un producto');
+                    return;
+                }
+                
+                if (!cantidad || parseFloat(cantidad) <= 0) {
+                    alert('⚠️ Ingrese una cantidad válida');
+                    return;
+                }
+                
+                const producto = {
+                    producto_id: productoSelect.value,
+                    nombre: productoSelect.options[productoSelect.selectedIndex].text,
+                    cantidad: parseFloat(cantidad),
+                    unidad: unidad
+                };
+                
+                productosManager.agregar(producto);
+                
+                // Limpiar campos
+                productoSelect.value = '';
+                document.getElementById('cantidadProducto').value = '';
+                document.getElementById('unidadProducto').value = '';
+                
+            } catch (error) {
+                console.error('❌ Error agregando producto:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        /**
+         * Agregar punto de control a la lista
+         */
+        function agregarPunto() {
+            try {
+                const numero = document.getElementById('numeroPunto').value;
+                const tipoPlaga = document.getElementById('tipoPlaga').value;
+                const estado = document.getElementById('estadoPunto').value;
+                
+                if (!numero || !tipoPlaga || !estado) {
+                    alert('⚠️ Complete los campos obligatorios: Número, Tipo de Plaga y Estado');
+                    return;
+                }
+                
+                const punto = {
+                    numero: parseInt(numero),
+                    tipo_plaga: tipoPlaga,
+                    tipo_dispositivo: document.getElementById('tipoDispositivo').value,
+                    ubicacion: document.getElementById('ubicacionPunto').value,
+                    estado: estado,
+                    accion_realizada: document.getElementById('accionRealizada').value
+                };
+                
+                puntosManager.agregar(punto);
+                
+                // Limpiar campos
+                document.getElementById('numeroPunto').value = '';
+                document.getElementById('tipoPlaga').value = '';
+                document.getElementById('tipoDispositivo').value = '';
+                document.getElementById('ubicacionPunto').value = '';
+                document.getElementById('estadoPunto').value = '';
+                document.getElementById('accionRealizada').value = '';
+                
+            } catch (error) {
+                console.error('❌ Error agregando punto:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        /**
+         * Guardar control completo
+         */
+        async function guardarControl() {
+            try {
+                // Validar wizard
+                if (!wizard.validarPasoActual()) {
+                    return;
+                }
+                
+                console.log('💾 Iniciando guardado...');
+                
+                // Recopilar datos del formulario
+                const formData = controlManager.recopilarDatosFormulario();
+                
+                // Obtener productos y puntos
+                const productos = productosManager.getAll();
+                const puntos = puntosManager.getAll();
+                const selloUrl = selloManager.getSelloUrl();
+                
+                // Confirmar antes de guardar
+                const confirmar = confirm(
+                    `¿Desea guardar este control?\n\n` +
+                    `Productos: ${productos.length}\n` +
+                    `Puntos: ${puntos.length}\n` +
+                    `Sello: ${selloUrl ? 'Sí' : 'No'}`
+                );
+                
+                if (!confirmar) return;
+                
+                // Guardar control
+                const control = await controlManager.guardar(
+                    formData,
+                    productosManager.prepararParaGuardar('temp'),
+                    puntosManager.prepararParaGuardar('temp'),
+                    selloUrl
+                );
+                
+                // Actualizar IDs en productos y puntos
+                const productosData = productosManager.prepararParaGuardar(control.control_id);
+                const puntosData = puntosManager.prepararParaGuardar(control.control_id);
+                
+                alert('✅ Control guardado exitosamente');
+                
+                // Redirigir a la lista de controles
+                window.location.href = '../controles.html';
+                
+            } catch (error) {
+                console.error('❌ Error guardando control:', error);
+                alert('❌ Error al guardar control: ' + error.message);
+            }
+        }
+        
+        /**
+         * Control del menú hamburguesa
+         */
+        const wizardToggle = document.getElementById('wizardToggle');
+        const wizardMenu = document.getElementById('wizardMenu');
+        const wizardOverlay = document.getElementById('wizardOverlay');
+        const wizardClose = document.getElementById('wizardClose');
+        
+        function abrirMenu() {
+            wizardMenu.classList.add('active');
+            wizardOverlay.classList.add('active');
+            wizardToggle.classList.add('active');
+            // Agregar clase al body para controlar estilos
+            document.body.classList.add('menu-open');
+            // Solo bloquear scroll cuando el menú está abierto
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function cerrarMenu() {
+            wizardMenu.classList.remove('active');
+            wizardOverlay.classList.remove('active');
+            wizardToggle.classList.remove('active');
+            // Remover clase del body
+            document.body.classList.remove('menu-open');
+            // Restaurar scroll
+            document.body.style.overflow = '';
+        }
+        
+        wizardToggle.addEventListener('click', () => {
+            if (wizardMenu.classList.contains('active')) {
+                cerrarMenu();
+            } else {
+                abrirMenu();
+            }
+        });
+        
+        wizardClose.addEventListener('click', cerrarMenu);
+        wizardOverlay.addEventListener('click', cerrarMenu);
+        
+        // Cerrar menú al hacer clic en un paso
+        document.querySelectorAll('.wizard-step').forEach(step => {
+            step.addEventListener('click', () => {
+                cerrarMenu();
+            });
+        });
+        
+        /**
+         * Actualizar indicador de paso actual en el header
+         */
+        function actualizarIndicadorPaso(paso) {
+            const stepNames = [
+                'Información General',
+                'Productos',
+                'Puntos de Control',
+                'Observaciones',
+                'Sello'
+            ];
+            
+            document.getElementById('currentStepNumber').textContent = paso;
+            document.getElementById('currentStepName').textContent = stepNames[paso - 1];
+        }
+        
+        // Interceptar cambios de paso del wizard
+        const originalIrAPaso = wizard.irAPaso.bind(wizard);
+        wizard.irAPaso = function(paso) {
+            originalIrAPaso(paso);
+            actualizarIndicadorPaso(paso);
+        };
+    </script>
+</body>
+</html>

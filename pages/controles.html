@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Controles - Sistema de Plagas</title>
+    <link rel="stylesheet" href="../css/clientes.css">
+    <link rel="stylesheet" href="../css/controles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../ts/auth.js"></script>
+    <style>
+        .controls-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .controls-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.95rem;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge.pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.en_progreso {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .badge.completado {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .badge.cancelado {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-clear {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-icon:hover {
+            background: #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .controls-table {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls-container">
+        <div style="margin-bottom: 20px;">
+            <a href="../index.html" style="text-decoration: none; color: #007bff; display: inline-flex; align-items: center; gap: 5px;">
+                ← Volver al Dashboard
+            </a>
+        </div>
+        
+        <div class="header-section">
+            <div>
+                <h1>📋 Gestión de Controles</h1>
+                <p style="color: #6c757d; margin-top: 5px;">Registros de controles de plagas realizados</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'">
+                ➕ Nuevo Control
+            </button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Controles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statPendientes">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statEnProgreso">0</div>
+                <div class="stat-label">En Progreso</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statCompletados">0</div>
+                <div class="stat-label">Completados</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Cliente</label>
+                    <select id="filterCliente">
+                        <option value="">Todos los clientes</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Técnico</label>
+                    <select id="filterTecnico">
+                        <option value="">Todos los técnicos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select id="filterEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_progreso">En Progreso</option>
+                        <option value="completado">Completado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Fecha desde</label>
+                    <input type="date" id="filterFechaDesde">
+                </div>
+                <div class="filter-group">
+                    <label>Fecha hasta</label>
+                    <input type="date" id="filterFechaHasta">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">🔍 Buscar</button>
+                <button class="btn btn-clear" onclick="limpiarFiltros()">🗑️ Limpiar</button>
+            </div>
+        </div>
+
+        <!-- Tabla de Controles -->
+        <div class="controls-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Planta</th>
+                        <th>Técnico</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="controlesTableBody">
+                    <tr>
+                        <td colspan="7" class="loading">
+                            Cargando controles...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Usar el cliente de Supabase del auth.js
+        const supabase = window.supabaseClient || supabase.createClient(
+            'https://rrgxvwttarkcxqfekfeb.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ'
+        );
+
+        let controles = [];
+        let clientes = [];
+        let tecnicos = [];
+        let workerProfile = null;
+
+        // Cargar al inicio - IGUAL que clientes.html
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Esperar a que auth.js se inicialice
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log('🔵 Iniciando carga de controles...');
+            
+            // Obtener worker info desde auth.js
+            workerProfile = await window.authUtils.getWorkerProfile();
+            
+            if (!workerProfile) {
+                console.error('❌ No se pudo cargar información del worker');
+                alert('Error: No se pudo cargar tu perfil. Por favor recarga la página.');
+                return;
+            }
+            
+            console.log('✅ Worker info:', workerProfile);
+            
+            await cargarDatosIniciales();
+            await cargarControles();
+        });
+
+        async function cargarDatosIniciales() {
+            try {
+                // Cargar clientes para filtro (de la misma empresa)
+                const { data: clientesData } = await supabase
+                    .from('clientes')
+                    .select('cliente_id, nombre')
+                    .eq('empresa_id', workerProfile.empresa_id)
+                    .order('nombre');
+                
+                clientes = clientesData || [];
+                const selectCliente = document.getElementById('filterCliente');
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.cliente_id;
+                    option.textContent = cliente.nombre;
+                    selectCliente.appendChild(option);
+                });
+
+                // Cargar técnicos para filtro (de la misma empresa)
+                const { data: tecnicosData } = await supabase
+                    .from('worker')
+                    .select('worker_id, nombre, puesto')
+                    .eq('empresa_id', workerProfile.empresa_id)
+                    .order('nombre');
+                
+                tecnicos = tecnicosData || [];
+                const selectTecnico = document.getElementById('filterTecnico');
+                tecnicos.forEach(tecnico => {
+                    const option = document.createElement('option');
+                    option.value = tecnico.worker_id;
+                    option.textContent = `${tecnico.nombre}${tecnico.puesto ? ' - ' + tecnico.puesto : ''}`;
+                    selectTecnico.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error cargando datos iniciales:', error);
+            }
+        }
+
+        async function cargarControles() {
+            try {
+                const { data, error } = await supabase
+                    .from('controles')
+                    .select(`
+                        *,
+                        cliente:clientes!controles_cliente_id_fkey(nombre),
+                        planta:plantas!controles_planta_id_fkey(nombre),
+                        tecnico:worker!controles_tecnico_id_fkey(nombre)
+                    `)
+                    .order('fecha_control', { ascending: false });
+
+                if (error) throw error;
+
+                controles = data || [];
+                renderizarControles(controles);
+                actualizarEstadisticas(controles);
+
+            } catch (error) {
+                console.error('Error cargando controles:', error);
+                mostrarError('Error al cargar los controles');
+            }
+        }
+
+        function renderizarControles(data) {
+            const tbody = document.getElementById('controlesTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3>No hay controles registrados</h3>
+                                <p>Comienza creando tu primer control de plagas</p>
+                                <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'" style="margin-top: 20px;">
+                                    Crear Primer Control
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(control => {
+                const fecha = new Date(control.fecha_control).toLocaleDateString('es-ES');
+                const clienteNombre = control.cliente?.nombre || 'Sin cliente';
+                const plantaNombre = control.planta?.nombre || 'Sin planta';
+                const tecnicoNombre = control.tecnico?.nombre || 'Sin asignar';
+                
+                const estadoBadge = `<span class="badge ${control.estado}">${formatearEstado(control.estado)}</span>`;
+                const tipoBadge = control.tipo_control ? control.tipo_control.charAt(0).toUpperCase() + control.tipo_control.slice(1) : 'Preventivo';
+
+                return `
+                    <tr onclick="verControl('${control.control_id}')">
+                        <td>${fecha}</td>
+                        <td><strong>${clienteNombre}</strong></td>
+                        <td>${plantaNombre}</td>
+                        <td>${tecnicoNombre}</td>
+                        <td>${tipoBadge}</td>
+                        <td>${estadoBadge}</td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="actions-cell">
+                                <button class="btn btn-icon" onclick="verControl('${control.control_id}')" title="Ver detalles">
+                                    👁️
+                                </button>
+                                ${control.estado !== 'completado' ? `
+                                    <button class="btn btn-icon" onclick="editarControl('${control.control_id}')" title="Editar">
+                                        ✏️
+                                    </button>
+                                ` : ''}
+                                ${control.pdf_url ? `
+                                    <button class="btn btn-icon" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
+                                        📄
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function actualizarEstadisticas(data) {
+            document.getElementById('statTotal').textContent = data.length;
+            document.getElementById('statPendientes').textContent = data.filter(c => c.estado === 'pendiente').length;
+            document.getElementById('statEnProgreso').textContent = data.filter(c => c.estado === 'en_progreso').length;
+            document.getElementById('statCompletados').textContent = data.filter(c => c.estado === 'completado').length;
+        }
+
+        function formatearEstado(estado) {
+            const estados = {
+                'pendiente': 'Pendiente',
+                'en_progreso': 'En Progreso',
+                'completado': 'Completado',
+                'cancelado': 'Cancelado'
+            };
+            return estados[estado] || estado;
+        }
+
+        window.aplicarFiltros = function() {
+            let filtrados = [...controles];
+
+            const clienteId = document.getElementById('filterCliente').value;
+            const tecnicoId = document.getElementById('filterTecnico').value;
+            const estado = document.getElementById('filterEstado').value;
+            const fechaDesde = document.getElementById('filterFechaDesde').value;
+            const fechaHasta = document.getElementById('filterFechaHasta').value;
+
+            if (clienteId) {
+                filtrados = filtrados.filter(c => c.cliente_id === clienteId);
+            }
+
+            if (tecnicoId) {
+                filtrados = filtrados.filter(c => c.tecnico_id === tecnicoId);
+            }
+
+            if (estado) {
+                filtrados = filtrados.filter(c => c.estado === estado);
+            }
+
+            if (fechaDesde) {
+                filtrados = filtrados.filter(c => new Date(c.fecha_control) >= new Date(fechaDesde));
+            }
+
+            if (fechaHasta) {
+                filtrados = filtrados.filter(c => new Date(c.fecha_control) <= new Date(fechaHasta));
+            }
+
+            renderizarControles(filtrados);
+            actualizarEstadisticas(filtrados);
+        };
+
+        window.limpiarFiltros = function() {
+            document.getElementById('filterCliente').value = '';
+            document.getElementById('filterTecnico').value = '';
+            document.getElementById('filterEstado').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            
+            renderizarControles(controles);
+            actualizarEstadisticas(controles);
+        };
+
+        window.verControl = function(controlId) {
+            window.location.href = `ver-control.html?id=${controlId}`;
+        };
+
+        window.editarControl = function(controlId) {
+            window.location.href = `nuevo-control.html?id=${controlId}`;
+        };
+
+        window.descargarPDF = function(url) {
+            window.open(url, '_blank');
+        };
+
+        function mostrarError(mensaje) {
+            const tbody = document.getElementById('controlesTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #dc3545; padding: 40px;">
+                        ⚠️ ${mensaje}
+                    </td>
+                </tr>
+            `;
+        }
+    </script>
+</body>
+</html>

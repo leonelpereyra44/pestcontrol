@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Invitaciones - Admin</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestión de Invitaciones</h1>
+            <div>
+                <button class="btn btn-primary" onclick="openInviteModal()">Nueva Invitación</button>
+                <a href="../index.html" class="btn" style="background-color: #6c757d; color: white; text-decoration: none;">Volver al Dashboard</a>
+            </div>
+        </div>
+
+        <div id="invitationsTable">
+            <p>Cargando invitaciones...</p>
+        </div>
+    </div>
+
+    <!-- Modal para nueva invitación -->
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <h3>Nueva Invitación</h3>
+            <form id="inviteForm">
+                <div class="form-group">
+                    <label>Email del Invitado</label>
+                    <input type="email" id="inviteEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Puesto Sugerido</label>
+                    <input type="text" id="invitePuesto" class="form-control" placeholder="ej: Técnico, Supervisor">
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Enviar Invitación</button>
+                    <button type="button" class="btn" onclick="closeModal()" style="background-color: #6c757d; color: white;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Configuración de Supabase inline
+        const SUPABASE_URL = "https://rrgxvwttarkcxqfekfeb.supabase.co"
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ"
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        // Funciones de autenticación simplificadas
+        window.authUtils = {
+            isLoggedIn: async () => {
+                const { data } = await supabaseClient.auth.getSession()
+                return !!data.session
+            },
+            getCurrentUser: () => {
+                return supabaseClient.auth.getUser().then(({ data }) => data.user)
+            },
+            getWorkerProfile: async () => {
+                const { data: session } = await supabaseClient.auth.getSession()
+                if (!session.session) return null
+                
+                const user = session.session.user
+                
+                try {
+                    // Intentar por user_id primero
+                    let { data: worker, error } = await supabaseClient
+                        .from('worker')
+                        .select(`
+                            *,
+                            empresa:empresa_id (
+                                empresa_id,
+                                nombre
+                            )
+                        `)
+                        .eq('user_id', user.id)
+                        .maybeSingle()
+                    
+                    // Si no encuentra por user_id, buscar por email
+                    if (!worker && user.email) {
+                        console.log('🔍 Buscando por email...')
+                        const result = await supabaseClient
+                            .from('worker')
+                            .select(`
+                                *,
+                                empresa:empresa_id (
+                                    empresa_id,
+                                    nombre
+                                )
+                            `)
+                            .eq('mail', user.email)
+                            .maybeSingle()
+                        
+                        worker = result.data
+                        error = result.error
+                    }
+                    
+                    if (error) {
+                        console.error('Error obteniendo worker profile:', error)
+                    }
+                    
+                    return worker
+                } catch (error) {
+                    console.error('Error obteniendo worker profile:', error)
+                    return null
+                }
+            }
+        }
+    </script>
+
+    <script>
+        let currentWorkerInfo = null
+
+        // Verificar permisos de admin
+        async function checkAdminPermissions() {
+            console.log('🔍 Verificando permisos de admin...')
+            
+            if (!window.authUtils || !window.authUtils.isLoggedIn()) {
+                console.log('❌ No está logueado')
+                window.location.href = 'login.html'
+                return false
+            }
+
+            try {
+                // Obtener perfil directamente sin reintentos complejos
+                const workerInfo = await window.authUtils.getWorkerProfile()
+                
+                console.log('📋 Worker Info obtenido:', workerInfo)
+                console.log('👤 Rol del usuario:', workerInfo?.rol)
+                console.log('✔️ ¿Es admin o supervisor?:', ['admin', 'supervisor'].includes(workerInfo?.rol))
+                
+                if (!workerInfo) {
+                    console.error('❌ No se pudo obtener el perfil del worker')
+                    alert('Error: No se pudo cargar tu perfil de usuario. Por favor, cierra sesión y vuelve a entrar.')
+                    return false
+                }
+                
+                if (!['admin', 'supervisor'].includes(workerInfo.rol)) {
+                    console.error('❌ Acceso denegado. Rol:', workerInfo.rol)
+                    alert('No tienes permisos para acceder a esta página. Tu rol: ' + workerInfo.rol)
+                    window.location.href = '../index.html'
+                    return false
+                }
+
+                console.log('✅ Permisos verificados correctamente')
+                currentWorkerInfo = workerInfo
+                return true
+            } catch (error) {
+                console.error('❌ Error verificando permisos:', error)
+                alert('Error verificando permisos: ' + error.message)
+                return false
+            }
+        }
+
+        // Cargar invitaciones
+        async function loadInvitations() {
+            try {
+                const { data: invitations, error } = await supabaseClient
+                    .from('invitaciones')
+                    .select(`
+                        *,
+                        empresa:empresa_id(nombre),
+                        invitador:invitado_por(nombre)
+                    `)
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+                    .order('fecha_invitacion', { ascending: false })
+
+                if (error) {
+                    console.error('Error cargando invitaciones:', error)
+                    document.getElementById('invitationsTable').innerHTML = `
+                        <div style="color: red;">Error cargando invitaciones: ${error.message}</div>
+                    `
+                    return
+                }
+
+                if (!invitations || invitations.length === 0) {
+                    document.getElementById('invitationsTable').innerHTML = `
+                        <p>No hay invitaciones registradas. Crea la primera invitación usando el botón "Nueva Invitación".</p>
+                    `
+                    return
+                }
+
+                // Crear tabla
+                const now = new Date()
+                const tableHTML = `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Puesto</th>
+                                <th>Estado</th>
+                                <th>Fecha Invitación</th>
+                                <th>Expira</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${invitations.map(inv => {
+                                const expired = new Date(inv.fecha_expiracion) <= now
+                                const status = inv.usado ? 'used' : (expired ? 'expired' : 'pending')
+                                const statusText = inv.usado ? 'Usado' : (expired ? 'Expirado' : 'Pendiente')
+                                const statusClass = `status-${status}`
+                                
+                                return `
+                                    <tr>
+                                        <td>${inv.email}</td>
+                                        <td>${inv.puesto_sugerido || 'No especificado'}</td>
+                                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                                        <td>${new Date(inv.fecha_invitacion).toLocaleDateString()}</td>
+                                        <td>${new Date(inv.fecha_expiracion).toLocaleDateString()}</td>
+                                        <td>
+                                            ${!inv.usado && !expired ? `
+                                                <button class="copy-link" onclick="copyInvitationLink('${inv.token}')">
+                                                    Copiar Link
+                                                </button>
+                                            ` : ''}
+                                            <button class="btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteInvitation('${inv.id}')">
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `
+
+                document.getElementById('invitationsTable').innerHTML = tableHTML
+
+            } catch (error) {
+                console.error('Error cargando invitaciones:', error)
+                document.getElementById('invitationsTable').innerHTML = `
+                    <div style="color: red;">Error de conexión cargando invitaciones</div>
+                `
+            }
+        }
+
+        // Generar token único
+        function generateToken() {
+            return 'INV-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        }
+
+        // Crear nueva invitación
+        async function createInvitation(email, puesto) {
+            try {
+                const token = generateToken()
+                
+                const { data, error } = await supabaseClient
+                    .from('invitaciones')
+                    .insert({
+                        empresa_id: currentWorkerInfo.empresa_id,
+                        email: email,
+                        puesto_sugerido: puesto,
+                        invitado_por: currentWorkerInfo.worker_id,
+                        token: token,
+                        fecha_expiracion: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                    })
+                    .select()
+                    .single()
+
+                if (error) {
+                    alert('Error creando invitación: ' + error.message)
+                    return false
+                }
+
+                // Mostrar link de invitación
+                const invitationUrl = `${window.location.origin}${window.location.pathname.replace('admin-invitaciones.html', '')}registro-invitacion.html?token=${token}`
+                
+                const linkModal = `
+                    <div id="successModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%;">
+                            <h3>✅ Invitación creada exitosamente</h3>
+                            <p><strong>Email:</strong> ${email}</p>
+                            <p><strong>Puesto:</strong> ${puesto || 'No especificado'}</p>
+                            <p><strong>Link de invitación:</strong></p>
+                            <textarea readonly style="width: 100%; height: 80px; margin: 10px 0; font-family: monospace; font-size: 12px;">${invitationUrl}</textarea>
+                            <div>
+                                <button onclick="copyToClipboard('${invitationUrl}')" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Copiar Link</button>
+                                <button onclick="closeSuccessModal()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Cerrar</button>
+                            </div>
+                            <p style="font-size: 12px; color: #666; margin-top: 15px;"><em>Envía este link al usuario para que pueda registrarse. El link expira en 7 días.</em></p>
+                        </div>
+                    </div>
+                `
+                document.body.insertAdjacentHTML('beforeend', linkModal)
+                
+                return true
+
+            } catch (error) {
+                console.error('Error creando invitación:', error)
+                alert('Error de conexión creando invitación')
+                return false
+            }
+        }
+
+        // Función para copiar al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Link copiado al portapapeles')
+            }).catch(err => {
+                prompt('Copia este link manualmente:', text)
+            })
+        }
+
+        // Función para cerrar el modal de éxito
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal')
+            if (modal) {
+                modal.remove()
+            }
+        }
+
+        // Copiar link de invitación
+        function copyInvitationLink(token) {
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin-invitaciones.html', '')
+            const invitationUrl = `${baseUrl}registro-invitacion.html?token=${token}`
+            
+            navigator.clipboard.writeText(invitationUrl).then(() => {
+                alert('Link de invitación copiado al portapapeles')
+            }).catch(err => {
+                prompt('Copia este link para enviar la invitación:', invitationUrl)
+            })
+        }
+
+        // Eliminar invitación
+        async function deleteInvitation(invitationId) {
+            if (!confirm('¿Estás seguro de eliminar esta invitación?')) return
+
+            try {
+                const { error } = await supabaseClient
+                    .from('invitaciones')
+                    .delete()
+                    .eq('id', invitationId)
+
+                if (error) {
+                    alert('Error eliminando invitación: ' + error.message)
+                    return
+                }
+
+                alert('Invitación eliminada')
+                await loadInvitations()
+
+            } catch (error) {
+                console.error('Error eliminando invitación:', error)
+                alert('Error de conexión eliminando invitación')
+            }
+        }
+
+        // Modal functions
+        function openInviteModal() {
+            document.getElementById('inviteModal').style.display = 'block'
+        }
+
+        function closeModal() {
+            document.getElementById('inviteModal').style.display = 'none'
+            document.getElementById('inviteForm').reset()
+        }
+
+        // Form submission
+        document.getElementById('inviteForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+            
+            const email = document.getElementById('inviteEmail').value.trim()
+            const puesto = document.getElementById('invitePuesto').value.trim()
+
+            if (await createInvitation(email, puesto)) {
+                closeModal()
+                await loadInvitations()
+            }
+        })
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            // Esperar a que se inicialicen los sistemas (igual que en test-permisos.html)
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            
+            if (await checkAdminPermissions()) {
+                await loadInvitations()
+            }
+        })
+    </script>
+</body>
+</html>

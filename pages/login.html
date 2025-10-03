@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - PCP</title>
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="loader"></div>
+      <div class="loading-text">
+        <span class="loading-dots">Verificando credenciales</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <h2>Iniciar Sesión</h2>
+    
+    <div id="message" class="message"></div>
+    
+    <input type="email" id="loginEmail" placeholder="Email" required />
+    <input type="password" id="loginPassword" placeholder="Contraseña" required />
+    <button onclick="signIn()" id="loginBtn">Ingresar</button>
+    
+    <div class="link">
+      <p>¿No tienes cuenta? El registro es solo por invitación</p>
+      <p style="font-size: 12px; color: #666;">Contacta al administrador de tu empresa para obtener una invitación</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase
+
+    const SUPABASE_URL = "https://rrgxvwttarkcxqfekfeb.supabase.co"
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ"
+
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('message')
+      messageDiv.textContent = message
+      messageDiv.className = `message ${type}`
+      messageDiv.style.display = 'block'
+      
+      // Ocultar mensaje después de 5 segundos
+      setTimeout(() => {
+        messageDiv.style.display = 'none'
+      }, 5000)
+    }
+
+    async function signIn() {
+      const email = document.getElementById("loginEmail").value
+      const password = document.getElementById("loginPassword").value
+      const loginBtn = document.getElementById("loginBtn")
+      const loadingOverlay = document.getElementById("loadingOverlay")
+
+      // Validar campos
+      if (!email || !password) {
+        showMessage("Por favor completa todos los campos", "error")
+        return
+      }
+
+      try {
+        // Mostrar loader
+        loginBtn.classList.add('loading')
+        loginBtn.disabled = true
+        loadingOverlay.classList.add('active')
+        
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        })
+
+        // Ocultar loader
+        loadingOverlay.classList.remove('active')
+        loginBtn.classList.remove('loading')
+        loginBtn.disabled = false
+
+        if (error) {
+          showMessage("Error: " + error.message, "error")
+        } else {
+          // Mensaje de bienvenida personalizado
+          const userName = data.user.email.split('@')[0]
+          showMessage("¡Bienvenido " + userName + "! 🎉", "success")
+          
+          // Redirigir después de login exitoso
+          setTimeout(() => {
+            window.location.href = "../index.html"
+          }, 1500)
+        }
+      } catch (error) {
+        // Ocultar loader en caso de error
+        loadingOverlay.classList.remove('active')
+        loginBtn.classList.remove('loading')
+        loginBtn.disabled = false
+        showMessage("Error de conexión: " + error.message, "error")
+      }
+    }
+
+    // Permitir login con Enter
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        signIn()
+      }
+    })
+
+    // Verificar si el usuario ya está logueado
+    window.addEventListener('load', async () => {
+      const { data } = await supabaseClient.auth.getSession()
+      if (data.session) {
+        showMessage("Ya tienes una sesión activa", "success")
+        setTimeout(() => {
+          window.location.href = "../index.html"
+        }, 2000)
+      }
+    })
+  </script>
+</body>
+</html>

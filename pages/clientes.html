@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes - Sistema de Control de Plagas</title>
+    <link rel="stylesheet" href="../css/clientes.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 Gestión de Clientes</h1>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
+                <button class="btn btn-primary" onclick="openModal()">+ Nuevo Cliente</button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="totalClientes">0</div>
+                <div class="stat-label">Total Clientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="clientesActivos">0</div>
+                <div class="stat-label">Clientes Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📍</div>
+                <div class="stat-value" id="totalPlantas">0</div>
+                <div class="stat-label">Total Plantas</div>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="content-card">
+            <!-- Barra de búsqueda y filtros -->
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="🔍 Buscar por nombre, email o teléfono..."
+                >
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Cargando clientes...</p>
+            </div>
+
+            <!-- Tabla de clientes -->
+            <div id="clientesTable" class="table-container" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientesBody">
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📋</div>
+                <h3>No hay clientes registrados</h3>
+                <p>Comienza agregando tu primer cliente</p>
+                <button class="btn btn-primary" onclick="openModal()" style="margin-top: 20px;">+ Agregar Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar cliente -->
+    <div id="clienteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nuevo Cliente</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="clienteForm" onsubmit="saveCliente(event)">
+                <input type="hidden" id="clienteId">
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre *</label>
+                    <input type="text" id="nombre" required placeholder="Ej: Restaurante El Buen Sabor">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="cliente@ejemplo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="+54 9 11 1234-5678">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles del Cliente con Pestañas -->
+    <div id="clienteDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="detailsModalTitle">Detalles del Cliente</h2>
+                <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+            </div>
+            
+            <!-- Pestañas -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('info', event)">📋 Información</button>
+                <button class="tab-btn" onclick="switchTab('plantas', event)">🏭 Plantas</button>
+            </div>
+            
+            <!-- Contenido de Pestaña: Información -->
+            <div id="tabInfo" class="tab-content active">
+                <form id="clienteEditForm" onsubmit="updateCliente(event)">
+                    <input type="hidden" id="editClienteId">
+                    
+                    <div class="form-group">
+                        <label for="editNombre">Nombre *</label>
+                        <input type="text" id="editNombre" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTelefono">Teléfono</label>
+                        <input type="tel" id="editTelefono">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeDetailsModal()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Contenido de Pestaña: Plantas -->
+            <div id="tabPlantas" class="tab-content">
+                <div class="plantas-section">
+                    <div class="plantas-header">
+                        <h3>Plantas de <span id="plantasClienteNombre"></span></h3>
+                        <button class="btn btn-primary btn-small" onclick="openPlantaModal()">+ Nueva Planta</button>
+                    </div>
+                    
+                    <div id="plantasLoading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Cargando plantas...</p>
+                    </div>
+                    
+                    <div id="plantasEmpty" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">🏭</div>
+                        <p>No hay plantas registradas para este cliente</p>
+                        <button class="btn btn-primary" onclick="openPlantaModal()">+ Agregar Primera Planta</button>
+                    </div>
+                    
+                    <div id="plantasTableContainer" style="display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Dirección</th>
+                                    <th>Contacto</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plantasBody">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar planta -->
+    <div id="plantaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="plantaModalTitle">Nueva Planta</h2>
+                <button class="close-btn" onclick="closePlantaModal()">&times;</button>
+            </div>
+            <form id="plantaForm" onsubmit="savePlanta(event)">
+                <input type="hidden" id="plantaId">
+                <input type="hidden" id="plantaClienteId">
+                
+                <div class="form-group">
+                    <label for="plantaNombre">Nombre de la Planta *</label>
+                    <input type="text" id="plantaNombre" required placeholder="Ej: Sede Principal">
+                </div>
+
+                <div class="form-group">
+                    <label for="plantaDireccion">Dirección *</label>
+                    <input type="text" id="plantaDireccion" required placeholder="Ej: Calle Gran Vía 45, Madrid">
+                </div>
+
+                <div class="form-group">
+                    <label for="plantaContacto">Contacto</label>
+                    <input type="text" id="plantaContacto" placeholder="Ej: Juan Pérez - Gerente">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closePlantaModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../ts/auth.js"></script>
+    
+    <script>
+        // Usar el supabaseClient de auth.js (ya está declarado globalmente)
+        let allClientes = []
+        let filteredClientes = []
+        let currentWorkerInfo = null
+
+        // Cargar al inicio
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Esperar a que auth.js se inicialice
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            // Obtener worker info desde auth.js
+            currentWorkerInfo = await window.authUtils.getWorkerProfile()
+            
+            if (!currentWorkerInfo) {
+                console.error('No se pudo cargar información del worker')
+                return
+            }
+            
+            await loadClientes()
+        })
+
+        async function loadClientes() {
+            try {
+                console.log('🔵 Iniciando carga de clientes...')
+                
+                // Verificar que tenemos worker info
+                if (!currentWorkerInfo) {
+                    console.error('❌ No hay información del worker')
+                    return
+                }
+
+                console.log('✅ Worker info:', currentWorkerInfo)
+
+                document.getElementById('loading').style.display = 'block'
+                document.getElementById('clientesTable').style.display = 'none'
+                document.getElementById('emptyState').style.display = 'none'
+
+                // Cargar clientes de la misma empresa
+                console.log('🔍 Consultando clientes de empresa:', currentWorkerInfo.empresa_id)
+                
+                const { data: clientes, error } = await supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+                    .order('nombre')
+
+                console.log('📊 Respuesta de Supabase:', { clientes, error })
+
+                if (error) {
+                    console.error('❌ Error en query:', error)
+                    throw error
+                }
+
+                allClientes = clientes || []
+                console.log('✅ Clientes cargados:', allClientes.length)
+                
+                document.getElementById('loading').style.display = 'none'
+
+                if (allClientes.length === 0) {
+                    console.log('⚠️ No hay clientes, mostrando empty state')
+                    document.getElementById('emptyState').style.display = 'block'
+                } else {
+                    console.log('✅ Renderizando clientes...')
+                    document.getElementById('clientesTable').style.display = 'block'
+                    renderClientes(allClientes)
+                    updateStats()
+                }
+
+            } catch (error) {
+                console.error('❌ Error cargando clientes:', error)
+                document.getElementById('loading').style.display = 'none'
+                alert('Error al cargar clientes: ' + error.message)
+            }
+        }
+
+        function renderClientes(clientes) {
+            const tbody = document.getElementById('clientesBody')
+            
+            if (clientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No se encontraron clientes</td></tr>'
+                return
+            }
+
+            tbody.innerHTML = clientes.map(cliente => `
+                <tr>
+                    <td><strong>${cliente.nombre || 'Sin nombre'}</strong></td>
+                    <td>
+                        ${cliente.mail ? `<a href="mailto:${cliente.mail}" class="clickable">${cliente.mail}</a>` : '-'}
+                    </td>
+                    <td>
+                        ${cliente.telefono ? `<a href="tel:${cliente.telefono}" class="clickable">${cliente.telefono}</a>` : '-'}
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-small" onclick="viewClienteDetails('${cliente.cliente_id}')">👁️ Ver Detalles</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteCliente('${cliente.cliente_id}', '${cliente.nombre}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('')
+        }
+
+        function updateStats() {
+            document.getElementById('totalClientes').textContent = allClientes.length
+            document.getElementById('clientesActivos').textContent = allClientes.length
+            document.getElementById('totalPlantas').textContent = 0
+        }
+
+        function filterClientes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase()
+
+            filteredClientes = allClientes.filter(cliente => {
+                return !searchTerm || 
+                    cliente.nombre?.toLowerCase().includes(searchTerm) ||
+                    cliente.mail?.toLowerCase().includes(searchTerm) ||
+                    cliente.telefono?.toLowerCase().includes(searchTerm)
+            })
+
+            renderClientes(filteredClientes)
+        }
+
+        // Event listener para búsqueda
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput')
+            if (searchInput) {
+                searchInput.addEventListener('input', filterClientes)
+            }
+        })
+
+        function openModal(clienteId = null) {
+            const modal = document.getElementById('clienteModal')
+            const form = document.getElementById('clienteForm')
+            
+            form.reset()
+            document.getElementById('modalTitle').textContent = clienteId ? 'Editar Cliente' : 'Nuevo Cliente'
+            
+            if (clienteId) {
+                const cliente = allClientes.find(c => c.cliente_id === clienteId)
+                if (cliente) {
+                    document.getElementById('clienteId').value = cliente.cliente_id
+                    document.getElementById('nombre').value = cliente.nombre || ''
+                    document.getElementById('email').value = cliente.mail || ''
+                    document.getElementById('telefono').value = cliente.telefono || ''
+                }
+            }
+            
+            modal.classList.add('active')
+        }
+
+        function closeModal() {
+            document.getElementById('clienteModal').classList.remove('active')
+            document.getElementById('clienteForm').reset()
+        }
+
+        async function saveCliente(event) {
+            event.preventDefault()
+            
+            const clienteId = document.getElementById('clienteId').value
+            const clienteData = {
+                nombre: document.getElementById('nombre').value,
+                mail: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                empresa_id: currentWorkerInfo.empresa_id
+            }
+
+            try {
+                if (clienteId) {
+                    // Actualizar
+                    const { error } = await supabaseClient
+                        .from('clientes')
+                        .update(clienteData)
+                        .eq('cliente_id', clienteId)
+
+                    if (error) throw error
+                    alert('✅ Cliente actualizado exitosamente')
+                } else {
+                    // Crear
+                    const { error } = await supabaseClient
+                        .from('clientes')
+                        .insert([clienteData])
+
+                    if (error) throw error
+                    alert('✅ Cliente creado exitosamente')
+                }
+
+                closeModal()
+                await loadClientes()
+
+            } catch (error) {
+                console.error('Error guardando cliente:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        function editCliente(clienteId) {
+            openModal(clienteId)
+        }
+
+        async function deleteCliente(clienteId, nombreCliente) {
+            if (!confirm(`¿Estás seguro de eliminar el cliente "${nombreCliente}"?\n\nEsta acción no se puede deshacer y eliminará todas las plantas asociadas.`)) {
+                return
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .delete()
+                    .eq('cliente_id', clienteId)
+
+                if (error) throw error
+
+                alert('✅ Cliente eliminado exitosamente')
+                await loadClientes()
+
+            } catch (error) {
+                console.error('Error eliminando cliente:', error)
+                alert('❌ Error al eliminar cliente: ' + error.message)
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('clienteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal()
+            }
+        })
+
+        // ========== FUNCIONES PARA MODAL DE DETALLES CON PESTAÑAS ==========
+        
+        let currentClienteId = null
+        let currentPlantas = []
+
+        async function viewClienteDetails(clienteId) {
+            currentClienteId = clienteId
+            const cliente = allClientes.find(c => c.cliente_id === clienteId)
+            
+            if (!cliente) return
+            
+            // Abrir modal
+            const modal = document.getElementById('clienteDetailsModal')
+            document.getElementById('detailsModalTitle').textContent = `Detalles: ${cliente.nombre}`
+            
+            // Llenar formulario de edición
+            document.getElementById('editClienteId').value = cliente.cliente_id
+            document.getElementById('editNombre').value = cliente.nombre || ''
+            document.getElementById('editEmail').value = cliente.mail || ''
+            document.getElementById('editTelefono').value = cliente.telefono || ''
+            
+            // Mostrar modal
+            modal.classList.add('active')
+            
+            // Activar tab de información por defecto
+            switchTab('info')
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('clienteDetailsModal').classList.remove('active')
+            currentClienteId = null
+            currentPlantas = []
+        }
+
+        function switchTab(tabName, event) {
+            // Cambiar estado de botones
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'))
+            if (event && event.target) {
+                event.target.classList.add('active')
+            }
+            
+            // Cambiar contenido
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'))
+            
+            if (tabName === 'info') {
+                document.getElementById('tabInfo').classList.add('active')
+            } else if (tabName === 'plantas') {
+                document.getElementById('tabPlantas').classList.add('active')
+                loadPlantas()
+            }
+        }
+
+        async function updateCliente(event) {
+            event.preventDefault()
+            
+            const clienteId = document.getElementById('editClienteId').value
+            const clienteData = {
+                nombre: document.getElementById('editNombre').value,
+                mail: document.getElementById('editEmail').value,
+                telefono: document.getElementById('editTelefono').value
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .update(clienteData)
+                    .eq('cliente_id', clienteId)
+
+                if (error) throw error
+                
+                alert('✅ Cliente actualizado exitosamente')
+                closeDetailsModal()
+                await loadClientes()
+
+            } catch (error) {
+                console.error('Error actualizando cliente:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== FUNCIONES PARA GESTIÓN DE PLANTAS ==========
+
+        async function loadPlantas() {
+            if (!currentClienteId) return
+            
+            const cliente = allClientes.find(c => c.cliente_id === currentClienteId)
+            document.getElementById('plantasClienteNombre').textContent = cliente?.nombre || ''
+            
+            try {
+                document.getElementById('plantasLoading').style.display = 'block'
+                document.getElementById('plantasEmpty').style.display = 'none'
+                document.getElementById('plantasTableContainer').style.display = 'none'
+                
+                const { data, error } = await supabaseClient
+                    .from('plantas')
+                    .select('*')
+                    .eq('cliente_id', currentClienteId)
+                    .order('nombre')
+
+                if (error) throw error
+
+                currentPlantas = data || []
+                
+                document.getElementById('plantasLoading').style.display = 'none'
+                
+                if (currentPlantas.length === 0) {
+                    document.getElementById('plantasEmpty').style.display = 'block'
+                } else {
+                    document.getElementById('plantasTableContainer').style.display = 'block'
+                    renderPlantas()
+                }
+
+                // Actualizar stats
+                await updatePlantasStats()
+
+            } catch (error) {
+                console.error('Error cargando plantas:', error)
+                document.getElementById('plantasLoading').style.display = 'none'
+                alert('Error al cargar plantas: ' + error.message)
+            }
+        }
+
+        function renderPlantas() {
+            const tbody = document.getElementById('plantasBody')
+            
+            tbody.innerHTML = currentPlantas.map(planta => `
+                <tr>
+                    <td><strong>${planta.nombre}</strong></td>
+                    <td>${planta.direccion || '-'}</td>
+                    <td>${planta.contacto || '-'}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-small" onclick="editPlanta('${planta.planta_id}')">✏️ Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletePlanta('${planta.planta_id}', '${planta.nombre}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('')
+        }
+
+        function openPlantaModal(plantaId = null) {
+            const modal = document.getElementById('plantaModal')
+            const form = document.getElementById('plantaForm')
+            
+            form.reset()
+            document.getElementById('plantaClienteId').value = currentClienteId
+            document.getElementById('plantaModalTitle').textContent = plantaId ? 'Editar Planta' : 'Nueva Planta'
+            
+            if (plantaId) {
+                const planta = currentPlantas.find(p => p.planta_id === plantaId)
+                if (planta) {
+                    document.getElementById('plantaId').value = planta.planta_id
+                    document.getElementById('plantaNombre').value = planta.nombre || ''
+                    document.getElementById('plantaDireccion').value = planta.direccion || ''
+                    document.getElementById('plantaContacto').value = planta.contacto || ''
+                }
+            }
+            
+            modal.classList.add('active')
+        }
+
+        function closePlantaModal() {
+            document.getElementById('plantaModal').classList.remove('active')
+            document.getElementById('plantaForm').reset()
+        }
+
+        async function savePlanta(event) {
+            event.preventDefault()
+            
+            const plantaId = document.getElementById('plantaId').value
+            const plantaData = {
+                nombre: document.getElementById('plantaNombre').value,
+                direccion: document.getElementById('plantaDireccion').value,
+                contacto: document.getElementById('plantaContacto').value,
+                cliente_id: currentClienteId,
+                empresa_id: currentWorkerInfo.empresa_id
+            }
+
+            try {
+                if (plantaId) {
+                    // Actualizar
+                    const { error } = await supabaseClient
+                        .from('plantas')
+                        .update(plantaData)
+                        .eq('planta_id', plantaId)
+
+                    if (error) throw error
+                    alert('✅ Planta actualizada exitosamente')
+                } else {
+                    // Crear
+                    const { error } = await supabaseClient
+                        .from('plantas')
+                        .insert([plantaData])
+
+                    if (error) throw error
+                    alert('✅ Planta creada exitosamente')
+                }
+
+                closePlantaModal()
+                await loadPlantas()
+
+            } catch (error) {
+                console.error('Error guardando planta:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        function editPlanta(plantaId) {
+            openPlantaModal(plantaId)
+        }
+
+        async function deletePlanta(plantaId, nombrePlanta) {
+            if (!confirm(`¿Estás seguro de eliminar la planta "${nombrePlanta}"?\n\nEsta acción no se puede deshacer.`)) {
+                return
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('plantas')
+                    .delete()
+                    .eq('planta_id', plantaId)
+
+                if (error) throw error
+
+                alert('✅ Planta eliminada exitosamente')
+                await loadPlantas()
+
+            } catch (error) {
+                console.error('Error eliminando planta:', error)
+                alert('❌ Error al eliminar planta: ' + error.message)
+            }
+        }
+
+        async function updatePlantasStats() {
+            try {
+                const { count, error } = await supabaseClient
+                    .from('plantas')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('empresa_id', currentWorkerInfo.empresa_id)
+
+                if (error) throw error
+
+                document.getElementById('totalPlantas').textContent = count || 0
+
+            } catch (error) {
+                console.error('Error actualizando stats de plantas:', error)
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        document.getElementById('clienteDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDetailsModal()
+            }
+        })
+
+        document.getElementById('plantaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePlantaModal()
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario - Sistema de Control de Plagas</title>
+    <link rel="stylesheet" href="../css/productos.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 Gestión de Inventario</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportarCSV()">
+                    <span>⬇️</span> Exportar a CSV
+                </button>
+                <button class="btn btn-primary" onclick="abrirModalProducto()">
+                    <span>➕</span> Añadir Producto
+                </button>
+                <a href="../index.html" class="btn btn-back">← Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                    <h3>Productos con bajo stock</h3>
+                    <div class="stat-value" id="statBajoStock">-</div>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-info">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <h3>Total de Productos</h3>
+                    <div class="stat-value" id="statTotalProductos">-</div>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-success">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h3>Valor Estimado del Inventario</h3>
+                    <div class="stat-value" id="statValorInventario">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar por nombre..."
+                    oninput="filtrarProductos()"
+                >
+            </div>
+            
+            <select id="filterTipo" class="filter-select" onchange="filtrarProductos()">
+                <option value="">Filtrar por tipo</option>
+                <option value="Químico">Químico</option>
+                <option value="Herramienta">Herramienta</option>
+                <option value="Trampa">Trampa</option>
+                <option value="Equipo">Equipo</option>
+                <option value="Otro">Otro</option>
+            </select>
+            
+            <select id="filterStock" class="filter-select" onchange="filtrarProductos()">
+                <option value="">Filtrar por stock</option>
+                <option value="bajo">Bajo stock</option>
+                <option value="normal">Stock normal</option>
+                <option value="alto">Stock alto</option>
+            </select>
+        </div>
+
+        <!-- Tabla de Productos -->
+        <div class="table-container">
+            <table class="productos-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                        </th>
+                        <th>NOMBRE DEL PRODUCTO</th>
+                        <th>TIPO</th>
+                        <th>CANTIDAD ACTUAL</th>
+                        <th>UNIDAD</th>
+                        <th>NIVEL DE ALERTA</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="productosTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            <div class="loading-spinner"></div>
+                            <p>Cargando productos...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sin resultados -->
+        <div id="noResults" style="display: none;" class="no-results">
+            <p>😕 No se encontraron productos</p>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar/Editar Producto -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">➕ Añadir Producto</h2>
+                <button class="btn-close" onclick="cerrarModalProducto()">✕</button>
+            </div>
+            
+            <form id="formProducto" onsubmit="guardarProducto(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="inputNombre">Nombre del Producto *</label>
+                        <input 
+                            type="text" 
+                            id="inputNombre" 
+                            class="form-control" 
+                            required
+                            placeholder="Ej: Insecticida Concentrado X"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputTipo">Tipo *</label>
+                        <select id="inputTipo" class="form-control" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Químico">Químico</option>
+                            <option value="Herramienta">Herramienta</option>
+                            <option value="Trampa">Trampa</option>
+                            <option value="Equipo">Equipo</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="inputDescripcion">Descripción</label>
+                        <textarea 
+                            id="inputDescripcion" 
+                            class="form-control" 
+                            rows="3"
+                            placeholder="Descripción detallada del producto..."
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputCantidad">Cantidad Actual *</label>
+                        <input 
+                            type="number" 
+                            id="inputCantidad" 
+                            class="form-control" 
+                            required
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputUnidad">Unidad de Medida *</label>
+                        <select id="inputUnidad" class="form-control" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Litros">Litros</option>
+                            <option value="Kilogramos">Kilogramos</option>
+                            <option value="Gramos">Gramos</option>
+                            <option value="Unidades">Unidades</option>
+                            <option value="Cajas">Cajas</option>
+                            <option value="Paquetes">Paquetes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputNivelAlerta">Nivel de Alerta *</label>
+                        <input 
+                            type="number" 
+                            id="inputNivelAlerta" 
+                            class="form-control" 
+                            required
+                            min="0"
+                            step="0.01"
+                            placeholder="10"
+                        >
+                        <small>Se notificará cuando el stock esté en este nivel</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPrecio">Precio Unitario</label>
+                        <input 
+                            type="number" 
+                            id="inputPrecio" 
+                            class="form-control"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                        >
+                        <small>Opcional - para cálculo de valor</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalProducto()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span id="btnGuardarText">Guardar Producto</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Configuración de Supabase
+        const SUPABASE_URL = "https://rrgxvwttarkcxqfekfeb.supabase.co"
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ"
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        // Auth utils
+        window.authUtils = {
+            isLoggedIn: async () => {
+                const { data } = await supabaseClient.auth.getSession()
+                return !!data.session
+            },
+            getWorkerProfile: async () => {
+                const { data: session } = await supabaseClient.auth.getSession()
+                if (!session.session) return null
+                
+                const { data: worker } = await supabaseClient
+                    .from('worker')
+                    .select('*, empresa:empresa_id(*)')
+                    .eq('user_id', session.session.user.id)
+                    .single()
+                
+                return worker
+            }
+        }
+
+        // Variables globales
+        let currentWorkerInfo = null
+        let todosProductos = []
+        let productoEditando = null
+
+        // ========== INICIALIZACIÓN ==========
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            currentWorkerInfo = await window.authUtils.getWorkerProfile()
+            
+            if (!currentWorkerInfo) {
+                alert('❌ No se pudo cargar información del usuario')
+                window.location.href = '../index.html'
+                return
+            }
+
+            await cargarProductos()
+            actualizarEstadisticas()
+        })
+
+        // ========== CARGAR PRODUCTOS ==========
+
+        async function cargarProductos() {
+            try {
+                console.log('Cargando productos para empresa:', currentWorkerInfo.empresa_id)
+                
+                const { data, error } = await supabaseClient
+                    .from('productos')
+                    .select('*')
+                    .eq('activo', true)
+                    .order('nombre')
+
+                if (error) {
+                    console.error('Error de Supabase:', error)
+                    throw error
+                }
+
+                console.log('Productos cargados:', data)
+
+                todosProductos = data || []
+                renderizarProductos(todosProductos)
+                actualizarEstadisticas()
+
+            } catch (error) {
+                console.error('Error cargando productos:', error)
+                document.getElementById('productosTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #e74c3c; padding: 40px;">
+                            ❌ Error cargando productos: ${error.message || JSON.stringify(error)}
+                        </td>
+                    </tr>
+                `
+            }
+        }
+
+        // ========== RENDERIZAR PRODUCTOS ==========
+
+        function renderizarProductos(productos) {
+            const tbody = document.getElementById('productosTableBody')
+            
+            if (productos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            No hay productos registrados
+                        </td>
+                    </tr>
+                `
+                return
+            }
+
+            tbody.innerHTML = productos.map(p => {
+                const bajoStock = p.cantidad_actual <= p.nivel_alerta
+                const stockClass = bajoStock ? 'stock-bajo' : 'stock-normal'
+                const stockBadge = bajoStock ? 
+                    `<span class="badge badge-warning">${p.cantidad_actual}</span>` : 
+                    `<span class="badge badge-success">${p.cantidad_actual}</span>`
+
+                return `
+                    <tr data-id="${p.producto_id}">
+                        <td>
+                            <input type="checkbox" class="row-checkbox" value="${p.producto_id}">
+                        </td>
+                        <td>
+                            <strong>${p.nombre}</strong>
+                            ${p.descripcion ? `<br><small style="color: #999;">${p.descripcion.substring(0, 50)}...</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge badge-tipo-${p.tipo.toLowerCase()}">${p.tipo}</span>
+                        </td>
+                        <td class="${stockClass}">
+                            ${stockBadge}
+                        </td>
+                        <td>${p.unidad_medida}</td>
+                        <td>${p.nivel_alerta} ${p.unidad_medida}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-edit" onclick="editarProducto('${p.producto_id}')" title="Editar">
+                                    ✏️
+                                </button>
+                                <button class="btn-icon btn-history" onclick="verHistorial('${p.producto_id}')" title="Ver historial">
+                                    🔄
+                                </button>
+                                <button class="btn-icon btn-delete" onclick="eliminarProducto('${p.producto_id}')" title="Eliminar">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `
+            }).join('')
+        }
+
+        // ========== FILTRAR PRODUCTOS ==========
+
+        function filtrarProductos() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase()
+            const tipoFilter = document.getElementById('filterTipo').value
+            const stockFilter = document.getElementById('filterStock').value
+
+            let productosFiltrados = todosProductos.filter(p => {
+                // Filtro de búsqueda
+                const matchSearch = !searchTerm || 
+                    p.nombre.toLowerCase().includes(searchTerm) ||
+                    (p.descripcion && p.descripcion.toLowerCase().includes(searchTerm))
+
+                // Filtro de tipo
+                const matchTipo = !tipoFilter || p.tipo === tipoFilter
+
+                // Filtro de stock
+                let matchStock = true
+                if (stockFilter === 'bajo') {
+                    matchStock = p.cantidad_actual <= p.nivel_alerta
+                } else if (stockFilter === 'normal') {
+                    matchStock = p.cantidad_actual > p.nivel_alerta && p.cantidad_actual <= p.nivel_alerta * 2
+                } else if (stockFilter === 'alto') {
+                    matchStock = p.cantidad_actual > p.nivel_alerta * 2
+                }
+
+                return matchSearch && matchTipo && matchStock
+            })
+
+            renderizarProductos(productosFiltrados)
+        }
+
+        // ========== ACTUALIZAR ESTADÍSTICAS ==========
+
+        function actualizarEstadisticas() {
+            const bajoStock = todosProductos.filter(p => p.cantidad_actual <= p.nivel_alerta).length
+            const total = todosProductos.length
+            const valorTotal = todosProductos.reduce((sum, p) => {
+                return sum + (p.cantidad_actual * (p.precio_unitario || 0))
+            }, 0)
+
+            document.getElementById('statBajoStock').textContent = bajoStock
+            document.getElementById('statTotalProductos').textContent = total
+            document.getElementById('statValorInventario').textContent = `$${valorTotal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`
+        }
+
+        // ========== MODAL PRODUCTO ==========
+
+        function abrirModalProducto() {
+            productoEditando = null
+            document.getElementById('modalTitle').innerHTML = '➕ Añadir Producto'
+            document.getElementById('btnGuardarText').textContent = 'Guardar Producto'
+            document.getElementById('formProducto').reset()
+            document.getElementById('modalProducto').style.display = 'flex'
+        }
+
+        function cerrarModalProducto() {
+            document.getElementById('modalProducto').style.display = 'none'
+            productoEditando = null
+        }
+
+        // ========== GUARDAR PRODUCTO ==========
+
+        async function guardarProducto(event) {
+            event.preventDefault()
+
+            const productoData = {
+                nombre: document.getElementById('inputNombre').value.trim(),
+                tipo: document.getElementById('inputTipo').value,
+                descripcion: document.getElementById('inputDescripcion').value.trim() || null,
+                cantidad_actual: parseFloat(document.getElementById('inputCantidad').value),
+                unidad_medida: document.getElementById('inputUnidad').value,
+                nivel_alerta: parseFloat(document.getElementById('inputNivelAlerta').value),
+                precio_unitario: parseFloat(document.getElementById('inputPrecio').value) || 0,
+                empresa_id: currentWorkerInfo.empresa_id,
+                activo: true
+            }
+
+            console.log('Guardando producto:', productoData)
+
+            try {
+                if (productoEditando) {
+                    // Actualizar
+                    console.log('Actualizando producto:', productoEditando)
+                    const { data, error } = await supabaseClient
+                        .from('productos')
+                        .update(productoData)
+                        .eq('producto_id', productoEditando)
+                        .select()
+
+                    if (error) {
+                        console.error('Error de Supabase (UPDATE):', error)
+                        throw error
+                    }
+                    console.log('Producto actualizado:', data)
+                    alert('✅ Producto actualizado exitosamente')
+                } else {
+                    // Crear
+                    console.log('Insertando nuevo producto')
+                    const { data, error } = await supabaseClient
+                        .from('productos')
+                        .insert(productoData)
+                        .select()
+
+                    if (error) {
+                        console.error('Error de Supabase (INSERT):', error)
+                        throw error
+                    }
+                    console.log('Producto creado:', data)
+                    alert('✅ Producto creado exitosamente')
+                }
+
+                cerrarModalProducto()
+                await cargarProductos()
+
+            } catch (error) {
+                console.error('Error guardando producto:', error)
+                const errorMsg = error.message || error.hint || JSON.stringify(error)
+                alert('❌ Error: ' + errorMsg)
+            }
+        }
+
+        // ========== EDITAR PRODUCTO ==========
+
+        async function editarProducto(productoId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('productos')
+                    .select('*')
+                    .eq('producto_id', productoId)
+                    .single()
+
+                if (error) throw error
+
+                productoEditando = productoId
+                document.getElementById('modalTitle').innerHTML = '✏️ Editar Producto'
+                document.getElementById('btnGuardarText').textContent = 'Actualizar Producto'
+
+                // Llenar formulario
+                document.getElementById('inputNombre').value = data.nombre
+                document.getElementById('inputTipo').value = data.tipo
+                document.getElementById('inputDescripcion').value = data.descripcion || ''
+                document.getElementById('inputCantidad').value = data.cantidad_actual
+                document.getElementById('inputUnidad').value = data.unidad_medida
+                document.getElementById('inputNivelAlerta').value = data.nivel_alerta
+                document.getElementById('inputPrecio').value = data.precio_unitario || 0
+
+                document.getElementById('modalProducto').style.display = 'flex'
+
+            } catch (error) {
+                console.error('Error cargando producto:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== ELIMINAR PRODUCTO ==========
+
+        async function eliminarProducto(productoId) {
+            if (!confirm('¿Estás seguro de eliminar este producto?')) return
+
+            try {
+                const { error } = await supabaseClient
+                    .from('productos')
+                    .update({ activo: false })
+                    .eq('producto_id', productoId)
+
+                if (error) throw error
+
+                alert('✅ Producto eliminado exitosamente')
+                await cargarProductos()
+
+            } catch (error) {
+                console.error('Error eliminando producto:', error)
+                alert('❌ Error: ' + error.message)
+            }
+        }
+
+        // ========== VER HISTORIAL ==========
+
+        function verHistorial(productoId) {
+            alert('🔄 Funcionalidad de historial en desarrollo')
+            // TODO: Implementar modal con historial de movimientos
+        }
+
+        // ========== EXPORTAR CSV ==========
+
+        function exportarCSV() {
+            const csv = [
+                ['Nombre', 'Tipo', 'Cantidad', 'Unidad', 'Nivel Alerta', 'Precio', 'Valor Total'].join(','),
+                ...todosProductos.map(p => [
+                    `"${p.nombre}"`,
+                    p.tipo,
+                    p.cantidad_actual,
+                    p.unidad_medida,
+                    p.nivel_alerta,
+                    p.precio_unitario || 0,
+                    (p.cantidad_actual * (p.precio_unitario || 0)).toFixed(2)
+                ].join(','))
+            ].join('\n')
+
+            const blob = new Blob([csv], { type: 'text/csv' })
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `inventario_${new Date().toISOString().split('T')[0]}.csv`
+            a.click()
+        }
+
+        // ========== SELECT ALL ==========
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.row-checkbox')
+            const selectAll = document.getElementById('selectAll')
+            checkboxes.forEach(cb => cb.checked = selectAll.checked)
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalProducto')
+            if (event.target === modal) {
+                cerrarModalProducto()
+            }
+        }
+    </script>
+</body>
+</html>
