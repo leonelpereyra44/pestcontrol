@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PCP</title>
+    <!-- CSS standalone -->
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    <div class="header">
+        <h1>PCP - Sistema de Gestión</h1>
+        <div class="user-info" id="userInfo">
+            <div class="loading">Cargando...</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="authContent">
+            <div class="loading">Verificando sesión...</div>
+        </div>
+    </div>
+
+    <!-- Incluir Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Incluir nuestro sistema de autenticación -->
+    <script src="../ts/auth.js"></script>
+    <!-- Incluir funciones multi-tenant -->
+    <script src="../ts/multi-tenant.js"></script>
+
+    <script>
+        // Función para cerrar sesión
+        async function logout() {
+            console.log('🔴 Logout function called!')
+            console.log('🔍 window.authUtils exists?', typeof window.authUtils)
+            console.log('🔍 window.authUtils.logout exists?', typeof window.authUtils?.logout)
+            
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                try {
+                    console.log('✅ User confirmed, calling authUtils.logout()...')
+                    const result = await window.authUtils.logout()
+                    console.log('📊 Logout result:', result)
+                } catch (error) {
+                    console.error('❌ Error during logout:', error)
+                    alert('Error al cerrar sesión: ' + error.message)
+                }
+            } else {
+                console.log('❌ User cancelled logout')
+            }
+        }
+
+        // Hacer la función disponible globalmente
+        window.logout = logout
+
+        // Verificar que la función esté disponible globalmente
+        console.log('✅ Logout function defined:', typeof logout)
+        console.log('✅ window.logout defined:', typeof window.logout)
+
+        // Esperar a que se inicialice la autenticación
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Esperar un poco para que se inicialice la autenticación
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            const userInfoContainer = document.getElementById('userInfo')
+            const authContent = document.getElementById('authContent')
+            
+            if (window.authUtils && window.authUtils.isLoggedIn()) {
+                // Usuario autenticado
+                const user = window.authUtils.getCurrentUser()
+                
+                // Obtener información del worker y empresa
+                try {
+                    const workerProfile = await window.authUtils.getWorkerProfile()
+                    
+                    if (workerProfile) {
+                        // Mostrar información completa del worker y empresa
+                        userInfoContainer.innerHTML = `
+                            <div class="user-text">
+                                <div class="user-name">${workerProfile.nombre}</div>
+                                <div class="user-details">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
+                            </div>
+                            <button onclick="logout()">Cerrar Sesión</button>
+                        `
+                    } else {
+                        // Fallback si no se encuentra el perfil del worker
+                        userInfoContainer.innerHTML = `
+                            <span>Bienvenido, ${user.email}</span>
+                            <button onclick="logout()">Cerrar Sesión</button>
+                        `
+                    }
+                } catch (error) {
+                    console.error('Error cargando perfil:', error)
+                    // Fallback básico
+                    userInfoContainer.innerHTML = `
+                        <span>Bienvenido, ${user.email}</span>
+                        <button onclick="logout()">Cerrar Sesión</button>
+                    `
+                }
+                
+                // Mostrar contenido principal
+                try {
+                    const workerProfile = await window.authUtils.getWorkerProfile()
+                    
+                    if (workerProfile) {
+                        // Verificar si es super admin sin empresa
+                        if (workerProfile.is_super_admin && !workerProfile.empresa_id) {
+                            // Super Admin SIN empresa - Panel especial
+                            userInfoContainer.innerHTML = `
+                                <div class="user-text">
+                                    <div class="user-name">👑 ${workerProfile.nombre}</div>
+                                    <div class="user-details">Super Administrador</div>
+                                </div>
+                                <button onclick="logout()">Cerrar Sesión</button>
+                            `
+                            
+                            authContent.innerHTML = `
+                                <div class="welcome-card">
+                                    <h2>👑 Panel de Super Administrador</h2>
+                                    <div class="super-admin-banner">
+                                        <h3>Bienvenido, ${workerProfile.nombre}</h3>
+                                        <p>Tienes acceso total al sistema para gestionar todas las empresas</p>
+                                    </div>
+                                    
+                                    <div class="feature-grid">
+                                        <div class="feature-card primary" onclick="window.location.href='super-admin.html'">
+                                            <div class="icon">🏢</div>
+                                            <h3>Gestión de Empresas</h3>
+                                            <p>Ver todas las empresas, crear nuevas y generar invitaciones</p>
+                                            <div class="cta-button">
+                                                → Acceder al Panel
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card secondary">
+                                            <div class="icon">📊</div>
+                                            <h3 style="color: #333;">Estadísticas del Sistema</h3>
+                                            <p style="color: #666;">Próximamente: Dashboard con métricas globales del sistema</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert-box yellow">
+                                        <p><strong>💡 Nota:</strong> Como Super Admin, no estás asociado a ninguna empresa específica. Tu función es gestionar el sistema completo y crear nuevas empresas.</p>
+                                    </div>
+                                </div>
+                            `
+                            return
+                        }
+                        
+                        // Worker normal con empresa
+                        userInfoContainer.innerHTML = `
+                            <div class="user-text">
+                                <div class="user-name">${workerProfile.nombre}</div>
+                                <div class="user-details">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
+                            </div>
+                            <button onclick="logout()">Cerrar Sesión</button>
+                        `
+                        
+                        authContent.innerHTML = `
+                            <div class="welcome-card">
+                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                                <div class="info-box">
+                                    <h3>Tu Información</h3>
+                                    <p><strong>Nombre:</strong> ${workerProfile.nombre}</p>
+                                    <p><strong>Email:</strong> ${user.email}</p>
+                                    <p><strong>Empresa:</strong> ${workerProfile.empresa.nombre}</p>
+                                    <p><strong>Puesto:</strong> ${workerProfile.puesto}</p>
+                                </div>
+                                
+                                <h3>Funcionalidades disponibles:</h3>
+                                <div class="mini-feature-grid">
+                                    <div class="mini-feature-card feature-card success">
+                                        <h4>🏢 Gestión de Clientes</h4>
+                                        <p>Administra clientes y sus plantas/ubicaciones</p>
+                                        <a href="clientes.html">→ Ir a Clientes</a>
+                                    </div>
+                                    <div class="mini-feature-card feature-card warning" onclick="window.location.href='controles.html'">
+                                        <h4>🐛 Controles de Plagas</h4>
+                                        <p>Registra y seguimiento de controles</p>
+                                        <a href="controles.html">→ Gestionar Controles</a>
+                                    </div>
+                                    <div class="mini-feature-card feature-card pink" onclick="window.location.href='productos.html'">
+                                        <h4>📦 Productos</h4>
+                                        <p>Gestión de inventario y productos</p>
+                                        <a href="productos.html">→ Gestionar Inventario</a>
+                                    </div>
+                                    ${workerProfile.rol === 'admin' || workerProfile.rol === 'supervisor' ? `
+                                    <div class="mini-feature-card feature-card purple">
+                                        <h4>👥 Gestión de Usuarios</h4>
+                                        <p>Invitar nuevos trabajadores</p>
+                                        <a href="admin-invitaciones.html">→ Gestionar Invitaciones</a>
+                                    </div>
+                                    <div class="mini-feature-card feature-card info">
+                                        <h4>🏢 Información de Empresa</h4>
+                                        <p>Logo, sellos y certificados</p>
+                                        <a href="empresa-info.html">→ Gestionar Documentos</a>
+                                    </div>
+                                    ` : ''}
+                                    ${workerProfile.is_super_admin ? `
+                                    <div class="mini-feature-card feature-card super-admin">
+                                        <h4>👑 Super Admin Panel</h4>
+                                        <p>Gestión central de todas las empresas</p>
+                                        <a href="super-admin.html">→ Acceder al Panel</a>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div class="alert-box yellow">
+                                    <p><strong>💡 Nota:</strong> Todas las funcionalidades están limitadas a los datos de tu empresa (${workerProfile.empresa.nombre})</p>
+                                </div>
+                            </div>
+                        `
+                    } else {
+                        authContent.innerHTML = `
+                            <div class="welcome-card">
+                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                                <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
+                                <div class="alert-box warning">
+                                    <p><strong>⚠️ Configuración Pendiente:</strong> No se encontró tu perfil de trabajador. Por favor contacta al administrador para completar la configuración de tu cuenta.</p>
+                                </div>
+                            </div>
+                        `
+                    }
+                } catch (error) {
+                    console.error('Error cargando perfil para dashboard:', error)
+                    authContent.innerHTML = `
+                        <div class="welcome-card">
+                            <h2>¡Bienvenido al Sistema de Gestión!</h2>
+                            <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
+                            <div class="alert-box danger">
+                                <p><strong>⚠️ Error:</strong> Hubo un problema cargando tu información. Por favor intenta recargar la página.</p>
+                            </div>
+                        </div>
+                    `
+                }
+            } else {
+                // Usuario no autenticado
+                userInfoContainer.innerHTML = `
+                    <div>No autenticado</div>
+                `
+                
+                authContent.innerHTML = `
+                    <div class="login-prompt">
+                        <h2>Acceso Requerido</h2>
+                        <p>Para acceder al sistema de gestión, necesitas iniciar sesión o crear una cuenta.</p>
+                        
+                        <div style="margin-top: 2rem;">
+                            <a href="login.html">Iniciar Sesión</a>
+                            <a href="info-invitaciones.html">Información sobre Registro</a>
+                        </div>
+                    </div>
+                `
+            }
+        })
+    </script>
+</body>
+</html>

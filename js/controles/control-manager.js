@@ -56,9 +56,15 @@ class ControlManager {
             if (productos.length > 0) {
                 console.log('📦 Guardando productos...');
                 
+                // Asignar el control_id real a cada producto
+                const productosConId = productos.map(p => ({
+                    ...p,
+                    control_id: control.control_id
+                }));
+                
                 const { error: prodError } = await this.supabase
                     .from('control_productos')
-                    .insert(productos);
+                    .insert(productosConId);
                 
                 if (prodError) {
                     console.error('❌ Error guardando productos:', prodError);
@@ -72,9 +78,15 @@ class ControlManager {
             if (puntos.length > 0) {
                 console.log('📍 Guardando puntos de control...');
                 
+                // Asignar el control_id real a cada punto
+                const puntosConId = puntos.map(p => ({
+                    ...p,
+                    control_id: control.control_id
+                }));
+                
                 const { error: puntosError } = await this.supabase
                     .from('control_puntos')
-                    .insert(puntos);
+                    .insert(puntosConId);
                 
                 if (puntosError) {
                     console.error('❌ Error guardando puntos:', puntosError);

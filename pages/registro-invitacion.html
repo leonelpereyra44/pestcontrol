@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro por Invitación - PCP</title>
     <!-- Sistema de componentes -->
-    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/registro-invitacion.css">
 </head>
 <body>
     <div class="page-wrapper">
-        <div class="container" style="max-width: 600px; padding-top: var(--spacing-4xl);">
+        <div class="container">
             
             <!-- Card principal -->
             <div class="card">
@@ -20,19 +20,19 @@
                 
                 <div class="card-body">
                     <!-- Información de invitación -->
-                    <div id="invitationInfo" class="card" style="display: none; margin-bottom: var(--spacing-xl); border-left: 4px solid var(--color-success);">
+                    <div id="invitationInfo" class="card">
                         <div class="card-body">
-                            <h3 style="color: var(--color-success); margin-top: 0;">✅ Invitación Válida</h3>
-                            <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
-                                <p style="margin: 0;"><strong>Empresa:</strong> <span id="empresaNombre"></span></p>
-                                <p style="margin: 0;"><strong>Email:</strong> <span id="emailInvitado"></span></p>
-                                <p style="margin: 0;"><strong>Puesto Sugerido:</strong> <span id="puestoSugerido"></span></p>
+                            <h3>✅ Invitación Válida</h3>
+                            <div class="invitation-details">
+                                <p><strong>Empresa:</strong> <span id="empresaNombre"></span></p>
+                                <p><strong>Email:</strong> <span id="emailInvitado"></span></p>
+                                <p><strong>Puesto Sugerido:</strong> <span id="puestoSugerido"></span></p>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Mensajes -->
-                    <div id="message" style="display: none;"></div>
+                    <div id="message"></div>
                     
                     <!-- Formulario -->
                     <form id="registerForm">
@@ -70,8 +70,8 @@
                         </button>
                     </form>
                     
-                    <div style="text-align: center; margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
-                        <p style="margin: 0;">¿Ya tienes cuenta? <a href="login.html" style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">Inicia sesión aquí</a></p>
+                    <div class="login-link-section">
+                        <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
                     </div>
                 </div>
             </div>

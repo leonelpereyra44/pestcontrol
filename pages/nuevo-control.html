@@ -1,17 +1,11 @@
-<!DOC    <title>Nuevo Control - Sistema de Control de Plagas</title>
-    <!-- Sistema de componentes -->
-    <link rel="stylesheet" href="../css/main.css">
-</head>
-<body>ml>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuevo Control de Plagas</title>
     <!-- Sistema de componentes -->
-    <link rel="stylesheet" href="../css/main.css">
-    <!-- Estilos específicos de controles -->
-    <link rel="stylesheet" href="../css/controles.css">
+    <link rel="stylesheet" href="../css/nuevo-control.css">
 </head>
 <body>
     <div class="page-wrapper">
@@ -105,7 +99,7 @@
             </div>
             
             <!-- Preview del sello del técnico -->
-            <div id="selloPreviewContainer" style="display: none;" class="sello-preview-card">
+            <div id="selloPreviewContainer" class="sello-preview-card hidden">
                 <div class="sello-preview-header">
                     <h3>Sello del Técnico Seleccionado</h3>
                 </div>
@@ -113,7 +107,7 @@
                     <div id="selloPreviewPlaceholder" class="sello-placeholder">
                         Seleccione un técnico para ver su sello
                     </div>
-                    <img id="selloPreviewImg" style="display: none;" alt="Sello del técnico">
+                    <img id="selloPreviewImg" class="hidden" alt="Sello del técnico">
                 </div>
             </div>
             
@@ -167,7 +161,7 @@
                 + Agregar Producto
             </button>
             
-            <div id="productosAgregados" style="margin-top: 2rem;">
+            <div id="productosAgregados">
                 <div class="empty-state">
                     <div class="empty-state-icon">📦</div>
                     <p class="empty-state-message">No se han agregado productos</p>
@@ -241,7 +235,7 @@
                 + Agregar Punto
             </button>
             
-            <div id="puntosAgregados" style="margin-top: 2rem;">
+            <div id="puntosAgregados">
                 <div class="empty-state">
                     <div class="empty-state-icon">📍</div>
                     <p class="empty-state-message">No se han agregado puntos de control</p>
@@ -291,7 +285,7 @@
                 <div id="selloTecnicoPlaceholder" class="sello-placeholder">
                     <p>👤 Seleccione un técnico para ver su sello</p>
                 </div>
-                <img id="selloTecnicoImg" style="display: none;" alt="Sello del técnico">
+                <img id="selloTecnicoImg" class="hidden" alt="Sello del técnico">
             </div>
             
             <div class="wizard-navigation">
@@ -598,17 +592,32 @@
                 
                 if (!confirmar) return;
                 
+                // Preparar productos y puntos SIN control_id (se asignará después de crear el control)
+                const productosPreparados = productosManager.getAll().map(p => ({
+                    producto_id: p.producto_id,
+                    cantidad_usada: p.cantidad,
+                    unidad: p.unidad
+                }));
+                
+                const puntosPreparados = puntosManager.getAll().map(p => ({
+                    numero_punto: p.numero,
+                    tipo_plaga: p.tipo_plaga,
+                    tipo_dispositivo: p.tipo_dispositivo || null,
+                    ubicacion: p.ubicacion || null,
+                    estado: p.estado,
+                    accion_realizada: p.accion_realizada || null
+                }));
+                
                 // Guardar control
                 const control = await controlManager.guardar(
                     formData,
-                    productosManager.prepararParaGuardar('temp'),
-                    puntosManager.prepararParaGuardar('temp'),
+                    productosPreparados,
+                    puntosPreparados,
                     selloUrl
                 );
                 
-                // Actualizar IDs en productos y puntos
-                const productosData = productosManager.prepararParaGuardar(control.control_id);
-                const puntosData = puntosManager.prepararParaGuardar(control.control_id);
+                // Actualizar IDs en managers (ya no es necesario, pero se puede mantener para referencia)
+                console.log('✅ Control guardado con ID:', control.control_id);
                 
                 alert('✅ Control guardado exitosamente');
                 

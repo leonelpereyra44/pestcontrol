@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Control - Sistema de Control de Plagas</title>
+    <link rel="stylesheet" href="../css/ver-control.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Cargando información del control...</p>
+            </div>
+
+            <!-- Content (hidden initially) -->
+            <div id="controlContent" style="display: none;">
+                <!-- Header -->
+                <div class="header">
+                    <div class="header-title">
+                        <h1 id="controlTitle">📋 Control de Plagas</h1>
+                        <p class="header-subtitle" id="controlSubtitle"></p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="controles.html" class="btn btn-secondary">← Volver</a>
+                        <button class="btn btn-success" onclick="generarPDF()">📄 Generar PDF</button>
+                        <button class="btn btn-danger" onclick="eliminarControl()">🗑️ Eliminar</button>
+                    </div>
+                </div>
+
+                <!-- Información General -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📋 Información General</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid" id="infoGeneral"></div>
+                    </div>
+                </div>
+
+                <!-- Productos Utilizados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🧪 Productos Utilizados</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="productosContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Puntos de Control -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📍 Puntos de Control Revisados</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="puntosContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📝 Observaciones Generales</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="observacionesContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Firma del Técnico -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>✍️ Firma del Técnico</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="selloContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../ts/auth.js"></script>
+    
+    <script>
+        // Usar el cliente de Supabase del auth.js
+        const supabase = window.supabaseClient;
+        let controlData = null;
+        let workerProfile = null;
+
+        // Obtener ID del control desde URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const controlId = urlParams.get('id');
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('🚀 Iniciando visualización del control...');
+                
+                // Verificar que tenemos un ID
+                if (!controlId) {
+                    alert('❌ ID de control no especificado');
+                    window.location.href = 'controles.html';
+                    return;
+                }
+
+                // Esperar a que auth.js se inicialice
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Verificar autenticación
+                if (!window.authUtils) {
+                    alert('❌ Sistema de autenticación no disponible');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                workerProfile = await window.authUtils.getWorkerProfile();
+                
+                if (!workerProfile) {
+                    alert('❌ Debes iniciar sesión primero');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('✅ Usuario autenticado:', workerProfile);
+
+                // Cargar datos del control
+                await cargarControl();
+
+            } catch (error) {
+                console.error('❌ Error en inicialización:', error);
+                alert('Error al cargar el control: ' + error.message);
+                window.location.href = 'controles.html';
+            }
+        });
+
+        /**
+         * Cargar información completa del control
+         */
+        async function cargarControl() {
+            try {
+                console.log('📥 Cargando control ID:', controlId);
+
+                // Obtener control principal con información relacionada
+                const { data: control, error: controlError } = await supabase
+                    .from('controles')
+                    .select(`
+                        *,
+                        cliente:clientes!controles_cliente_id_fkey(cliente_id, nombre),
+                        planta:plantas!controles_planta_id_fkey(planta_id, nombre),
+                        tecnico:worker!controles_tecnico_id_fkey(worker_id, nombre, puesto)
+                    `)
+                    .eq('control_id', controlId)
+                    .eq('empresa_id', workerProfile.empresa_id)
+                    .single();
+
+                if (controlError) throw controlError;
+                if (!control) throw new Error('Control no encontrado');
+
+                controlData = control;
+                console.log('✅ Control cargado:', control);
+
+                // Cargar productos
+                const { data: productos, error: prodError } = await supabase
+                    .from('control_productos')
+                    .select(`
+                        *,
+                        producto:productos!control_productos_producto_id_fkey(producto_id, nombre, unidad)
+                    `)
+                    .eq('control_id', controlId);
+
+                if (prodError) throw prodError;
+
+                // Cargar puntos
+                const { data: puntos, error: puntosError } = await supabase
+                    .from('control_puntos')
+                    .select('*')
+                    .eq('control_id', controlId)
+                    .order('numero_punto', { ascending: true });
+
+                if (puntosError) throw puntosError;
+
+                console.log('✅ Productos:', productos?.length || 0);
+                console.log('✅ Puntos:', puntos?.length || 0);
+
+                // Renderizar todo
+                renderizarControl(control, productos, puntos);
+
+                // Ocultar loading y mostrar contenido
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('controlContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('❌ Error cargando control:', error);
+                throw error;
+            }
+        }
+
+        /**
+         * Renderizar información del control
+         */
+        function renderizarControl(control, productos, puntos) {
+            // Título
+            document.getElementById('controlTitle').textContent = 
+                `📋 Control #${control.control_id.split('-')[0]}`;
+            
+            document.getElementById('controlSubtitle').textContent = 
+                `Control de ${control.tipo_control} - ${formatearFecha(control.fecha_control)}`;
+
+            // Información general
+            const infoGeneral = document.getElementById('infoGeneral');
+            infoGeneral.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Cliente</span>
+                    <span class="info-value">${control.cliente?.nombre || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Planta</span>
+                    <span class="info-value ${!control.planta ? 'empty' : ''}">${control.planta?.nombre || 'Sin planta específica'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Técnico Responsable</span>
+                    <span class="info-value">${control.tecnico?.nombre || 'N/A'}${control.tecnico?.puesto ? ' - ' + control.tecnico.puesto : ''}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fecha del Control</span>
+                    <span class="info-value">${formatearFecha(control.fecha_control)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tipo de Control</span>
+                    <span class="info-value">
+                        <span class="badge badge-${control.tipo_control}">${formatearTipoControl(control.tipo_control)}</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Estado</span>
+                    <span class="info-value">
+                        <span class="badge badge-${control.estado}">${formatearEstado(control.estado)}</span>
+                    </span>
+                </div>
+            `;
+
+            // Productos
+            renderizarProductos(productos);
+
+            // Puntos
+            renderizarPuntos(puntos);
+
+            // Observaciones
+            renderizarObservaciones(control.observaciones);
+
+            // Sello
+            renderizarSello(control.firma_tecnico);
+        }
+
+        /**
+         * Renderizar tabla de productos
+         */
+        function renderizarProductos(productos) {
+            const container = document.getElementById('productosContainer');
+            
+            if (!productos || productos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p class="empty-state-message">No se utilizaron productos en este control</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${productos.map(p => `
+                                <tr>
+                                    <td><strong>${p.producto?.nombre || 'Producto desconocido'}</strong></td>
+                                    <td>${p.cantidad_usada}</td>
+                                    <td>${p.unidad || p.producto?.unidad || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        /**
+         * Renderizar tabla de puntos
+         */
+        function renderizarPuntos(puntos) {
+            const container = document.getElementById('puntosContainer');
+            
+            if (!puntos || puntos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📍</div>
+                        <p class="empty-state-message">No se revisaron puntos de control específicos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Punto</th>
+                                <th>Tipo de Plaga</th>
+                                <th>Dispositivo</th>
+                                <th>Ubicación</th>
+                                <th>Estado</th>
+                                <th>Acción Realizada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${puntos.map(p => `
+                                <tr>
+                                    <td><strong>#${p.numero_punto}</strong></td>
+                                    <td>${formatearTipoPlaga(p.tipo_plaga)}</td>
+                                    <td>${p.tipo_dispositivo || '-'}</td>
+                                    <td>${p.ubicacion || '-'}</td>
+                                    <td><span class="badge badge-${p.estado}">${formatearEstadoPunto(p.estado)}</span></td>
+                                    <td>${p.accion_realizada || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        /**
+         * Renderizar observaciones
+         */
+        function renderizarObservaciones(observaciones) {
+            const container = document.getElementById('observacionesContainer');
+            
+            if (!observaciones || observaciones.trim() === '') {
+                container.innerHTML = `
+                    <div class="observaciones-text empty">
+                        Sin observaciones registradas
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="observaciones-text">${observaciones}</div>
+                `;
+            }
+        }
+
+        /**
+         * Renderizar sello del técnico
+         */
+        function renderizarSello(selloUrl) {
+            const container = document.getElementById('selloContainer');
+            
+            if (!selloUrl) {
+                container.innerHTML = `
+                    <div class="sello-container">
+                        <div class="sello-placeholder">
+                            <p>👤 Sin firma/sello del técnico</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="sello-container">
+                        <img src="${selloUrl}" alt="Firma del técnico" class="sello-img">
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Formatear fecha
+         */
+        function formatearFecha(fecha) {
+            if (!fecha) return 'N/A';
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        /**
+         * Formatear tipo de control
+         */
+        function formatearTipoControl(tipo) {
+            const tipos = {
+                'preventivo': 'Preventivo',
+                'correctivo': 'Correctivo',
+                'especial': 'Especial'
+            };
+            return tipos[tipo] || tipo;
+        }
+
+        /**
+         * Formatear estado
+         */
+        function formatearEstado(estado) {
+            const estados = {
+                'completado': 'Completado',
+                'pendiente': 'Pendiente',
+                'en_progreso': 'En Progreso'
+            };
+            return estados[estado] || estado;
+        }
+
+        /**
+         * Formatear tipo de plaga
+         */
+        function formatearTipoPlaga(tipo) {
+            const tipos = {
+                'roedores': 'Roedores',
+                'voladores': 'Voladores',
+                'rastreros': 'Rastreros'
+            };
+            return tipos[tipo] || tipo;
+        }
+
+        /**
+         * Formatear estado de punto
+         */
+        function formatearEstadoPunto(estado) {
+            const estados = {
+                'ok': 'OK',
+                'con_actividad': 'Con Actividad',
+                'faltante': 'Faltante',
+                'reemplazado': 'Reemplazado'
+            };
+            return estados[estado] || estado;
+        }
+
+        /**
+         * Generar PDF del control
+         */
+        function generarPDF() {
+            alert('🚧 Función de generar PDF en desarrollo');
+            // TODO: Implementar generación de PDF
+        }
+
+        /**
+         * Eliminar control
+         */
+        async function eliminarControl() {
+            if (!confirm('⚠️ ¿Está seguro de que desea eliminar este control?\n\nEsta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ Eliminando control...');
+
+                // Eliminar control (los productos y puntos se eliminarán automáticamente por CASCADE)
+                const { error } = await supabase
+                    .from('controles')
+                    .delete()
+                    .eq('control_id', controlId)
+                    .eq('empresa_id', workerProfile.empresa_id);
+
+                if (error) throw error;
+
+                alert('✅ Control eliminado exitosamente');
+                window.location.href = 'controles.html';
+
+            } catch (error) {
+                console.error('❌ Error eliminando control:', error);
+                alert('Error al eliminar control: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -3,254 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCP</title>
-    <!-- CSS standalone -->
-    <link rel="stylesheet" href="css/dashboard.css">
+    <title>Sistema de Control de Plagas Profesional | PCP</title>
+    <meta name="description" content="Gestiona tu empresa de control de plagas de forma profesional. Sistema completo para clientes, controles, productos e informes.">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
 <body>
-    <div class="header">
-        <h1>PCP - Sistema de Gestión</h1>
-        <div class="user-info" id="userInfo">
-            <div class="loading">Cargando...</div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">🐛 PCP Sistema</div>
+        <div class="nav-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#caracteristicas">Características</a>
+            <a href="#beneficios">Beneficios</a>
+            <a href="#contacto">Contacto</a>
+            <a href="pages/login.html" class="btn-nav">Iniciar Sesión</a>
         </div>
-    </div>
+    </nav>
 
-    <div class="main-content">
-        <div id="authContent">
-            <div class="loading">Verificando sesión...</div>
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <h1>Sistema Profesional de Control de Plagas</h1>
+            <p>Gestiona tu empresa de manera eficiente con nuestro sistema integral. Control de clientes, programación de servicios, gestión de productos e informes automáticos.</p>
+            <div class="hero-buttons">
+                <a href="#contacto" class="btn-hero btn-hero-primary">📞 Solicitar Demo</a>
+                <a href="#caracteristicas" class="btn-hero btn-hero-secondary">Ver Características</a>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Incluir Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Incluir nuestro sistema de autenticación -->
-    <script src="ts/auth.js"></script>
-    <!-- Incluir funciones multi-tenant -->
-    <script src="ts/multi-tenant.js"></script>
-
-    <script>
-        // Función para cerrar sesión
-        async function logout() {
-            console.log('🔴 Logout function called!')
-            console.log('🔍 window.authUtils exists?', typeof window.authUtils)
-            console.log('🔍 window.authUtils.logout exists?', typeof window.authUtils?.logout)
+    <!-- Features Section -->
+    <section class="features" id="caracteristicas">
+        <div class="container">
+            <h2 class="section-title">Todo lo que necesitas en un solo lugar</h2>
+            <p class="section-subtitle">Herramientas profesionales diseñadas para empresas de control de plagas</p>
             
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                try {
-                    console.log('✅ User confirmed, calling authUtils.logout()...')
-                    const result = await window.authUtils.logout()
-                    console.log('📊 Logout result:', result)
-                } catch (error) {
-                    console.error('❌ Error during logout:', error)
-                    alert('Error al cerrar sesión: ' + error.message)
-                }
-            } else {
-                console.log('❌ User cancelled logout')
-            }
-        }
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🏢</span>
+                    <h3>Gestión de Clientes</h3>
+                    <p>Administra clientes, plantas y ubicaciones de forma organizada. Historial completo de servicios por cliente.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">📋</span>
+                    <h3>Controles Digitales</h3>
+                    <p>Registra controles con productos utilizados, puntos revisados y observaciones. Todo documentado digitalmente.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">📦</span>
+                    <h3>Inventario de Productos</h3>
+                    <p>Control de stock, productos utilizados por control y gestión de certificados de productos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">📄</span>
+                    <h3>Informes Automáticos</h3>
+                    <p>Genera reportes PDF profesionales con logo de tu empresa y firma digital del técnico.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">👥</span>
+                    <h3>Multi-Usuario</h3>
+                    <p>Múltiples técnicos, supervisores y administradores. Cada uno con sus permisos específicos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">🔒</span>
+                    <h3>Seguro y Confiable</h3>
+                    <p>Datos protegidos con encriptación. Sistema multi-tenant donde cada empresa tiene sus datos aislados.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        // Hacer la función disponible globalmente
-        window.logout = logout
-
-        // Verificar que la función esté disponible globalmente
-        console.log('✅ Logout function defined:', typeof logout)
-        console.log('✅ window.logout defined:', typeof window.logout)
-
-        // Esperar a que se inicialice la autenticación
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Esperar un poco para que se inicialice la autenticación
-            await new Promise(resolve => setTimeout(resolve, 1000))
+    <!-- Benefits Section -->
+    <section class="benefits" id="beneficios">
+        <div class="container">
+            <h2 class="section-title">¿Por qué elegir nuestro sistema?</h2>
+            <p class="section-subtitle">Ventajas que marcan la diferencia</p>
             
-            const userInfoContainer = document.getElementById('userInfo')
-            const authContent = document.getElementById('authContent')
-            
-            if (window.authUtils && window.authUtils.isLoggedIn()) {
-                // Usuario autenticado
-                const user = window.authUtils.getCurrentUser()
-                
-                // Obtener información del worker y empresa
-                try {
-                    const workerProfile = await window.authUtils.getWorkerProfile()
-                    
-                    if (workerProfile) {
-                        // Mostrar información completa del worker y empresa
-                        userInfoContainer.innerHTML = `
-                            <div class="user-text">
-                                <div class="user-name">${workerProfile.nombre}</div>
-                                <div class="user-details">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
-                            </div>
-                            <button onclick="logout()">Cerrar Sesión</button>
-                        `
-                    } else {
-                        // Fallback si no se encuentra el perfil del worker
-                        userInfoContainer.innerHTML = `
-                            <span>Bienvenido, ${user.email}</span>
-                            <button onclick="logout()">Cerrar Sesión</button>
-                        `
-                    }
-                } catch (error) {
-                    console.error('Error cargando perfil:', error)
-                    // Fallback básico
-                    userInfoContainer.innerHTML = `
-                        <span>Bienvenido, ${user.email}</span>
-                        <button onclick="logout()">Cerrar Sesión</button>
-                    `
-                }
-                
-                // Mostrar contenido principal
-                try {
-                    const workerProfile = await window.authUtils.getWorkerProfile()
-                    
-                    if (workerProfile) {
-                        // Verificar si es super admin sin empresa
-                        if (workerProfile.is_super_admin && !workerProfile.empresa_id) {
-                            // Super Admin SIN empresa - Panel especial
-                            userInfoContainer.innerHTML = `
-                                <div class="user-text">
-                                    <div class="user-name">👑 ${workerProfile.nombre}</div>
-                                    <div class="user-details">Super Administrador</div>
-                                </div>
-                                <button onclick="logout()">Cerrar Sesión</button>
-                            `
-                            
-                            authContent.innerHTML = `
-                                <div class="welcome-card">
-                                    <h2>👑 Panel de Super Administrador</h2>
-                                    <div class="super-admin-banner">
-                                        <h3>Bienvenido, ${workerProfile.nombre}</h3>
-                                        <p>Tienes acceso total al sistema para gestionar todas las empresas</p>
-                                    </div>
-                                    
-                                    <div class="feature-grid">
-                                        <div class="feature-card primary" onclick="window.location.href='pages/super-admin.html'">
-                                            <div class="icon">🏢</div>
-                                            <h3>Gestión de Empresas</h3>
-                                            <p>Ver todas las empresas, crear nuevas y generar invitaciones</p>
-                                            <div class="cta-button">
-                                                → Acceder al Panel
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card secondary">
-                                            <div class="icon">📊</div>
-                                            <h3 style="color: #333;">Estadísticas del Sistema</h3>
-                                            <p style="color: #666;">Próximamente: Dashboard con métricas globales del sistema</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="alert-box yellow">
-                                        <p><strong>💡 Nota:</strong> Como Super Admin, no estás asociado a ninguna empresa específica. Tu función es gestionar el sistema completo y crear nuevas empresas.</p>
-                                    </div>
-                                </div>
-                            `
-                            return
-                        }
-                        
-                        // Worker normal con empresa
-                        userInfoContainer.innerHTML = `
-                            <div class="user-text">
-                                <div class="user-name">${workerProfile.nombre}</div>
-                                <div class="user-details">${workerProfile.empresa.nombre} - ${workerProfile.puesto}</div>
-                            </div>
-                            <button onclick="logout()">Cerrar Sesión</button>
-                        `
-                        
-                        authContent.innerHTML = `
-                            <div class="welcome-card">
-                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
-                                <div class="info-box">
-                                    <h3>Tu Información</h3>
-                                    <p><strong>Nombre:</strong> ${workerProfile.nombre}</p>
-                                    <p><strong>Email:</strong> ${user.email}</p>
-                                    <p><strong>Empresa:</strong> ${workerProfile.empresa.nombre}</p>
-                                    <p><strong>Puesto:</strong> ${workerProfile.puesto}</p>
-                                </div>
-                                
-                                <h3>Funcionalidades disponibles:</h3>
-                                <div class="mini-feature-grid">
-                                    <div class="mini-feature-card feature-card success">
-                                        <h4>🏢 Gestión de Clientes</h4>
-                                        <p>Administra clientes y sus plantas/ubicaciones</p>
-                                        <a href="pages/clientes.html">→ Ir a Clientes</a>
-                                    </div>
-                                    <div class="mini-feature-card feature-card warning" onclick="window.location.href='pages/controles.html'">
-                                        <h4>🐛 Controles de Plagas</h4>
-                                        <p>Registra y seguimiento de controles</p>
-                                        <a href="pages/controles.html">→ Gestionar Controles</a>
-                                    </div>
-                                    <div class="mini-feature-card feature-card pink" onclick="window.location.href='pages/productos.html'">
-                                        <h4>📦 Productos</h4>
-                                        <p>Gestión de inventario y productos</p>
-                                        <a href="pages/productos.html">→ Gestionar Inventario</a>
-                                    </div>
-                                    ${workerProfile.rol === 'admin' || workerProfile.rol === 'supervisor' ? `
-                                    <div class="mini-feature-card feature-card purple">
-                                        <h4>👥 Gestión de Usuarios</h4>
-                                        <p>Invitar nuevos trabajadores</p>
-                                        <a href="pages/admin-invitaciones.html">→ Gestionar Invitaciones</a>
-                                    </div>
-                                    <div class="mini-feature-card feature-card info">
-                                        <h4>🏢 Información de Empresa</h4>
-                                        <p>Logo, sellos y certificados</p>
-                                        <a href="pages/empresa-info.html">→ Gestionar Documentos</a>
-                                    </div>
-                                    ` : ''}
-                                    ${workerProfile.is_super_admin ? `
-                                    <div class="mini-feature-card feature-card super-admin">
-                                        <h4>👑 Super Admin Panel</h4>
-                                        <p>Gestión central de todas las empresas</p>
-                                        <a href="pages/super-admin.html">→ Acceder al Panel</a>
-                                    </div>
-                                    ` : ''}
-                                </div>
-                                
-                                <div class="alert-box yellow">
-                                    <p><strong>💡 Nota:</strong> Todas las funcionalidades están limitadas a los datos de tu empresa (${workerProfile.empresa.nombre})</p>
-                                </div>
-                            </div>
-                        `
-                    } else {
-                        authContent.innerHTML = `
-                            <div class="welcome-card">
-                                <h2>¡Bienvenido al Sistema de Gestión!</h2>
-                                <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
-                                <div class="alert-box warning">
-                                    <p><strong>⚠️ Configuración Pendiente:</strong> No se encontró tu perfil de trabajador. Por favor contacta al administrador para completar la configuración de tu cuenta.</p>
-                                </div>
-                            </div>
-                        `
-                    }
-                } catch (error) {
-                    console.error('Error cargando perfil para dashboard:', error)
-                    authContent.innerHTML = `
-                        <div class="welcome-card">
-                            <h2>¡Bienvenido al Sistema de Gestión!</h2>
-                            <p>Has iniciado sesión exitosamente como: <strong>${user.email}</strong></p>
-                            <div class="alert-box danger">
-                                <p><strong>⚠️ Error:</strong> Hubo un problema cargando tu información. Por favor intenta recargar la página.</p>
-                            </div>
-                        </div>
-                    `
-                }
-            } else {
-                // Usuario no autenticado
-                userInfoContainer.innerHTML = `
-                    <div>No autenticado</div>
-                `
-                
-                authContent.innerHTML = `
-                    <div class="login-prompt">
-                        <h2>Acceso Requerido</h2>
-                        <p>Para acceder al sistema de gestión, necesitas iniciar sesión o crear una cuenta.</p>
-                        
-                        <div style="margin-top: 2rem;">
-                            <a href="pages/login.html">Iniciar Sesión</a>
-                            <a href="pages/info-invitaciones.html">Información sobre Registro</a>
-                        </div>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <span class="benefit-icon">⚡</span>
+                    <div class="benefit-content">
+                        <h4>Ahorra Tiempo</h4>
+                        <p>Reduce el tiempo de administración en un 70%. Genera reportes en segundos, no en horas.</p>
                     </div>
-                `
-            }
-        })
-    </script>
+                </div>
+                
+                <div class="benefit-item">
+                    <span class="benefit-icon">💼</span>
+                    <div class="benefit-content">
+                        <h4>Imagen Profesional</h4>
+                        <p>Reportes con tu logo, firma digital y formato profesional. Impresiona a tus clientes.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <span class="benefit-icon">📊</span>
+                    <div class="benefit-content">
+                        <h4>Toma Mejores Decisiones</h4>
+                        <p>Estadísticas y análisis de tu operación. Identifica patrones y optimiza tu negocio.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <span class="benefit-icon">🌐</span>
+                    <div class="benefit-content">
+                        <h4>Acceso desde Cualquier Lugar</h4>
+                        <p>Sistema web. Accede desde computadora, tablet o celular. Trabajen en campo sin problemas.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <span class="benefit-icon">💰</span>
+                    <div class="benefit-content">
+                        <h4>Sin Inversión Inicial</h4>
+                        <p>No necesitas servidores ni infraestructura. Todo en la nube y listo para usar.</p>
+                    </div>
+                </div>
+                
+                <div class="benefit-item">
+                    <span class="benefit-icon">🎯</span>
+                    <div class="benefit-content">
+                        <h4>Fácil de Usar</h4>
+                        <p>Interfaz intuitiva. Tu equipo aprende a usarlo en minutos, no en semanas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="contacto">
+        <div class="container">
+            <h2>¿Listo para modernizar tu empresa?</h2>
+            <p>Únete a las empresas que ya confían en nuestro sistema para gestionar sus operaciones</p>
+            <div class="hero-buttons">
+                <a href="mailto:contacto@tuempresa.com" class="btn-hero btn-hero-primary">📧 Contactar Ventas</a>
+                <a href="pages/info-invitaciones.html" class="btn-hero btn-hero-secondary">ℹ️ Más Información</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🐛 PCP Sistema</h3>
+                <p>Sistema profesional de gestión para empresas de control de plagas.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Producto</h3>
+                <a href="#caracteristicas">Características</a>
+                <a href="#beneficios">Beneficios</a>
+                <a href="pages/info-invitaciones.html">Preguntas Frecuentes</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Empresa</h3>
+                <a href="#contacto">Contacto</a>
+                <a href="pages/login.html">Iniciar Sesión</a>
+                <a href="pages/dashboard.html">Dashboard</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <p>📧 contacto@tuempresa.com</p>
+                <p>📱 +54 9 11 XXXX-XXXX</p>
+                <p>📍 Buenos Aires, Argentina</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 PCP Sistema. Todos los derechos reservados.</p>
+        </div>
+    </footer>
 </body>
 </html>
