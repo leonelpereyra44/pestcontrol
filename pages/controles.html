@@ -4,310 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Controles - Sistema de Plagas</title>
-    <link rel="stylesheet" href="../css/clientes.css">
+    <!-- CSS standalone -->
     <link rel="stylesheet" href="../css/controles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../ts/auth.js"></script>
-    <style>
-        .controls-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .filters-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-        }
-
-        .controls-table {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #495057;
-            font-size: 0.9rem;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
-            font-size: 0.95rem;
-        }
-
-        tbody tr:hover {
-            background: #f8f9fa;
-            cursor: pointer;
-        }
-
-        .badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .badge.pendiente {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .badge.en_progreso {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .badge.completado {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .badge.cancelado {
-            background: #f8d7da;
-            color: #842029;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-clear {
-            background: white;
-            color: #666;
-            border: 1px solid #ddd;
-        }
-
-        .actions-cell {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-icon {
-            padding: 6px 10px;
-            font-size: 0.85rem;
-            background: #f8f9fa;
-            color: #495057;
-            border: 1px solid #dee2e6;
-        }
-
-        .btn-icon:hover {
-            background: #e9ecef;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .controls-table {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 800px;
-            }
-
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="controls-container">
-        <div style="margin-bottom: 20px;">
-            <a href="../index.html" style="text-decoration: none; color: #007bff; display: inline-flex; align-items: center; gap: 5px;">
-                ← Volver al Dashboard
-            </a>
-        </div>
-        
-        <div class="header-section">
-            <div>
-                <h1>📋 Gestión de Controles</h1>
-                <p style="color: #6c757d; margin-top: 5px;">Registros de controles de plagas realizados</p>
-            </div>
-            <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'">
-                ➕ Nuevo Control
-            </button>
-        </div>
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="header-content">
+                    <div class="back-button">
+                        <a href="../index.html" class="btn btn-secondary btn-sm">
+                            ← Volver al Dashboard
+                        </a>
+                    </div>
+                    <h1 class="header-title">📋 Gestión de Controles</h1>
+                    <p class="header-subtitle">Registros de controles de plagas realizados</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'">
+                        ➕ Nuevo Control
+                    </button>
+                </div>
+            </header>
 
         <!-- Estadísticas -->
-        <div class="stats-grid">
+        <div class="stat-grid">
             <div class="stat-card">
-                <div class="stat-value" id="statTotal">0</div>
-                <div class="stat-label">Total Controles</div>
+                <div class="stat-content">
+                    <h3 class="stat-label">Total Controles</h3>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statPendientes">0</div>
-                <div class="stat-label">Pendientes</div>
+            <div class="stat-card stat-card-warning">
+                <div class="stat-content">
+                    <h3 class="stat-label">Pendientes</h3>
+                    <div class="stat-value" id="statPendientes">0</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statEnProgreso">0</div>
-                <div class="stat-label">En Progreso</div>
+            <div class="stat-card stat-card-info">
+                <div class="stat-content">
+                    <h3 class="stat-label">En Progreso</h3>
+                    <div class="stat-value" id="statEnProgreso">0</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statCompletados">0</div>
-                <div class="stat-label">Completados</div>
+            <div class="stat-card stat-card-success">
+                <div class="stat-content">
+                    <h3 class="stat-label">Completados</h3>
+                    <div class="stat-value" id="statCompletados">0</div>
+                </div>
             </div>
         </div>
 
         <!-- Filtros -->
-        <div class="filters-section">
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label>Cliente</label>
-                    <select id="filterCliente">
-                        <option value="">Todos los clientes</option>
-                    </select>
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filterCliente">Cliente</label>
+                        <select id="filterCliente" class="form-control">
+                            <option value="">Todos los clientes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterTecnico">Técnico</label>
+                        <select id="filterTecnico" class="form-control">
+                            <option value="">Todos los técnicos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEstado">Estado</label>
+                        <select id="filterEstado" class="form-control">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_progreso">En Progreso</option>
+                            <option value="completado">Completado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterFechaDesde">Fecha desde</label>
+                        <input type="date" id="filterFechaDesde" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterFechaHasta">Fecha hasta</label>
+                        <input type="date" id="filterFechaHasta" class="form-control">
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <label>Técnico</label>
-                    <select id="filterTecnico">
-                        <option value="">Todos los técnicos</option>
-                    </select>
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-md);">
+                    <button class="btn btn-primary" onclick="aplicarFiltros()">🔍 Buscar</button>
+                    <button class="btn btn-secondary btn-outline" onclick="limpiarFiltros()">🗑️ Limpiar</button>
                 </div>
-                <div class="filter-group">
-                    <label>Estado</label>
-                    <select id="filterEstado">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="en_progreso">En Progreso</option>
-                        <option value="completado">Completado</option>
-                        <option value="cancelado">Cancelado</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Fecha desde</label>
-                    <input type="date" id="filterFechaDesde">
-                </div>
-                <div class="filter-group">
-                    <label>Fecha hasta</label>
-                    <input type="date" id="filterFechaHasta">
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" onclick="aplicarFiltros()">🔍 Buscar</button>
-                <button class="btn btn-clear" onclick="limpiarFiltros()">🗑️ Limpiar</button>
             </div>
         </div>
 
         <!-- Tabla de Controles -->
-        <div class="controls-table">
-            <table>
+        <div class="table-container">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -316,18 +111,22 @@
                         <th>Técnico</th>
                         <th>Tipo</th>
                         <th>Estado</th>
-                        <th>Acciones</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="controlesTableBody">
                     <tr>
-                        <td colspan="7" class="loading">
-                            Cargando controles...
+                        <td colspan="7">
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                                <p>Cargando controles...</p>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+    </div>
     </div>
 
     <script>
@@ -433,15 +232,13 @@
             if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
-                            <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <h3>No hay controles registrados</h3>
-                                <p>Comienza creando tu primer control de plagas</p>
-                                <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'" style="margin-top: 20px;">
-                                    Crear Primer Control
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <h3 class="empty-state-title">No hay controles registrados</h3>
+                                <p class="empty-state-message">Comienza creando tu primer control de plagas</p>
+                                <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'" style="margin-top: var(--spacing-lg);">
+                                    ➕ Crear Primer Control
                                 </button>
                             </div>
                         </td>
@@ -456,29 +253,47 @@
                 const plantaNombre = control.planta?.nombre || 'Sin planta';
                 const tecnicoNombre = control.tecnico?.nombre || 'Sin asignar';
                 
-                const estadoBadge = `<span class="badge ${control.estado}">${formatearEstado(control.estado)}</span>`;
+                // Mapeo de badges según estado
+                let estadoBadge = '';
+                switch(control.estado) {
+                    case 'pendiente':
+                        estadoBadge = `<span class="badge badge-warning">Pendiente</span>`;
+                        break;
+                    case 'en_progreso':
+                        estadoBadge = `<span class="badge badge-info">En Progreso</span>`;
+                        break;
+                    case 'completado':
+                        estadoBadge = `<span class="badge badge-success">Completado</span>`;
+                        break;
+                    case 'cancelado':
+                        estadoBadge = `<span class="badge badge-danger">Cancelado</span>`;
+                        break;
+                    default:
+                        estadoBadge = `<span class="badge badge-secondary">${control.estado}</span>`;
+                }
+                
                 const tipoBadge = control.tipo_control ? control.tipo_control.charAt(0).toUpperCase() + control.tipo_control.slice(1) : 'Preventivo';
 
                 return `
-                    <tr onclick="verControl('${control.control_id}')">
+                    <tr onclick="verControl('${control.control_id}')" style="cursor: pointer;">
                         <td>${fecha}</td>
                         <td><strong>${clienteNombre}</strong></td>
                         <td>${plantaNombre}</td>
                         <td>${tecnicoNombre}</td>
-                        <td>${tipoBadge}</td>
+                        <td><span class="badge badge-primary">${tipoBadge}</span></td>
                         <td>${estadoBadge}</td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="actions-cell">
-                                <button class="btn btn-icon" onclick="verControl('${control.control_id}')" title="Ver detalles">
+                        <td class="text-center" onclick="event.stopPropagation()">
+                            <div class="action-buttons">
+                                <button class="btn-icon-sm btn-view" onclick="verControl('${control.control_id}')" title="Ver detalles">
                                     👁️
                                 </button>
                                 ${control.estado !== 'completado' ? `
-                                    <button class="btn btn-icon" onclick="editarControl('${control.control_id}')" title="Editar">
+                                    <button class="btn-icon-sm btn-edit" onclick="editarControl('${control.control_id}')" title="Editar">
                                         ✏️
                                     </button>
                                 ` : ''}
                                 ${control.pdf_url ? `
-                                    <button class="btn btn-icon" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
+                                    <button class="btn-icon-sm btn-info" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
                                         📄
                                     </button>
                                 ` : ''}
@@ -494,16 +309,6 @@
             document.getElementById('statPendientes').textContent = data.filter(c => c.estado === 'pendiente').length;
             document.getElementById('statEnProgreso').textContent = data.filter(c => c.estado === 'en_progreso').length;
             document.getElementById('statCompletados').textContent = data.filter(c => c.estado === 'completado').length;
-        }
-
-        function formatearEstado(estado) {
-            const estados = {
-                'pendiente': 'Pendiente',
-                'en_progreso': 'En Progreso',
-                'completado': 'Completado',
-                'cancelado': 'Cancelado'
-            };
-            return estados[estado] || estado;
         }
 
         window.aplicarFiltros = function() {
@@ -566,8 +371,80 @@
             const tbody = document.getElementById('controlesTableBody');
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; color: #dc3545; padding: 40px;">
-                        ⚠️ ${mensaje}
+                    <td colspan="7">
+                        <div class="alert alert-danger">
+                            ⚠️ ${mensaje}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    </script>
+</body>
+</html>
+            let filtrados = [...controles];
+
+            const clienteId = document.getElementById('filterCliente').value;
+            const tecnicoId = document.getElementById('filterTecnico').value;
+            const estado = document.getElementById('filterEstado').value;
+            const fechaDesde = document.getElementById('filterFechaDesde').value;
+            const fechaHasta = document.getElementById('filterFechaHasta').value;
+
+            if (clienteId) {
+                filtrados = filtrados.filter(c => c.cliente_id === clienteId);
+            }
+
+            if (tecnicoId) {
+                filtrados = filtrados.filter(c => c.tecnico_id === tecnicoId);
+            }
+
+            if (estado) {
+                filtrados = filtrados.filter(c => c.estado === estado);
+            }
+
+            if (fechaDesde) {
+                filtrados = filtrados.filter(c => new Date(c.fecha_control) >= new Date(fechaDesde));
+            }
+
+            if (fechaHasta) {
+                filtrados = filtrados.filter(c => new Date(c.fecha_control) <= new Date(fechaHasta));
+            }
+
+            renderizarControles(filtrados);
+            actualizarEstadisticas(filtrados);
+        };
+
+        window.limpiarFiltros = function() {
+            document.getElementById('filterCliente').value = '';
+            document.getElementById('filterTecnico').value = '';
+            document.getElementById('filterEstado').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            
+            renderizarControles(controles);
+            actualizarEstadisticas(controles);
+        };
+
+        window.verControl = function(controlId) {
+            window.location.href = `ver-control.html?id=${controlId}`;
+        };
+
+        window.editarControl = function(controlId) {
+            window.location.href = `nuevo-control.html?id=${controlId}`;
+        };
+
+        window.descargarPDF = function(url) {
+            window.open(url, '_blank');
+        };
+
+        function mostrarError(mensaje) {
+            const tbody = document.getElementById('controlesTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="alert alert-danger">
+                            ⚠️ ${mensaje}
+                        </div>
                     </td>
                 </tr>
             `;

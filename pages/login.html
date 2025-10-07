@@ -1,34 +1,92 @@
-<!DOCTYPE html>
+<!DOC  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - PCP</title>
-  <link rel="stylesheet" href="../css/auth.css">
+  <title>Login - Sistema de Control de Plagas</title>
+  <link rel="stylesheet" href="../css/login.css">
 </head>
-<body>
+<body class="auth-page">
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-      <div class="loader"></div>
-      <div class="loading-text">
-        <span class="loading-dots">Verificando credenciales</span>
-      </div>
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Verificando credenciales...</p>
     </div>
   </div>
 
-  <div class="form-container">
-    <h2>Iniciar Sesión</h2>
-    
-    <div id="message" class="message"></div>
-    
-    <input type="email" id="loginEmail" placeholder="Email" required />
-    <input type="password" id="loginPassword" placeholder="Contraseña" required />
-    <button onclick="signIn()" id="loginBtn">Ingresar</button>
-    
-    <div class="link">
-      <p>¿No tienes cuenta? El registro es solo por invitación</p>
-      <p style="font-size: 12px; color: #666;">Contacta al administrador de tu empresa para obtener una invitación</p>
+  <div class="auth-wrapper">
+    <div class="form-container">
+      <div class="card">
+        <div class="card-body">
+          <!-- Icon -->
+          <div class="login-icon">
+            🔐
+          </div>
+
+          <!-- Title & Subtitle -->
+          <h2 class="login-title">Iniciar Sesión</h2>
+          <p class="login-subtitle">Accede a tu cuenta para continuar.</p>
+          
+          <div id="message" class="message"></div>
+          
+          <form onsubmit="signIn(); return false;">
+            <!-- Email -->
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <div class="input-with-icon">
+                <span class="input-icon">📧</span>
+                <input 
+                  type="email" 
+                  id="loginEmail" 
+                  class="form-control" 
+                  placeholder="correo@ejemplo.com" 
+                  required 
+                />
+              </div>
+            </div>
+            
+            <!-- Password -->
+            <div class="form-group">
+              <label for="loginPassword">Contraseña</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🔒</span>
+                <input 
+                  type="password" 
+                  id="loginPassword" 
+                  class="form-control" 
+                  placeholder="••••••••" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <!-- Remember me + Forgot password -->
+            <div class="form-extras">
+              <label class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <span>Recuérdame</span>
+              </label>
+              <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg btn-block btn-submit" id="loginBtn">
+              Ingresar
+            </button>
+          </form>
+          
+          <!-- Info box -->
+          <div class="info-box">
+            <div class="info-box-icon">ℹ️</div>
+            <div class="info-box-content">
+              <div class="info-box-title">¿No tienes cuenta?</div>
+              <p class="info-box-text">
+                El registro es solo por invitación. Contacta al administrador de tu empresa para obtener una invitación.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -44,12 +102,13 @@
     function showMessage(message, type) {
       const messageDiv = document.getElementById('message')
       messageDiv.textContent = message
-      messageDiv.className = `message ${type}`
+      messageDiv.className = type === 'error' ? 'alert alert-danger' : 'alert alert-success'
       messageDiv.style.display = 'block'
       
       // Ocultar mensaje después de 5 segundos
       setTimeout(() => {
         messageDiv.style.display = 'none'
+        messageDiv.textContent = ''
       }, 5000)
     }
 

@@ -4,59 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información sobre Invitaciones - PCP</title>
-    <link rel="stylesheet" href="../css/empresa-info.css">
+    <!-- CSS standalone -->
+    <link rel="stylesheet" href="../css/info-invitaciones.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 Sistema de Invitaciones</h1>
-        
-        <div class="info-section">
-            <h2>¿Por qué solo por invitación?</h2>
-            <p>Para garantizar la seguridad y privacidad de los datos de cada empresa, el registro es exclusivamente por invitación. Esto asegura que solo personal autorizado tenga acceso al sistema.</p>
+    <div class="page-wrapper">
+    <div class="container" style="max-width: 900px;">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="header-title">🔐 Sistema de Invitaciones</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--spacing-xs);">
+                    Información sobre cómo funciona el registro por invitación
+                </p>
+            </div>
+        </header>
+
+        <!-- Por qué invitación -->
+        <div class="card" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-body">
+                <h2 style="margin: 0 0 var(--spacing-lg) 0; color: var(--color-primary);">¿Por qué solo por invitación?</h2>
+                <p style="margin: 0; line-height: 1.6;">
+                    Para garantizar la seguridad y privacidad de los datos de cada empresa, el registro es exclusivamente por invitación. 
+                    Esto asegura que solo personal autorizado tenga acceso al sistema.
+                </p>
+            </div>
         </div>
 
-        <h2>📝 ¿Cómo funciona?</h2>
-        
-        <div class="step">
-            <strong>1. El administrador te invita</strong>
-            <p>Un administrador de tu empresa crea una invitación con tu email desde el panel de administración.</p>
+        <!-- Título de sección -->
+        <h2 style="margin: 0 0 var(--spacing-xl) 0; padding-bottom: var(--spacing-md); border-bottom: 2px solid var(--color-border);">
+            📝 ¿Cómo funciona?
+        </h2>
+
+        <!-- Pasos -->
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-primary); color: white; border-radius: 50%; font-weight: bold; font-size: var(--font-size-sm);">1</span>
+                        El administrador te invita
+                    </h3>
+                    <p style="margin: 0; padding-left: 40px; line-height: 1.6;">
+                        Un administrador de tu empresa crea una invitación con tu email desde el panel de administración.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-info); color: white; border-radius: 50%; font-weight: bold; font-size: var(--font-size-sm);">2</span>
+                        Recibes el link
+                    </h3>
+                    <p style="margin: 0; padding-left: 40px; line-height: 1.6;">
+                        Recibirás un link único y temporal que te permitirá registrarte en el sistema.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-warning); color: white; border-radius: 50%; font-weight: bold; font-size: var(--font-size-sm);">3</span>
+                        Completas tu registro
+                    </h3>
+                    <p style="margin: 0; padding-left: 40px; line-height: 1.6;">
+                        Usando el link, completas tus datos y creas tu contraseña. El sistema automáticamente te asocia con tu empresa.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-success); color: white; border-radius: 50%; font-weight: bold; font-size: var(--font-size-sm);">4</span>
+                        Acceso inmediato
+                    </h3>
+                    <p style="margin: 0; padding-left: 40px; line-height: 1.6;">
+                        Una vez completado, ya puedes acceder al sistema con todas las funcionalidades de tu empresa.
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <div class="step">
-            <strong>2. Recibes el link</strong>
-            <p>Recibirás un link único y temporal que te permitirá registrarte en el sistema.</p>
+        <!-- Necesitas invitación -->
+        <div class="alert alert-info" style="margin-bottom: var(--spacing-2xl);">
+            <h3 style="margin: 0 0 var(--spacing-lg) 0;">🤝 ¿Necesitas una invitación?</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                <p style="margin: 0;"><strong>Si eres nuevo empleado:</strong> Contacta al administrador de tu empresa para que te envíe una invitación.</p>
+                <p style="margin: 0;"><strong>Si eres administrador:</strong> Inicia sesión y ve al panel de "Gestión de Invitaciones" para invitar nuevos trabajadores.</p>
+                <p style="margin: 0;"><strong>Si tienes problemas:</strong> Verifica que el link no haya expirado y que estés usando el email correcto.</p>
+            </div>
         </div>
 
-        <div class="step">
-            <strong>3. Completas tu registro</strong>
-            <p>Usando el link, completas tus datos y creas tu contraseña. El sistema automáticamente te asocia con tu empresa.</p>
+        <!-- Beneficios -->
+        <div class="card" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-body">
+                <h2 style="margin: 0 0 var(--spacing-xl) 0; color: var(--color-success);">🔒 Beneficios del Sistema</h2>
+                <ul style="margin: 0; padding-left: var(--spacing-xl); display: flex; flex-direction: column; gap: var(--spacing-md); line-height: 1.6;">
+                    <li><strong>Mayor seguridad:</strong> Solo personal autorizado puede acceder</li>
+                    <li><strong>Control total:</strong> Los administradores gestionan quién puede entrar</li>
+                    <li><strong>Datos protegidos:</strong> Cada empresa mantiene sus datos completamente privados</li>
+                    <li><strong>Auditoría completa:</strong> Se registra quién invitó a quién y cuándo</li>
+                    <li><strong>Links temporales:</strong> Las invitaciones expiran automáticamente por seguridad</li>
+                </ul>
+            </div>
         </div>
 
-        <div class="step">
-            <strong>4. Acceso inmediato</strong>
-            <p>Una vez completado, ya puedes acceder al sistema con todas las funcionalidades de tu empresa.</p>
+        <!-- Navegación -->
+        <div style="display: flex; gap: var(--spacing-md); justify-content: center;">
+            <a href="login.html" class="btn btn-primary">Ir al Login</a>
+            <a href="../index.html" class="btn btn-secondary">Volver al Inicio</a>
         </div>
-
-        <div class="contact-info">
-            <h3>🤝 ¿Necesitas una invitación?</h3>
-            <p><strong>Si eres nuevo empleado:</strong> Contacta al administrador de tu empresa para que te envíe una invitación.</p>
-            <p><strong>Si eres administrador:</strong> Inicia sesión y ve al panel de "Gestión de Invitaciones" para invitar nuevos trabajadores.</p>
-            <p><strong>Si tienes problemas:</strong> Verifica que el link no haya expirado y que estés usando el email correcto.</p>
-        </div>
-
-        <h2>🔒 Beneficios del Sistema</h2>
-        <ul>
-            <li><strong>Mayor seguridad:</strong> Solo personal autorizado puede acceder</li>
-            <li><strong>Control total:</strong> Los administradores gestionan quién puede entrar</li>
-            <li><strong>Datos protegidos:</strong> Cada empresa mantiene sus datos completamente privados</li>
-            <li><strong>Auditoría completa:</strong> Se registra quién invitó a quién y cuándo</li>
-            <li><strong>Links temporales:</strong> Las invitaciones expiran automáticamente por seguridad</li>
-        </ul>
-
-        <div class="nav-links">
-            <a href="login.html">Ir al Login</a>
-            <a href="../index.html">Volver al Inicio</a>
-        </div>
+    </div>
     </div>
 </body>
 </html>

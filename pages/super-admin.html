@@ -7,157 +7,160 @@
     <link rel="stylesheet" href="../css/super-admin.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <div>
-                <h1>👑 Panel de Super Administrador</h1>
-                <p class="subtitle">Gestión central de empresas del sistema</p>
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="header-title">👑 Panel de Super Administrador</h1>
+                <p class="header-subtitle">Gestión central de empresas del sistema</p>
             </div>
             <div class="header-actions">
                 <button class="btn btn-primary" onclick="abrirModalNuevaEmpresa()">
                     ➕ Nueva Empresa
                 </button>
-                <a href="../index.html" class="btn btn-back">← Dashboard</a>
+                <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
             </div>
-        </div>
+        </header>
 
         <!-- Estadísticas -->
-        <div class="stats-grid">
+        <div class="stat-grid">
             <div class="stat-card">
                 <div class="stat-icon">🏢</div>
                 <div class="stat-content">
-                    <h3>Total Empresas</h3>
+                    <h3 class="stat-label">Total Empresas</h3>
                     <div class="stat-value" id="statTotalEmpresas">-</div>
                 </div>
             </div>
             
-            <div class="stat-card">
+            <div class="stat-card stat-card-info">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3>Total Usuarios</h3>
+                    <h3 class="stat-label">Total Usuarios</h3>
                     <div class="stat-value" id="statTotalUsuarios">-</div>
                 </div>
             </div>
             
-            <div class="stat-card">
+            <div class="stat-card stat-card-success">
                 <div class="stat-icon">🏭</div>
                 <div class="stat-content">
-                    <h3>Total Clientes</h3>
+                    <h3 class="stat-label">Total Clientes</h3>
                     <div class="stat-value" id="statTotalClientes">-</div>
                 </div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card stat-card-warning">
                 <div class="stat-icon">📍</div>
                 <div class="stat-content">
-                    <h3>Total Plantas</h3>
+                    <h3 class="stat-label">Total Plantas</h3>
                     <div class="stat-value" id="statTotalPlantas">-</div>
                 </div>
             </div>
         </div>
 
         <!-- Búsqueda -->
-        <div class="search-bar">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Buscar empresa por nombre o email..."
-                    oninput="filtrarEmpresas()"
-                >
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group" style="margin: 0;">
+                    <label for="searchInput">🔍 Buscar empresa</label>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        class="form-control"
+                        placeholder="Buscar por nombre o email..."
+                        oninput="filtrarEmpresas()"
+                    >
+                </div>
             </div>
         </div>
 
         <!-- Tabla de Empresas -->
         <div class="table-container">
-            <table class="empresas-table">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>EMPRESA</th>
-                        <th>TRABAJADORES</th>
-                        <th>CLIENTES</th>
-                        <th>PLANTAS</th>
-                        <th>ACCIONES</th>
+                        <th class="text-center">TRABAJADORES</th>
+                        <th class="text-center">CLIENTES</th>
+                        <th class="text-center">PLANTAS</th>
+                        <th class="text-center">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody id="empresasTableBody">
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px;">
-                            <div class="loading-spinner"></div>
-                            <p>Cargando empresas...</p>
+                        <td colspan="5">
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                                <p>Cargando empresas...</p>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+    </div>
 
     <!-- Modal para Nueva Empresa -->
-    <div id="modalNuevaEmpresa" class="modal">
+    <div id="modalNuevaEmpresa" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>➕ Crear Nueva Empresa</h2>
-                <button class="btn-close" onclick="cerrarModalNuevaEmpresa()">✕</button>
+                <button class="modal-close" onclick="cerrarModalNuevaEmpresa()">✕</button>
             </div>
             
             <form id="formNuevaEmpresa" onsubmit="crearEmpresa(event)">
-                <div class="form-section">
-                    <h3>📋 Datos de la Empresa</h3>
-                    <div class="form-grid">
-                        <div class="form-group form-group-full">
-                            <label for="inputEmpresaNombre">Nombre de la Empresa *</label>
-                            <input 
-                                type="text" 
-                                id="inputEmpresaNombre" 
-                                class="form-control" 
-                                required
-                                placeholder="Ej: Fumigaciones ABC S.A."
-                            >
-                        </div>
+                <div class="modal-body">
+                    <h3 class="section-header">📋 Datos de la Empresa</h3>
+                    
+                    <div class="form-group">
+                        <label for="inputEmpresaNombre">Nombre de la Empresa *</label>
+                        <input 
+                            type="text" 
+                            id="inputEmpresaNombre" 
+                            class="form-control" 
+                            required
+                            placeholder="Ej: Fumigaciones ABC S.A."
+                        >
+                    </div>
+
+                    <h3 class="section-header section-header-spacing">👤 Primer Administrador</h3>
+                    
+                    <div class="form-group">
+                        <label for="inputAdminNombre">Nombre Completo *</label>
+                        <input 
+                            type="text" 
+                            id="inputAdminNombre" 
+                            class="form-control" 
+                            required
+                            placeholder="Juan Pérez"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputAdminEmail">Email *</label>
+                        <input 
+                            type="email" 
+                            id="inputAdminEmail" 
+                            class="form-control" 
+                            required
+                            placeholder="juan.perez@empresa.com"
+                        >
+                        <small>Se generará un link de invitación para este email</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputAdminPuesto">Puesto</label>
+                        <input 
+                            type="text" 
+                            id="inputAdminPuesto" 
+                            class="form-control"
+                            placeholder="Gerente General"
+                        >
                     </div>
                 </div>
 
-                <div class="form-section">
-                    <h3>👤 Primer Administrador</h3>
-                    <div class="form-grid">
-                        <div class="form-group form-group-full">
-                            <label for="inputAdminNombre">Nombre Completo *</label>
-                            <input 
-                                type="text" 
-                                id="inputAdminNombre" 
-                                class="form-control" 
-                                required
-                                placeholder="Juan Pérez"
-                            >
-                        </div>
-
-                        <div class="form-group form-group-full">
-                            <label for="inputAdminEmail">Email *</label>
-                            <input 
-                                type="email" 
-                                id="inputAdminEmail" 
-                                class="form-control" 
-                                required
-                                placeholder="juan.perez@empresa.com"
-                            >
-                            <small>Se generará un link de invitación para este email</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="inputAdminPuesto">Puesto</label>
-                            <input 
-                                type="text" 
-                                id="inputAdminPuesto" 
-                                class="form-control"
-                                placeholder="Gerente General"
-                            >
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
+                <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="cerrarModalNuevaEmpresa()">
                         Cancelar
                     </button>
@@ -170,18 +173,18 @@
     </div>
 
     <!-- Modal de Link de Invitación -->
-    <div id="modalInvitacion" class="modal">
+    <div id="modalInvitacion" class="modal-overlay">
         <div class="modal-content modal-success">
             <div class="modal-header">
                 <h2>✅ Empresa Creada Exitosamente</h2>
-                <button class="btn-close" onclick="cerrarModalInvitacion()">✕</button>
+                <button class="modal-close" onclick="cerrarModalInvitacion()">✕</button>
             </div>
             
-            <div class="invitation-result">
-                <div class="success-icon">🎉</div>
+            <div class="modal-body modal-body-center">
+                <div class="celebration-icon">🎉</div>
                 <h3>¡La empresa ha sido registrada!</h3>
                 
-                <div class="empresa-info">
+                <div class="alert alert-success">
                     <p><strong>Empresa:</strong> <span id="resultEmpresaNombre"></span></p>
                     <p><strong>Admin:</strong> <span id="resultAdminNombre"></span></p>
                     <p><strong>Email:</strong> <span id="resultAdminEmail"></span></p>
@@ -189,15 +192,18 @@
 
                 <div class="invitation-section">
                     <h4>🔗 Link de Invitación</h4>
-                    <p>Envía este link al administrador para que complete su registro:</p>
-                    <div class="link-box">
-                        <input type="text" id="invitationLink" readonly class="link-input">
-                        <button class="btn btn-copy" onclick="copiarLink()">📋 Copiar</button>
+                    <p class="invitation-description">Envía este link al administrador para que complete su registro:</p>
+                    <div class="form-group">
+                        <textarea id="invitationLink" readonly class="form-control" style="height: 100px;"></textarea>
+                        <small class="expiration-warning">⏰ Este link expira en 7 días</small>
                     </div>
                 </div>
             </div>
 
-            <div class="modal-footer">
+            <div class="form-actions">
+                <button class="btn btn-info" onclick="copiarLink()">
+                    📋 Copiar Link
+                </button>
                 <button class="btn btn-primary" onclick="cerrarModalInvitacion()">
                     Entendido
                 </button>
@@ -277,8 +283,12 @@
                 console.error('Error cargando empresas:', error)
                 document.getElementById('empresasTableBody').innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #e74c3c; padding: 40px;">
-                            ❌ Error cargando empresas: ${error.message}
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">⚠️</div>
+                                <h3 class="empty-state-title">Error al cargar empresas</h3>
+                                <p class="empty-state-message">${error.message}</p>
+                            </div>
                         </td>
                     </tr>
                 `
@@ -293,8 +303,15 @@
             if (empresas.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px;">
-                            No hay empresas registradas
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <h3 class="empty-state-title">No hay empresas registradas</h3>
+                                <p class="empty-state-message">Comienza creando la primera empresa del sistema</p>
+                                <button class="btn btn-primary" onclick="abrirModalNuevaEmpresa()">
+                                    ➕ Crear Primera Empresa
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `
@@ -304,23 +321,25 @@
             tbody.innerHTML = empresas.map(e => `
                 <tr>
                     <td>
-                        <strong>${e.empresa_nombre}</strong>
+                        <div class="company-info">
+                            <span class="company-name">${e.empresa_nombre}</span>
+                        </div>
                     </td>
-                    <td><span class="badge badge-info">${e.total_trabajadores || 0}</span></td>
-                    <td><span class="badge badge-success">${e.total_clientes || 0}</span></td>
-                    <td><span class="badge badge-warning">${e.total_plantas || 0}</span></td>
-                    <td>
+                    <td class="text-center"><span class="badge badge-info">${e.total_trabajadores || 0}</span></td>
+                    <td class="text-center"><span class="badge badge-success">${e.total_clientes || 0}</span></td>
+                    <td class="text-center"><span class="badge badge-warning">${e.total_plantas || 0}</span></td>
+                    <td class="text-center">
                         <div class="action-buttons">
-                            <button class="btn-icon btn-view" onclick="verDetalles('${e.empresa_id}')" title="Ver detalles">
+                            <button class="btn-icon-sm btn-view" onclick="verDetalles('${e.empresa_id}')" title="Ver detalles">
                                 👁️
                             </button>
-                            <button class="btn-icon btn-edit" onclick="editarEmpresa('${e.empresa_id}')" title="Editar">
+                            <button class="btn-icon-sm btn-edit" onclick="editarEmpresa('${e.empresa_id}')" title="Editar">
                                 ✏️
                             </button>
-                            <button class="btn-icon btn-users" onclick="verUsuarios('${e.empresa_id}')" title="Ver usuarios">
+                            <button class="btn-icon-sm btn-view" onclick="verUsuarios('${e.empresa_id}')" title="Ver usuarios">
                                 👥
                             </button>
-                            <button class="btn-icon btn-delete" onclick="eliminarEmpresa('${e.empresa_id}', '${e.empresa_nombre}')" title="Eliminar">
+                            <button class="btn-icon-sm btn-delete" onclick="eliminarEmpresa('${e.empresa_id}', '${e.empresa_nombre}')" title="Eliminar">
                                 🗑️
                             </button>
                         </div>
@@ -360,11 +379,13 @@
 
         function abrirModalNuevaEmpresa() {
             document.getElementById('formNuevaEmpresa').reset()
-            document.getElementById('modalNuevaEmpresa').style.display = 'flex'
+            document.getElementById('modalNuevaEmpresa').classList.add('active')
+            document.body.classList.add('modal-open')
         }
 
         function cerrarModalNuevaEmpresa() {
-            document.getElementById('modalNuevaEmpresa').style.display = 'none'
+            document.getElementById('modalNuevaEmpresa').classList.remove('active')
+            document.body.classList.remove('modal-open')
         }
 
         // ========== CREAR EMPRESA ==========
@@ -427,7 +448,8 @@
                 document.getElementById('invitationLink').value = invitationUrl
 
                 cerrarModalNuevaEmpresa()
-                document.getElementById('modalInvitacion').style.display = 'flex'
+                document.getElementById('modalInvitacion').classList.add('active')
+                document.body.classList.add('modal-open')
 
                 await cargarEmpresas()
                 await cargarEstadisticas()
@@ -456,7 +478,8 @@
         }
 
         function cerrarModalInvitacion() {
-            document.getElementById('modalInvitacion').style.display = 'none'
+            document.getElementById('modalInvitacion').classList.remove('active')
+            document.body.classList.remove('modal-open')
         }
 
         // ========== ACCIONES DE EMPRESA ==========
@@ -472,65 +495,71 @@
 
                 // Abrir modal con detalles
                 const modalHTML = `
-                    <div id="modalDetalles" class="modal" style="display: flex;">
-                        <div class="modal-content">
+                    <div id="modalDetalles" class="modal-overlay active">
+                        <div class="modal-content" style="max-width: 800px;">
                             <div class="modal-header">
-                                <h2>� Detalles de ${empresa.empresa_nombre}</h2>
-                                <button class="btn-close" onclick="document.getElementById('modalDetalles').remove()">✕</button>
+                                <h2>🏢 Detalles de ${empresa.empresa_nombre}</h2>
+                                <button class="modal-close" onclick="cerrarModalDetalles()">✕</button>
                             </div>
                             
-                            <div style="padding: 30px;">
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
-                                    <div class="stat-card">
-                                        <div class="stat-icon" style="background: #3498db;">👥</div>
+                            <div class="modal-body">
+                                <div class="details-grid">
+                                    <div class="stat-card stat-card-info">
+                                        <div class="stat-icon">👥</div>
                                         <div class="stat-content">
-                                            <h3>Trabajadores</h3>
+                                            <h3 class="stat-label">Trabajadores</h3>
                                             <div class="stat-value">${empresa.total_trabajadores || 0}</div>
                                         </div>
                                     </div>
                                     
-                                    <div class="stat-card">
-                                        <div class="stat-icon" style="background: #2ecc71;">🏭</div>
+                                    <div class="stat-card stat-card-success">
+                                        <div class="stat-icon">🏭</div>
                                         <div class="stat-content">
-                                            <h3>Clientes</h3>
+                                            <h3 class="stat-label">Clientes</h3>
                                             <div class="stat-value">${empresa.total_clientes || 0}</div>
                                         </div>
                                     </div>
                                     
-                                    <div class="stat-card">
-                                        <div class="stat-icon" style="background: #f39c12;">📍</div>
+                                    <div class="stat-card stat-card-warning">
+                                        <div class="stat-icon">📍</div>
                                         <div class="stat-content">
-                                            <h3>Plantas</h3>
+                                            <h3 class="stat-label">Plantas</h3>
                                             <div class="stat-value">${empresa.total_plantas || 0}</div>
                                         </div>
                                     </div>
                                     
                                     <div class="stat-card">
-                                        <div class="stat-icon" style="background: #9b59b6;">✉️</div>
+                                        <div class="stat-icon">✉️</div>
                                         <div class="stat-content">
-                                            <h3>Administradores</h3>
-                                            <div class="stat-value" style="font-size: 0.8rem; word-break: break-all;">
+                                            <h3 class="stat-label">Administradores</h3>
+                                            <div class="admin-emails">
                                                 ${empresa.admins_email || 'Sin admins'}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                                    <h3 style="margin: 0 0 15px 0;">Información de la Empresa</h3>
-                                    <p><strong>ID:</strong> ${empresa.empresa_id}</p>
-                                    <p><strong>Nombre:</strong> ${empresa.empresa_nombre}</p>
+                                <div class="info-box">
+                                    <h3 class="section-header">Información de la Empresa</h3>
+                                    <div class="info-row">
+                                        <span class="info-label">ID:</span>
+                                        <span class="info-value">${empresa.empresa_id}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Nombre:</span>
+                                        <span class="info-value">${empresa.empresa_nombre}</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="modal-footer">
-                                <button class="btn btn-secondary" onclick="document.getElementById('modalDetalles').remove()">
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" onclick="cerrarModalDetalles()">
                                     Cerrar
                                 </button>
-                                <button class="btn btn-primary" onclick="document.getElementById('modalDetalles').remove(); editarEmpresa('${empresaId}')">
+                                <button class="btn btn-primary" onclick="cerrarModalDetalles(); editarEmpresa('${empresaId}')">
                                     ✏️ Editar Empresa
                                 </button>
-                                <button class="btn btn-primary" onclick="document.getElementById('modalDetalles').remove(); verUsuarios('${empresaId}')">
+                                <button class="btn btn-info" onclick="cerrarModalDetalles(); verUsuarios('${empresaId}')">
                                     👥 Ver Usuarios
                                 </button>
                             </div>
@@ -546,6 +575,13 @@
             }
         }
 
+        function cerrarModalDetalles() {
+            const modal = document.getElementById('modalDetalles')
+            if (modal) {
+                modal.remove()
+            }
+        }
+
         async function editarEmpresa(empresaId) {
             try {
                 const empresa = todasEmpresas.find(e => e.empresa_id === empresaId)
@@ -557,15 +593,15 @@
 
                 // Abrir modal para editar
                 const modalHTML = `
-                    <div id="modalEditar" class="modal" style="display: flex;">
+                    <div id="modalEditar" class="modal-overlay active">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h2>✏️ Editar Empresa</h2>
-                                <button class="btn-close" onclick="document.getElementById('modalEditar').remove()">✕</button>
+                                <button class="btn-close" onclick="cerrarModalDinamico('modalEditar')">✕</button>
                             </div>
                             
                             <form id="formEditarEmpresa" onsubmit="guardarEmpresa(event, '${empresaId}')">
-                                <div style="padding: 30px;">
+                                <div class="modal-body">
                                     <div class="form-group">
                                         <label for="editNombre">Nombre de la Empresa *</label>
                                         <input 
@@ -579,7 +615,7 @@
                                 </div>
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalEditar').remove()">
+                                    <button type="button" class="btn btn-secondary" onclick="cerrarModalDinamico('modalEditar')">
                                         Cancelar
                                     </button>
                                     <button type="submit" class="btn btn-primary">
@@ -592,6 +628,7 @@
                 `
                 
                 document.body.insertAdjacentHTML('beforeend', modalHTML)
+                document.body.classList.add('modal-open')
                 
             } catch (error) {
                 console.error('Error abriendo editor:', error)
@@ -614,7 +651,7 @@
                 if (error) throw error
 
                 alert('✅ Empresa actualizada correctamente')
-                document.getElementById('modalEditar').remove()
+                cerrarModalDinamico('modalEditar')
                 
                 await cargarEmpresas()
                 await cargarEstadisticas()
@@ -663,30 +700,30 @@
                             </td>
                         </tr>
                     `).join('')
-                    : `<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay usuarios registrados</td></tr>`
+                    : `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">👤</div><h3 class="empty-state-title">No hay usuarios registrados</h3></div></td></tr>`
 
                 const modalHTML = `
-                    <div id="modalUsuarios" class="modal" style="display: flex;">
-                        <div class="modal-content" style="max-width: 900px;">
+                    <div id="modalUsuarios" class="modal-overlay active">
+                        <div class="modal-content modal-lg">
                             <div class="modal-header">
                                 <h2>👥 Usuarios de ${empresa.empresa_nombre}</h2>
-                                <button class="btn-close" onclick="document.getElementById('modalUsuarios').remove()">✕</button>
+                                <button class="btn-close" onclick="cerrarModalDinamico('modalUsuarios')">✕</button>
                             </div>
                             
-                            <div style="padding: 30px;">
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <div class="modal-body">
+                                <div class="alert alert-info" style="margin-bottom: var(--spacing-xl);">
                                     <p style="margin: 0;"><strong>Total de usuarios:</strong> ${workers ? workers.length : 0}</p>
                                 </div>
 
-                                <div style="overflow-x: auto;">
-                                    <table class="empresas-table">
+                                <div class="table-container">
+                                    <table class="table table-striped">
                                         <thead>
                                             <tr>
                                                 <th>NOMBRE</th>
                                                 <th>EMAIL</th>
                                                 <th>PUESTO</th>
-                                                <th>ROL</th>
-                                                <th>EXTRAS</th>
+                                                <th class="text-center">ROL</th>
+                                                <th class="text-center">EXTRAS</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -697,7 +734,7 @@
                             </div>
 
                             <div class="modal-footer">
-                                <button class="btn btn-secondary" onclick="document.getElementById('modalUsuarios').remove()">
+                                <button class="btn btn-secondary" onclick="cerrarModalDinamico('modalUsuarios')">
                                     Cerrar
                                 </button>
                             </div>
@@ -706,6 +743,7 @@
                 `
                 
                 document.body.insertAdjacentHTML('beforeend', modalHTML)
+                document.body.classList.add('modal-open')
                 
             } catch (error) {
                 console.error('Error cargando usuarios:', error)
@@ -803,12 +841,30 @@
             }
         }
 
+        // Cerrar modales dinámicos
+        function cerrarModalDinamico(modalId) {
+            const modal = document.getElementById(modalId)
+            if (modal) {
+                modal.remove()
+                document.body.classList.remove('modal-open')
+            }
+        }
+
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none'
+            if (event.target.classList.contains('modal-overlay')) {
+                if (event.target.id === 'modalNuevaEmpresa') {
+                    cerrarModalNuevaEmpresa()
+                } else if (event.target.id === 'modalInvitacion') {
+                    cerrarModalInvitacion()
+                } else if (event.target.id === 'modalDetalles') {
+                    cerrarModalDetalles()
+                } else if (event.target.id === 'modalEditar' || event.target.id === 'modalUsuarios') {
+                    cerrarModalDinamico(event.target.id)
+                }
             }
         }
     </script>
 </body>
+</html>
 </html>

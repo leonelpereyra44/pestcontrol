@@ -61,21 +61,24 @@ class ProductosManager {
         if (!container) return;
         
         if (this.productos.length === 0) {
-            container.innerHTML = '<p style="color: #999; font-style: italic;">No se han agregado productos</p>';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p class="empty-state-message">No se han agregado productos</p>
+                </div>
+            `;
             return;
         }
         
         container.innerHTML = this.productos.map((p, index) => `
-            <div class="producto-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>${p.nombre}</strong><br>
-                        <span style="color: #666;">Cantidad: ${p.cantidad} ${p.unidad}</span>
-                    </div>
-                    <button class="btn btn-danger btn-sm" onclick="productosManager.eliminar(${index})">
-                        🗑️ Eliminar
-                    </button>
+            <div class="item-card">
+                <div class="item-card-content">
+                    <div class="item-card-title">${p.nombre}</div>
+                    <div class="item-card-subtitle">Cantidad: ${p.cantidad} ${p.unidad}</div>
                 </div>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="productosManager.eliminar(${index})" title="Eliminar producto">
+                    🗑️
+                </button>
             </div>
         `).join('');
     }

@@ -1,13 +1,20 @@
-<!DOCTYPE html>
+<!DOC    <title>Nuevo Control - Sistema de Control de Plagas</title>
+    <!-- Sistema de componentes -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>ml>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuevo Control de Plagas</title>
-    <link rel="stylesheet" href="../css/clientes.css">
+    <!-- Sistema de componentes -->
+    <link rel="stylesheet" href="../css/main.css">
+    <!-- Estilos específicos de controles -->
     <link rel="stylesheet" href="../css/controles.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -70,14 +77,14 @@
             <div class="form-row">
                 <div class="form-group required">
                     <label for="clienteId">Cliente</label>
-                    <select id="clienteId" required>
+                    <select id="clienteId" class="form-control" required>
                         <option value="">Seleccione un cliente</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="plantaId">Planta</label>
-                    <select id="plantaId">
+                    <select id="plantaId" class="form-control">
                         <option value="">Sin planta específica</option>
                     </select>
                 </div>
@@ -86,14 +93,14 @@
             <div class="form-row">
                 <div class="form-group required">
                     <label for="tecnicoId">Técnico Responsable</label>
-                    <select id="tecnicoId" required>
+                    <select id="tecnicoId" class="form-control" required>
                         <option value="">Seleccione un técnico</option>
                     </select>
                 </div>
                 
                 <div class="form-group required">
                     <label for="fechaControl">Fecha del Control</label>
-                    <input type="date" id="fechaControl" required>
+                    <input type="date" id="fechaControl" class="form-control" required>
                 </div>
             </div>
             
@@ -113,7 +120,7 @@
             <div class="form-row">
                 <div class="form-group required">
                     <label for="tipoControl">Tipo de Control</label>
-                    <select id="tipoControl" required>
+                    <select id="tipoControl" class="form-control" required>
                         <option value="">Seleccione tipo</option>
                         <option value="preventivo">Preventivo</option>
                         <option value="correctivo">Correctivo</option>
@@ -122,8 +129,8 @@
                 </div>
             </div>
             
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="wizard.nextStep()">
+            <div class="wizard-navigation">
+                <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
                     Siguiente →
                 </button>
             </div>
@@ -133,26 +140,26 @@
         <div class="step-content" data-step="2">
             <h2>Productos Utilizados</h2>
             
-            <p class="alert alert-info">
-                💡 Agregue los productos que utilizó en este control. Puede dejar esta sección vacía si no aplicó productos.
-            </p>
+            <div class="alert alert-info">
+                <p>💡 Agregue los productos que utilizó en este control. Puede dejar esta sección vacía si no aplicó productos.</p>
+            </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label for="productoSelect">Producto</label>
-                    <select id="productoSelect">
+                    <select id="productoSelect" class="form-control">
                         <option value="">Seleccione un producto</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="cantidadProducto">Cantidad</label>
-                    <input type="number" id="cantidadProducto" step="0.01" min="0.01">
+                    <input type="number" id="cantidadProducto" class="form-control" step="0.01" min="0.01">
                 </div>
                 
                 <div class="form-group">
                     <label for="unidadProducto">Unidad</label>
-                    <input type="text" id="unidadProducto" readonly>
+                    <input type="text" id="unidadProducto" class="form-control" readonly>
                 </div>
             </div>
             
@@ -161,14 +168,17 @@
             </button>
             
             <div id="productosAgregados" style="margin-top: 2rem;">
-                <p style="color: #999; font-style: italic;">No se han agregado productos</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p class="empty-state-message">No se han agregado productos</p>
+                </div>
             </div>
             
-            <div class="btn-group">
+            <div class="wizard-navigation">
                 <button class="btn btn-secondary" onclick="wizard.prevStep()">
                     ← Anterior
                 </button>
-                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
                     Siguiente →
                 </button>
             </div>
@@ -178,19 +188,19 @@
         <div class="step-content" data-step="3">
             <h2>Puntos de Control</h2>
             
-            <p class="alert alert-info">
-                💡 Registre los puntos de control revisados. Puede dejar esta sección vacía si no revisó puntos específicos.
-            </p>
+            <div class="alert alert-info">
+                <p>💡 Registre los puntos de control revisados. Puede dejar esta sección vacía si no revisó puntos específicos.</p>
+            </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label for="numeroPunto">Número de Punto *</label>
-                    <input type="number" id="numeroPunto" min="1">
+                    <input type="number" id="numeroPunto" class="form-control" min="1">
                 </div>
                 
                 <div class="form-group">
                     <label for="tipoPlaga">Tipo de Plaga *</label>
-                    <select id="tipoPlaga">
+                    <select id="tipoPlaga" class="form-control">
                         <option value="">Seleccione tipo</option>
                         <option value="roedores">Roedores</option>
                         <option value="voladores">Voladores</option>
@@ -200,19 +210,19 @@
                 
                 <div class="form-group">
                     <label for="tipoDispositivo">Tipo de Dispositivo</label>
-                    <input type="text" id="tipoDispositivo" placeholder="Ej: Cebadero, Trampa">
+                    <input type="text" id="tipoDispositivo" class="form-control" placeholder="Ej: Cebadero, Trampa">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label for="ubicacionPunto">Ubicación</label>
-                    <input type="text" id="ubicacionPunto" placeholder="Descripción de la ubicación">
+                    <input type="text" id="ubicacionPunto" class="form-control" placeholder="Descripción de la ubicación">
                 </div>
                 
                 <div class="form-group">
                     <label for="estadoPunto">Estado *</label>
-                    <select id="estadoPunto">
+                    <select id="estadoPunto" class="form-control">
                         <option value="">Seleccione estado</option>
                         <option value="ok">OK</option>
                         <option value="con_actividad">Con Actividad</option>
@@ -224,7 +234,7 @@
             
             <div class="form-group">
                 <label for="accionRealizada">Acción Realizada</label>
-                <textarea id="accionRealizada" rows="3" placeholder="Describa la acción realizada en este punto"></textarea>
+                <textarea id="accionRealizada" class="form-control" rows="3" placeholder="Describa la acción realizada en este punto"></textarea>
             </div>
             
             <button class="btn btn-primary" onclick="agregarPunto()">
@@ -232,16 +242,21 @@
             </button>
             
             <div id="puntosAgregados" style="margin-top: 2rem;">
-                <p style="color: #999; font-style: italic;">No se han agregado puntos de control</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    <p class="empty-state-message">No se han agregado puntos de control</p>
+                </div>
             </div>
             
-            <div class="btn-group">
+            <div class="wizard-navigation">
                 <button class="btn btn-secondary" onclick="wizard.prevStep()">
                     ← Anterior
                 </button>
-                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
                     Siguiente →
                 </button>
+            </div>
+        </div>
             </div>
         </div>
         
@@ -251,14 +266,14 @@
             
             <div class="form-group">
                 <label for="observaciones">Observaciones</label>
-                <textarea id="observaciones" rows="8" placeholder="Ingrese observaciones generales del control, hallazgos importantes, recomendaciones, etc."></textarea>
+                <textarea id="observaciones" class="form-control" rows="8" placeholder="Ingrese observaciones generales del control, hallazgos importantes, recomendaciones, etc."></textarea>
             </div>
             
-            <div class="btn-group">
+            <div class="wizard-navigation">
                 <button class="btn btn-secondary" onclick="wizard.prevStep()">
                     ← Anterior
                 </button>
-                <button class="btn btn-primary" onclick="wizard.nextStep()">
+                <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
                     Siguiente →
                 </button>
             </div>
@@ -269,7 +284,7 @@
             <h2>Sello del Técnico</h2>
             
             <div class="alert alert-info">
-                📌 El sello se carga automáticamente según el técnico responsable seleccionado en el Paso 1.
+                <p>📌 El sello se carga automáticamente según el técnico responsable seleccionado en el Paso 1.</p>
             </div>
             
             <div class="sello-container">
@@ -279,14 +294,15 @@
                 <img id="selloTecnicoImg" style="display: none;" alt="Sello del técnico">
             </div>
             
-            <div class="btn-group">
+            <div class="wizard-navigation">
                 <button class="btn btn-secondary" onclick="wizard.prevStep()">
                     ← Anterior
                 </button>
-                <button class="btn btn-primary" onclick="guardarControl()">
+                <button class="btn btn-success btn-lg" onclick="guardarControl()">
                     💾 Guardar Control
                 </button>
             </div>
+        </div>
         </div>
     </div>
     
@@ -674,5 +690,6 @@
             actualizarIndicadorPaso(paso);
         };
     </script>
+    </div> <!-- Cierre page-wrapper -->
 </body>
 </html>

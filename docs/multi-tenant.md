@@ -111,12 +111,21 @@ const hasAccess = await window.multiTenant.verifyAccess(empresaId)
 
 ### Para Usuarios Finales
 
-#### Registro:
-1. Ir a `/pages/register.html`
-2. Completar datos personales
-3. Seleccionar empresa
-4. Confirmar email
-5. Iniciar sesión
+#### Registro (Por Invitación):
+1. Administrador genera link de invitación desde:
+   - Super Admin: `/pages/super-admin.html` (al crear empresa)
+   - Admin de Empresa: `/pages/admin-invitaciones.html`
+2. Usuario recibe el link de invitación por email
+3. Hacer clic en el link → `/pages/registro-invitacion.html?token=xxx`
+4. El sistema valida el token y muestra:
+   - Nombre de la empresa
+   - Email vinculado
+   - Puesto sugerido
+5. Usuario completa sus datos (nombre, contraseña)
+6. Sistema crea cuenta y vincula a la empresa automáticamente
+7. Redirige a `/pages/login.html`
+
+> **Nota:** El registro es **exclusivamente por invitación**. No hay registro público para garantizar seguridad y control de acceso.
 
 #### Dashboard:
 - Información personalizada por empresa

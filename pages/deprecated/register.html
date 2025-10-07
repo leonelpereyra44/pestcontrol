@@ -1,46 +1,73 @@
-<!DOCTYPE html>
+<!DOC  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro - Plagas V3</title>
-  <link rel="stylesheet" href="../css/auth.css">
+  <title>Registro - Sistema de Control de Plagas</title>
+  <!-- Sistema de componentes -->
+  <link rel="stylesheet" href="../css/main.css">
 </head>
-<body>
+<body class="auth-page">
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-      <div class="loader"></div>
-      <div class="loading-text">
-        <span class="loading-dots">Creando cuenta</span>
-      </div>
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Creando cuenta...</p>
     </div>
   </div>
 
-  <div class="form-container">
-    <h2>Crear Cuenta</h2>
-    
-    <div id="message" class="message"></div>
-    
-    <input type="text" id="fullName" placeholder="Nombre completo" required />
-    <input type="email" id="email" placeholder="Email" required />
-    
-    <select id="empresa" required>
-      <option value="">Selecciona el código de tu empresa...</option>
-    </select>
-    
-    <input type="text" id="puesto" placeholder="Puesto de trabajo" required />
-    
-    <input type="password" id="password" placeholder="Contraseña" required />
-    <div class="password-requirements">
-      La contraseña debe tener al menos 6 caracteres
-    </div>
-    <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required />
-    
-    <button id="registerBtn" onclick="signUp()">Crear Cuenta</button>
-    
-    <div class="link">
-      <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+  <div class="auth-wrapper">
+    <div class="form-container">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="login-title">📝 Crear Cuenta</h2>
+          
+          <div id="message" style="display: none;"></div>
+          
+          <form onsubmit="signUp(); return false;">
+            <div class="form-group">
+              <label for="fullName">Nombre completo</label>
+              <input type="text" id="fullName" class="form-control" placeholder="Juan Pérez" required />
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" class="form-control" placeholder="correo@ejemplo.com" required />
+            </div>
+            
+            <div class="form-group">
+              <label for="empresa">Código de empresa</label>
+              <select id="empresa" class="form-control" required>
+                <option value="">Selecciona el código de tu empresa...</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="puesto">Puesto de trabajo</label>
+              <input type="text" id="puesto" class="form-control" placeholder="Técnico, Supervisor, etc." required />
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+              <small class="form-text">La contraseña debe tener al menos 6 caracteres</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirmPassword">Confirmar contraseña</label>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required />
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg btn-block" id="registerBtn">
+              Crear Cuenta
+            </button>
+          </form>
+          
+          <div class="link" style="margin-top: 1.5rem; text-align: center;">
+            <p>¿Ya tienes cuenta? <a href="login.html" class="btn btn-ghost btn-sm">Inicia sesión aquí</a></p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -56,7 +83,7 @@
     function showMessage(message, type) {
       const messageDiv = document.getElementById('message')
       messageDiv.textContent = message
-      messageDiv.className = `message ${type}`
+      messageDiv.className = type === 'error' ? 'alert alert-danger' : 'alert alert-success'
       messageDiv.style.display = 'block'
       
       // Ocultar mensaje después de 5 segundos
@@ -240,46 +267,35 @@
       showMessage("El registro ahora es solo por invitación. Contacta a tu administrador.", "warning")
       
       // Deshabilitar formulario
-      const form = document.querySelector('form') || document.body
+      const form = document.querySelector('form') || document.querySelector('.card-body')
       form.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-          <h3>🔐 Registro por Invitación Únicamente</h3>
-          <p>Para mantener la seguridad del sistema, el registro ahora es solo por invitación.</p>
-          <p><strong>Si tienes una invitación:</strong> Usa el link que recibiste por email</p>
-          <p><strong>Si necesitas acceso:</strong> Contacta al administrador de tu empresa</p>
-          <div style="margin-top: 30px;">
-            <a href="login.html" style="
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #4CAF50;
-              color: white;
-              text-decoration: none;
-              border-radius: 4px;
-              margin: 10px;
-            ">Ir al Login</a>
-            <a href="../index.html" style="
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #6c757d;
-              color: white;
-              text-decoration: none;
-              border-radius: 4px;
-              margin: 10px;
-            ">Volver al Inicio</a>
+        <div class="empty-state">
+          <div class="empty-state-icon">🔐</div>
+          <h3 class="empty-state-title">Registro por Invitación Únicamente</h3>
+          <p class="empty-state-message">
+            Para mantener la seguridad del sistema, el registro ahora es solo por invitación.
+          </p>
+          <div class="alert alert-info">
+            <p><strong>Si tienes una invitación:</strong> Usa el link que recibiste por email</p>
+            <p><strong>Si necesitas acceso:</strong> Contacta al administrador de tu empresa</p>
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+            <a href="login.html" class="btn btn-success">Ir al Login</a>
+            <a href="../index.html" class="btn btn-secondary">Volver al Inicio</a>
           </div>
         </div>
       `
     })
 
     // Validación en tiempo real de contraseñas
-    document.getElementById('confirmPassword').addEventListener('input', function() {
+    document.getElementById('confirmPassword')?.addEventListener('input', function() {
       const password = document.getElementById('password').value
       const confirmPassword = this.value
       
       if (confirmPassword && password !== confirmPassword) {
-        this.style.borderColor = '#dc3545'
+        this.classList.add('is-invalid')
       } else {
-        this.style.borderColor = '#ddd'
+        this.classList.remove('is-invalid')
       }
     })
   </script>

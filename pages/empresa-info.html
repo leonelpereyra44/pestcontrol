@@ -4,153 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información de la Empresa - Sistema de Control de Plagas</title>
+    <!-- CSS específico para empresa-info -->
     <link rel="stylesheet" href="../css/empresa-info.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <h1>🏢 Información de la Empresa</h1>
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="header-title">🏢 Información de la Empresa</h1>
+            </div>
             <div class="header-actions">
                 <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
             </div>
-        </div>
+        </header>
 
         <!-- Loading inicial -->
-        <div id="loadingInitial" class="loading">
-            <div class="spinner"></div>
+        <div id="loadingInitial" class="loading-container">
+            <div class="loading-spinner"></div>
             <p>Cargando información...</p>
         </div>
 
         <!-- Contenido principal -->
-        <div id="mainContent" class="content-card" style="display: none;">
+        <div id="mainContent" style="display: none;">
             
             <!-- Información Básica -->
-            <section class="section">
-                <h2>📋 Información Básica</h2>
-                <form id="empresaBasicForm" onsubmit="saveBasicInfo(event)">
-                    <div class="form-row">
+            <div class="card">
+                <section class="card-body">
+                    <h2 class="section-title">📋 Información Básica</h2>
+                    <form id="empresaBasicForm" onsubmit="saveBasicInfo(event)">
+                    <div class="form-row form-row-2">
                         <div class="form-group">
                             <label for="empresaNombre">Nombre de la Empresa *</label>
-                            <input type="text" id="empresaNombre" required>
+                            <input type="text" id="empresaNombre" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label for="empresaCuit">CUIT/RUT</label>
-                            <input type="text" id="empresaCuit">
+                            <input type="text" id="empresaCuit" class="form-control">
                         </div>
                     </div>
                     
-                    <div class="form-row">
+                    <div class="form-row form-row-2">
                         <div class="form-group">
                             <label for="empresaDireccion">Dirección</label>
-                            <input type="text" id="empresaDireccion">
+                            <input type="text" id="empresaDireccion" class="form-control">
                         </div>
                         <div class="form-group">
                             <label for="empresaTelefono">Teléfono</label>
-                            <input type="tel" id="empresaTelefono">
+                            <input type="tel" id="empresaTelefono" class="form-control">
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">💾 Guardar Información Básica</button>
                 </form>
             </section>
-
-            <hr>
+            </div>
 
             <!-- Documentos de la Empresa -->
-            <section class="section">
-                <h2>📄 Documentos de la Empresa</h2>
-                
-                <!-- Logo -->
-                <div class="document-item">
-                    <div class="document-info">
-                        <h3>🖼️ Logo de la Empresa</h3>
-                        <p>Formatos: PNG, JPG (máx. 5MB)</p>
-                        <div id="logoPreview" class="preview-container"></div>
-                    </div>
-                    <div class="document-actions">
-                        <input type="file" id="logoInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadLogo(event)">
-                        <button class="btn btn-primary" onclick="document.getElementById('logoInput').click()">
-                            📤 Subir Logo
-                        </button>
-                        <button class="btn btn-danger" id="deleteLogo" onclick="deleteDocument('logo')" style="display: none;">
-                            🗑️ Eliminar
-                        </button>
-                    </div>
-                </div>
+            <div class="card">
+                <section class="card-body">
+                    <h2 class="section-title">📄 Documentos de la Empresa</h2>
+                    
+                    <div class="documents-grid">
+                        <!-- Logo -->
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">🖼️</div>
+                                <div class="document-details">
+                                    <h3>Logo de la Empresa</h3>
+                                    <p>Formatos: PNG, JPG (máx. 5MB)</p>
+                                    <div id="logoPreview"></div>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <input type="file" id="logoInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadLogo(event)">
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('logoInput').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="deleteLogo" onclick="deleteDocument('logo')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- Sello Oficial -->
-                <div class="document-item">
-                    <div class="document-info">
-                        <h3>🔖 Sello Oficial</h3>
-                        <p>Formatos: PNG (con transparencia recomendado) (máx. 5MB)</p>
-                        <div id="selloPreview" class="preview-container"></div>
-                    </div>
-                    <div class="document-actions">
-                        <input type="file" id="selloInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadSello(event)">
-                        <button class="btn btn-primary" onclick="document.getElementById('selloInput').click()">
-                            📤 Subir Sello
-                        </button>
-                        <button class="btn btn-danger" id="deleteSello" onclick="deleteDocument('sello')" style="display: none;">
-                            🗑️ Eliminar
-                        </button>
-                    </div>
-                </div>
+                        <!-- Sello Oficial -->
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">🔖</div>
+                                <div class="document-details">
+                                    <h3>Sello Oficial</h3>
+                                    <p>Formatos: PNG (con transparencia) (máx. 5MB)</p>
+                                    <div id="selloPreview"></div>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <input type="file" id="selloInput" accept="image/png,image/jpeg" style="display: none;" onchange="uploadSello(event)">
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('selloInput').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="deleteSello" onclick="deleteDocument('sello')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- Certificado de Habilitación -->
-                <div class="document-item">
-                    <div class="document-info">
-                        <h3>📜 Certificado de Habilitación</h3>
-                        <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
-                        <div id="habilitacionPreview" class="preview-container"></div>
-                    </div>
-                    <div class="document-actions">
-                        <input type="file" id="habilitacionInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadHabilitacion(event)">
-                        <button class="btn btn-primary" onclick="document.getElementById('habilitacionInput').click()">
-                            📤 Subir Certificado
-                        </button>
-                        <button class="btn btn-danger" id="deleteHabilitacion" onclick="deleteDocument('habilitacion')" style="display: none;">
-                            🗑️ Eliminar
-                        </button>
-                    </div>
-                </div>
+                        <!-- Certificado de Habilitación -->
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">📜</div>
+                                <div class="document-details">
+                                    <h3>Certificado de Habilitación</h3>
+                                    <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
+                                    <div id="habilitacionPreview"></div>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <input type="file" id="habilitacionInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadHabilitacion(event)">
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('habilitacionInput').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="deleteHabilitacion" onclick="deleteDocument('habilitacion')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- Certificado SENASA -->
-                <div class="document-item">
-                    <div class="document-info">
-                        <h3>🏛️ Certificado SENASA / Regulatorio</h3>
-                        <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
-                        <div id="senasaPreview" class="preview-container"></div>
+                        <!-- Certificado SENASA -->
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">🏛️</div>
+                                <div class="document-details">
+                                    <h3>Certificado SENASA / Regulatorio</h3>
+                                    <p>Formatos: PDF, JPG, PNG (máx. 10MB)</p>
+                                    <div id="senasaPreview"></div>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <input type="file" id="senasaInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadSenasa(event)">
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('senasaInput').click()">
+                                    📤 Subir
+                                </button>
+                                <button class="btn btn-danger btn-sm" id="deleteSenasa" onclick="deleteDocument('senasa')" style="display: none;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="document-actions">
-                        <input type="file" id="senasaInput" accept="application/pdf,image/png,image/jpeg" style="display: none;" onchange="uploadSenasa(event)">
-                        <button class="btn btn-primary" onclick="document.getElementById('senasaInput').click()">
-                            📤 Subir Certificado
-                        </button>
-                        <button class="btn btn-danger" id="deleteSenasa" onclick="deleteDocument('senasa')" style="display: none;">
-                            🗑️ Eliminar
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <hr>
+                </section>
+            </div>
 
             <!-- Firmas y Sellos de Trabajadores -->
-            <section class="section">
-                <h2>✍️ Firmas y Sellos de Trabajadores</h2>
-                <p style="color: #666; margin-bottom: 20px;">Gestiona las firmas y sellos personales de cada trabajador que usarán para firmar los controles.</p>
+            <div class="card">
+                <section class="card-body">
+                    <h2 class="section-title">✍️ Firmas y Sellos de Trabajadores</h2>
+                    <p style="color: #6b7280; margin-bottom: 2rem; font-size: 0.938rem;">
+                        Gestiona las firmas y sellos personales de cada trabajador que usarán para firmar los controles.
+                    </p>
                 
-                <div id="workersLoading" class="loading">
-                    <div class="spinner"></div>
-                    <p>Cargando trabajadores...</p>
-                </div>
+                    <div id="workersLoading" class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">Cargando trabajadores...</p>
+                    </div>
 
-                <div id="workersContainer" style="display: none;">
-                    <!-- Se llenará dinámicamente con los trabajadores -->
-                </div>
-            </section>
+                    <div id="workersContainer" class="workers-list" style="display: none;">
+                        <!-- Se llenará dinámicamente con los trabajadores -->
+                    </div>
+                </section>
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- Supabase -->
@@ -268,23 +291,23 @@
                 
                 if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
                     container.innerHTML = `
-                        <img src="${data.signedUrl}" alt="${type}" class="preview-image">
-                        <a href="${data.signedUrl}" target="_blank" class="preview-link">Ver imagen completa</a>
+                        <img src="${data.signedUrl}" alt="${type}" class="document-preview">
+                        <a href="${data.signedUrl}" target="_blank" class="link-view">Ver completa</a>
                     `
                 } else if (fileExtension === 'pdf') {
                     container.innerHTML = `
-                        <div class="pdf-preview">📄 PDF</div>
-                        <a href="${data.signedUrl}" target="_blank" class="preview-link">Ver PDF</a>
+                        <div style="padding: 1rem; background: #f3f4f6; border-radius: 8px; display: inline-block; margin-top: 0.5rem;">📄 PDF</div>
+                        <a href="${data.signedUrl}" target="_blank" class="link-view">Abrir PDF</a>
                     `
                 }
 
                 if (deleteBtn) {
-                    deleteBtn.style.display = 'inline-block'
+                    deleteBtn.style.display = 'inline-flex'
                 }
 
             } catch (error) {
                 console.error(`Error mostrando preview de ${type}:`, error)
-                container.innerHTML = `<p style="color: #e74c3c; font-size: 12px;">⚠️ Error: ${error.message}</p>`
+                container.innerHTML = `<div class="alert alert-danger" style="margin-top: var(--spacing-md); font-size: var(--font-size-sm);">⚠️ Error: ${error.message}</div>`
             }
         }
 
@@ -482,90 +505,75 @@
             const container = document.getElementById('workersContainer')
             
             if (allWorkers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">No hay trabajadores registrados</p>'
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <h3 class="empty-state-title">No hay trabajadores registrados</h3>
+                        <p class="empty-state-message">Los trabajadores aparecerán aquí una vez registrados</p>
+                    </div>
+                `
                 return
             }
 
             container.innerHTML = allWorkers.map(worker => `
                 <div class="worker-card">
                     <div class="worker-header">
-                        <div style="flex: 1;">
-                            <h3>${worker.nombre} ${worker.apellido || ''}</h3>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                                <p style="color: #666; font-size: 14px; margin: 0;">
-                                    ${worker.mail}
-                                </p>
-                                <span style="color: #ccc;">•</span>
-                                <div class="puesto-editable" style="display: flex; align-items: center; gap: 5px;">
-                                    <span id="puestoText_${worker.worker_id}" 
-                                          class="puesto-text" 
-                                          onclick="${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? `editarPuesto('${worker.worker_id}')` : ''}"
-                                          style="cursor: ${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? 'pointer' : 'default'}; color: #667eea; font-size: 14px; font-weight: 500;">
-                                        ${worker.puesto || 'Sin puesto'}
-                                    </span>
-                                    ${currentWorkerInfo.rol === 'admin' || currentWorkerInfo.rol === 'supervisor' ? 
-                                        `<button onclick="editarPuesto('${worker.worker_id}')" class="btn-edit-puesto" title="Editar puesto">✏️</button>` 
-                                        : ''}
-                                    <input 
-                                        type="text" 
-                                        id="puestoInput_${worker.worker_id}" 
-                                        class="puesto-input" 
-                                        value="${worker.puesto || ''}"
-                                        placeholder="Ej: Técnico de fumigación"
-                                        onblur="guardarPuesto('${worker.worker_id}')"
-                                        onkeypress="if(event.key==='Enter') guardarPuesto('${worker.worker_id}')"
-                                        style="display: none;"
-                                    />
-                                </div>
+                        <div class="worker-info">
+                            <div class="worker-name">
+                                👤 ${worker.nombre} ${worker.apellido || ''}
+                                <span class="status-badge active">Activo</span>
                             </div>
+                            <p class="worker-email">${worker.mail}</p>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="font-size: 14px; color: #666; font-weight: 500;">Rol:</label>
+                        <div>
                             <select 
                                 id="rolSelect_${worker.worker_id}" 
-                                class="rol-select"
+                                class="worker-badge"
                                 onchange="cambiarRol('${worker.worker_id}', this.value)"
                                 ${currentWorkerInfo.rol !== 'admin' && currentWorkerInfo.rol !== 'supervisor' ? 'disabled' : ''}
+                                style="width: auto; min-width: 140px; height: 36px; border: none; cursor: pointer;"
                             >
-                                <option value="operador" ${worker.rol === 'operador' ? 'selected' : ''}>Operador</option>
-                                <option value="supervisor" ${worker.rol === 'supervisor' ? 'selected' : ''}>Supervisor</option>
-                                <option value="admin" ${worker.rol === 'admin' ? 'selected' : ''}>Admin</option>
+                                <option value="operador" ${worker.rol === 'operador' ? 'selected' : ''}>👷 Operador</option>
+                                <option value="supervisor" ${worker.rol === 'supervisor' ? 'selected' : ''}>👔 Supervisor</option>
+                                <option value="admin" ${worker.rol === 'admin' ? 'selected' : ''}>👑 Admin</option>
                             </select>
                         </div>
                     </div>
                     
-                    <div class="worker-documents">
-                        <!-- Firma -->
-                        <div class="worker-doc-item">
-                            <div class="worker-doc-info">
-                                <strong>✍️ Firma Digital</strong>
-                                <div id="workerFirma_${worker.worker_id}" class="worker-preview"></div>
+                    <div class="signatures-section">
+                        <div class="signatures-grid">
+                            <!-- Firma -->
+                            <div class="signature-item">
+                                <h4>✍️ Firma Digital</h4>
+                                <div class="signature-box" id="workerFirma_${worker.worker_id}">
+                                    <span class="signature-placeholder">Arrastra o sube la firma</span>
+                                </div>
+                                <div class="signature-actions">
+                                    <input type="file" id="firmaInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'firma')">
+                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('firmaInput_${worker.worker_id}').click()">
+                                        📤 Subir
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" id="deleteFirma_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'firma')" style="display: none;">
+                                        🗑️
+                                    </button>
+                                </div>
                             </div>
-                            <div class="worker-doc-actions">
-                                <input type="file" id="firmaInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'firma')">
-                                <button class="btn btn-primary btn-small" onclick="document.getElementById('firmaInput_${worker.worker_id}').click()">
-                                    📤 Subir
-                                </button>
-                                <button class="btn btn-danger btn-small" id="deleteFirma_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'firma')" style="display: none;">
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
 
-                        <!-- Sello -->
-                        <div class="worker-doc-item">
-                            <div class="worker-doc-info">
-                                <strong>🔖 Sello Personal</strong>
-                                <div id="workerSello_${worker.worker_id}" class="worker-preview"></div>
-                            </div>
-                            <div class="worker-doc-actions">
-                                <input type="file" id="selloInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'sello')">
-                                <button class="btn btn-primary btn-small" onclick="document.getElementById('selloInput_${worker.worker_id}').click()">
-                                    📤 Subir
-                                </button>
-                                <button class="btn btn-danger btn-small" id="deleteSello_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'sello')" style="display: none;">
-                                    🗑️
-                                </button>
+                            <!-- Sello -->
+                            <div class="signature-item">
+                                <h4>🔖 Sello Personal</h4>
+                                <div class="signature-box" id="workerSello_${worker.worker_id}">
+                                    <span class="signature-placeholder">Arrastra o sube el sello</span>
+                                </div>
+                                <div class="signature-actions">
+                                    <input type="file" id="selloInput_${worker.worker_id}" accept="image/png,image/jpeg" style="display: none;" onchange="uploadWorkerDoc(event, '${worker.worker_id}', 'sello')">
+                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('selloInput_${worker.worker_id}').click()">
+                                        📤 Subir
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" id="deleteSello_${worker.worker_id}" onclick="deleteWorkerDoc('${worker.worker_id}', 'sello')" style="display: none;">
+                                        🗑️
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -594,15 +602,18 @@
 
                 if (error) throw error
 
-                container.innerHTML = `<img src="${data.signedUrl}" alt="${type}" class="worker-preview-img">`
-                
-                if (deleteBtn) {
-                    deleteBtn.style.display = 'inline-block'
-                }
-
+                container.classList.add('has-signature')
+                container.innerHTML = `
+                    <img 
+                        src="${data.signedUrl}" 
+                        class="signature-preview"
+                        alt="${type}" 
+                    />
+                `
+                deleteBtn.style.display = 'inline-flex'
             } catch (error) {
                 console.error(`Error mostrando preview de ${type}:`, error)
-                container.innerHTML = `<p style="color: #999; font-size: 12px;">Error cargando preview</p>`
+                container.innerHTML = `<p style="color: var(--color-danger); font-size: var(--font-size-sm);">Error cargando ${type}</p>`
             }
         }
 

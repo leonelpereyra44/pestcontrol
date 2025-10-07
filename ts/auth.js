@@ -1,9 +1,11 @@
 // Configuración de Supabase
+console.log('🔧 Loading auth.js...')
 const SUPABASE_URL = "https://rrgxvwttarkcxqfekfeb.supabase.co"
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ"
 
 // Crear cliente de Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+console.log('✅ Supabase client created')
 
 // Exportar globalmente para que otras páginas puedan usarlo
 window.supabaseClient = supabaseClient
@@ -46,12 +48,29 @@ class AuthManager {
 
   // Cerrar sesión
   async signOut() {
-    const { error } = await supabaseClient.auth.signOut()
-    if (error) {
-      console.error('Error al cerrar sesión:', error)
-      return { success: false, error: error.message }
+    console.log('🔵 AuthManager.signOut() called')
+    try {
+      const { error } = await supabaseClient.auth.signOut()
+      if (error) {
+        console.error('❌ Supabase signOut error:', error)
+        // Si el error es "Auth session missing", igual consideramos exitoso
+        // porque significa que ya no hay sesión activa
+        if (error.message.includes('Auth session missing')) {
+          console.log('⚠️ Session already missing, clearing local state...')
+          this.currentUser = null
+          return { success: true }
+        }
+        return { success: false, error: error.message }
+      }
+      console.log('✅ Supabase signOut successful')
+      this.currentUser = null
+      return { success: true }
+    } catch (err) {
+      console.error('❌ Exception in signOut:', err)
+      // En caso de cualquier error, limpiamos el estado local
+      this.currentUser = null
+      return { success: true } // Consideramos exitoso porque limpiamos el estado
     }
-    return { success: true }
   }
 
   // Obtener información del trabajador y su empresa
@@ -223,8 +242,31 @@ window.authUtils = {
   
   // Cerrar sesión
   logout: async () => {
+    console.log('🟢 window.authUtils.logout() called')
     const result = await authManager.signOut()
+    console.log('🟢 authManager.signOut() result:', result)
     if (result.success) {
+      console.log('🟢 Clearing localStorage...')
+      // Limpiar cualquier dato de sesión en localStorage
+      try {
+        // Limpiar tokens de Supabase
+        const keys = Object.keys(localStorage)
+        keys.forEach(key => {
+          if (key.startsWith('sb-') || key.includes('supabase')) {
+            console.log('🧹 Removing localStorage key:', key)
+            localStorage.removeItem(key)
+          }
+        })
+      } catch (err) {
+        console.warn('⚠️ Error clearing localStorage:', err)
+      }
+      console.log('🟢 Redirecting to login page...')
+      window.location.href = '/pages/login.html'
+    } else {
+      console.error('🔴 Logout failed:', result.error)
+      alert('Error al cerrar sesión. Se forzará el cierre...')
+      // Forzar logout de todas formas
+      localStorage.clear()
       window.location.href = '/pages/login.html'
     }
     return result
@@ -300,3 +342,7 @@ async function displayUserInfo(containerId) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { authManager, supabaseClient }
 }
+
+console.log('✅ auth.js loaded successfully')
+console.log('✅ window.authUtils available:', typeof window.authUtils)
+console.log('✅ authManager available:', typeof authManager)

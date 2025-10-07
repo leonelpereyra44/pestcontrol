@@ -4,65 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Clientes - Sistema de Control de Plagas</title>
+    <!-- CSS específico para clientes -->
     <link rel="stylesheet" href="../css/clientes.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <h1>📋 Gestión de Clientes</h1>
-            <div class="header-actions">
-                <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
-                <button class="btn btn-primary" onclick="openModal()">+ Nuevo Cliente</button>
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="header-title">📋 Gestión de Clientes</h1>
+                <div class="header-actions">
+                    <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
+                    <button class="btn btn-primary" onclick="openModal()">+ Nuevo Cliente</button>
+                </div>
             </div>
-        </div>
+        </header>
 
         <!-- Estadísticas -->
-        <div class="stats">
-            <div class="stat-card">
+        <div class="stat-grid">
+            <div class="stat-card stat-card-primary">
                 <div class="stat-icon">👥</div>
-                <div class="stat-value" id="totalClientes">0</div>
-                <div class="stat-label">Total Clientes</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalClientes">0</div>
+                    <div class="stat-label">Total Clientes</div>
+                </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card stat-card-success">
                 <div class="stat-icon">✅</div>
-                <div class="stat-value" id="clientesActivos">0</div>
-                <div class="stat-label">Clientes Activos</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="clientesActivos">0</div>
+                    <div class="stat-label">Clientes Activos</div>
+                </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card stat-card-info">
                 <div class="stat-icon">📍</div>
-                <div class="stat-value" id="totalPlantas">0</div>
-                <div class="stat-label">Total Plantas</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalPlantas">0</div>
+                    <div class="stat-label">Total Plantas</div>
+                </div>
             </div>
         </div>
 
         <!-- Contenido principal -->
-        <div class="content-card">
-            <!-- Barra de búsqueda y filtros -->
-            <div class="search-bar">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput" 
-                    placeholder="🔍 Buscar por nombre, email o teléfono..."
-                >
-            </div>
+        <div class="card">
+            <div class="card-body">
+                <!-- Barra de búsqueda -->
+                <div class="form-group">
+                    <div class="search-input">
+                        <span class="input-group-icon">🔍</span>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="searchInput" 
+                            placeholder="Buscar por nombre, email o teléfono..."
+                        >
+                    </div>
+                </div>
 
-            <!-- Loading -->
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <p>Cargando clientes...</p>
-            </div>
+                <!-- Loading -->
+                <div id="loading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Cargando clientes...</p>
+                </div>
 
-            <!-- Tabla de clientes -->
-            <div id="clientesTable" class="table-container" style="display: none;">
-                <table>
-                    <thead>
+                <!-- Tabla de clientes -->
+                <div id="clientesTable" class="table-container" style="display: none;">
+                    <table class="table table-striped">
+                        <thead>
                         <tr>
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Teléfono</th>
-                            <th>Acciones</th>
+                            <th class="action-column">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="clientesBody">
@@ -74,52 +88,55 @@
             <!-- Empty state -->
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-state-icon">📋</div>
-                <h3>No hay clientes registrados</h3>
-                <p>Comienza agregando tu primer cliente</p>
-                <button class="btn btn-primary" onclick="openModal()" style="margin-top: 20px;">+ Agregar Cliente</button>
+                <h3 class="empty-state-title">No hay clientes registrados</h3>
+                <p class="empty-state-message">Comienza agregando tu primer cliente</p>
+                <button class="btn btn-primary" onclick="openModal()">+ Agregar Cliente</button>
             </div>
+        </div>
         </div>
     </div>
 
     <!-- Modal para crear/editar cliente -->
-    <div id="clienteModal" class="modal">
+    <div id="clienteModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Nuevo Cliente</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <h2 class="modal-title" id="modalTitle">Nuevo Cliente</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form id="clienteForm" onsubmit="saveCliente(event)">
-                <input type="hidden" id="clienteId">
-                
-                <div class="form-group">
-                    <label for="nombre">Nombre *</label>
-                    <input type="text" id="nombre" required placeholder="Ej: Restaurante El Buen Sabor">
+                <div class="modal-body">
+                    <input type="hidden" id="clienteId">
+                    
+                    <div class="form-group">
+                        <label for="nombre">Nombre *</label>
+                        <input type="text" id="nombre" class="form-control" required placeholder="Ej: Restaurante El Buen Sabor">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" class="form-control" placeholder="cliente@ejemplo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" class="form-control" placeholder="+54 9 11 1234-5678">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="cliente@ejemplo.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" placeholder="+54 9 11 1234-5678">
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Guardar</button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal de Detalles del Cliente con Pestañas -->
-    <div id="clienteDetailsModal" class="modal">
-        <div class="modal-content modal-large">
+    <div id="clienteDetailsModal" class="modal-overlay">
+        <div class="modal-content modal-lg">
             <div class="modal-header">
-                <h2 id="detailsModalTitle">Detalles del Cliente</h2>
-                <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+                <h2 class="modal-title" id="detailsModalTitle">Detalles del Cliente</h2>
+                <button class="modal-close" onclick="closeDetailsModal()">&times;</button>
             </div>
             
             <!-- Pestañas -->
@@ -135,17 +152,17 @@
                     
                     <div class="form-group">
                         <label for="editNombre">Nombre *</label>
-                        <input type="text" id="editNombre" required>
+                        <input type="text" id="editNombre" class="form-control" required>
                     </div>
 
                     <div class="form-group">
                         <label for="editEmail">Email</label>
-                        <input type="email" id="editEmail">
+                        <input type="email" id="editEmail" class="form-control">
                     </div>
 
                     <div class="form-group">
                         <label for="editTelefono">Teléfono</label>
-                        <input type="tel" id="editTelefono">
+                        <input type="tel" id="editTelefono" class="form-control">
                     </div>
 
                     <div class="form-actions">
@@ -174,8 +191,8 @@
                         <button class="btn btn-primary" onclick="openPlantaModal()">+ Agregar Primera Planta</button>
                     </div>
                     
-                    <div id="plantasTableContainer" style="display: none;">
-                        <table>
+                    <div id="plantasTableContainer" class="table-container" style="display: none;">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
@@ -195,34 +212,36 @@
     </div>
 
     <!-- Modal para crear/editar planta -->
-    <div id="plantaModal" class="modal">
+    <div id="plantaModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="plantaModalTitle">Nueva Planta</h2>
-                <button class="close-btn" onclick="closePlantaModal()">&times;</button>
+                <button class="modal-close" onclick="closePlantaModal()">&times;</button>
             </div>
             <form id="plantaForm" onsubmit="savePlanta(event)">
-                <input type="hidden" id="plantaId">
-                <input type="hidden" id="plantaClienteId">
-                
-                <div class="form-group">
-                    <label for="plantaNombre">Nombre de la Planta *</label>
-                    <input type="text" id="plantaNombre" required placeholder="Ej: Sede Principal">
+                <div class="modal-body">
+                    <input type="hidden" id="plantaId">
+                    <input type="hidden" id="plantaClienteId">
+                    
+                    <div class="form-group">
+                        <label for="plantaNombre">Nombre de la Planta *</label>
+                        <input type="text" id="plantaNombre" class="form-control" required placeholder="Ej: Sede Principal">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plantaDireccion">Dirección *</label>
+                        <input type="text" id="plantaDireccion" class="form-control" required placeholder="Ej: Calle Gran Vía 45, Madrid">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plantaContacto">Contacto</label>
+                        <input type="text" id="plantaContacto" class="form-control" placeholder="Ej: Juan Pérez - Gerente">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="plantaDireccion">Dirección *</label>
-                    <input type="text" id="plantaDireccion" required placeholder="Ej: Calle Gran Vía 45, Madrid">
-                </div>
-
-                <div class="form-group">
-                    <label for="plantaContacto">Contacto</label>
-                    <input type="text" id="plantaContacto" placeholder="Ej: Juan Pérez - Gerente">
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Guardar</button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closePlantaModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
                 </div>
             </form>
         </div>
@@ -326,8 +345,8 @@
                         ${cliente.telefono ? `<a href="tel:${cliente.telefono}" class="clickable">${cliente.telefono}</a>` : '-'}
                     </td>
                     <td class="actions">
-                        <button class="btn btn-primary btn-small" onclick="viewClienteDetails('${cliente.cliente_id}')">👁️ Ver Detalles</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteCliente('${cliente.cliente_id}', '${cliente.nombre}')">🗑️</button>
+                        <button class="btn btn-primary btn-small" onclick="viewClienteDetails('${cliente.cliente_id}')" title="Ver detalles">✏️</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteCliente('${cliente.cliente_id}', '${cliente.nombre}')" title="Eliminar">🗑️</button>
                     </td>
                 </tr>
             `).join('')
@@ -589,8 +608,8 @@
                     <td>${planta.direccion || '-'}</td>
                     <td>${planta.contacto || '-'}</td>
                     <td class="actions">
-                        <button class="btn btn-primary btn-small" onclick="editPlanta('${planta.planta_id}')">✏️ Editar</button>
-                        <button class="btn btn-danger btn-small" onclick="deletePlanta('${planta.planta_id}', '${planta.nombre}')">🗑️</button>
+                        <button class="btn btn-primary btn-small" onclick="editPlanta('${planta.planta_id}')" title="Editar">✏️</button>
+                        <button class="btn btn-danger btn-small" onclick="deletePlanta('${planta.planta_id}', '${planta.nombre}')" title="Eliminar">🗑️</button>
                     </td>
                 </tr>
             `).join('')
@@ -717,6 +736,13 @@
                 closePlantaModal()
             }
         })
+
+        document.getElementById('clienteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal()
+            }
+        })
     </script>
+    </div> <!-- Cierre page-wrapper -->
 </body>
 </html>

@@ -1,0 +1,1078 @@
+/**
+ * Estilos para el formulario de nuevo control
+ */
+
+/* ============= VARIABLES ============= */
+:root {
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
+    --border-color: #ddd;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    --wizard-menu-width: 320px;
+}
+
+/* ============= HEADER ============= */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: #2c3e50;
+}
+
+.current-step-text {
+    margin: 0.5rem 0 0 0;
+    color: #666;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.current-step-text span {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.btn-back-header {
+    flex-shrink: 0;
+}
+
+/* ============= HAMBURGER BUTTON ============= */
+.wizard-toggle {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.wizard-toggle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.wizard-toggle:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+.wizard-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.wizard-toggle:active {
+    transform: scale(0.95);
+}
+
+.hamburger-line {
+    width: 24px;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.wizard-toggle.active .hamburger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.wizard-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.wizard-toggle.active .hamburger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ============= WIZARD OVERLAY ============= */
+.wizard-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    animation: fadeIn 0.3s ease;
+}
+
+.wizard-overlay.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============= WIZARD MENU ============= */
+.wizard-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: var(--wizard-menu-width);
+    max-width: 90vw;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+}
+
+.wizard-menu.active {
+    left: 0;
+}
+
+.wizard-menu-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.wizard-menu-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.wizard-close {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.wizard-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* ============= WIZARD STEPS ============= */
+.wizard-steps {
+    position: relative;
+}
+
+.wizard-step {
+    padding: 1.25rem 1.5rem;
+    margin: 0.5rem 0;
+    border-radius: 12px;
+    background: var(--light-bg);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.wizard-step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary-color);
+    border-radius: 0 4px 4px 0;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.wizard-step:hover {
+    background: #e9ecef;
+    transform: translateX(8px);
+}
+
+.wizard-step.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transform: translateX(8px);
+}
+
+.wizard-step.active::before {
+    transform: scaleY(1);
+}
+
+.wizard-step.completed {
+    background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+    color: white;
+}
+
+.wizard-step.completed .wizard-step-status::before {
+    content: '✓';
+}
+
+.wizard-step-number {
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.wizard-step.active .wizard-step-number,
+.wizard-step.completed .wizard-step-number {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.wizard-step-title {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.wizard-step-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ============= STEP CONTENT ============= */
+.step-content {
+    display: none;
+    animation: fadeInUp 0.4s ease-out;
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+
+.step-content.active {
+    display: block;
+}
+
+.step-content h2 {
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    font-size: 1.85rem;
+    font-weight: 700;
+    border-bottom: none;
+    padding-bottom: 0;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.step-content h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 70%;
+    background: linear-gradient(to bottom, var(--primary-color), #764ba2);
+    border-radius: 3px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============= FORMS ============= */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+/* Asegurar que el contenedor principal no corte los dropdowns */
+.container {
+    overflow: visible;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.form-group:focus-within {
+    z-index: 100;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.form-group.required label::after {
+    content: " *";
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #fafafa;
+    color: #333;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: #c0c0c0;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1), 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+/* Solo aplicar transform en inputs, no en select */
+.form-group input:focus {
+    transform: translateY(-2px);
+}
+
+.form-group select:focus {
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+    background: #e9ecef;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ============= SELLO PREVIEW CARD ============= */
+.sello-preview-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 0;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    animation: slideIn 0.4s ease-out;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.sello-preview-header {
+    padding: 1.25rem 1.5rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.sello-preview-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sello-preview-header h3::before {
+    content: '🔖';
+    font-size: 1.3rem;
+}
+
+.sello-preview-content {
+    background: white;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    position: relative;
+}
+
+.sello-preview-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+}
+
+.sello-preview-content img {
+    max-width: 250px;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.sello-preview-content img:hover {
+    transform: scale(1.05);
+}
+
+/* ============= ITEMS AGREGADOS ============= */
+.producto-item,
+.punto-item {
+    background: var(--light-bg);
+    padding: 1.25rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.producto-item::before,
+.punto-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary-color), var(--success-color));
+}
+
+.producto-item:hover,
+.punto-item:hover {
+    transform: translateX(8px);
+    box-shadow: var(--shadow-md);
+    background: white;
+}
+
+/* ============= BUTTONS ============= */
+.btn-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #eee;
+}
+
+.btn {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #545b62 100%);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #545b62 0%, #3a3f44 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #bd2130 100%);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #bd2130 0%, #a71d2a 100%);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ============= SELLO CONTAINER ============= */
+.sello-container {
+    max-width: 400px;
+    border: 3px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 1.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.sello-container:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.sello-container img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.sello-placeholder {
+    color: #999;
+    font-style: italic;
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.sello-preview-content .sello-placeholder {
+    color: #999;
+    font-style: normal;
+    padding: 0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.sello-preview-content .sello-placeholder::before {
+    content: '👤';
+    font-size: 2rem;
+}
+
+/* ============= ALERTS ============= */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert::before {
+    content: '';
+    font-size: 1.5rem;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border-color: var(--warning-color);
+    color: #856404;
+}
+
+.alert-warning::before {
+    content: '⚠️';
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-info::before {
+    content: 'ℹ️';
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border-color: var(--danger-color);
+    color: #721c24;
+}
+
+.alert-danger::before {
+    content: '❌';
+}
+
+.alert-success {
+    background: #d4edda;
+    border-color: var(--success-color);
+    color: #155724;
+}
+
+.alert-success::before {
+    content: '✅';
+}
+
+/* ============= RESPONSIVE ============= */
+@media (max-width: 768px) {
+    /* Asegurar que el body permita scroll en móviles */
+    html, body {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        height: auto !important;
+        min-height: 100vh;
+    }
+    
+    /* Remover transformaciones que rompen el posicionamiento de select */
+    * {
+        transform: none !important;
+    }
+    
+    /* Cuando el menú NO está abierto, permitir que los select funcionen */
+    body:not(.menu-open) .container,
+    body:not(.menu-open) .step-content,
+    body:not(.menu-open) .form-row,
+    body:not(.menu-open) .form-group {
+        position: static;
+        overflow: visible;
+    }
+    
+    /* Cuando el menú ESTÁ abierto, mantener todo en su lugar */
+    body.menu-open .step-content,
+    body.menu-open .form-group,
+    body.menu-open .form-row {
+        position: relative;
+    }
+    
+    .header {
+        position: relative;
+        z-index: 1;
+        flex-direction: row;
+        padding: 1rem;
+    }
+    
+    /* Asegurar que los select nativos funcionen correctamente */
+    .form-group select {
+        -webkit-appearance: menulist;
+        -moz-appearance: menulist;
+        appearance: menulist;
+        position: relative;
+    }
+    
+    /* Remover efectos que interfieren con select */
+    .form-group input:focus,
+    .form-group textarea:focus {
+        transform: none !important;
+    }
+    
+    .form-group select:focus {
+        transform: none !important;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+    }
+    
+    .header-content {
+        gap: 1rem;
+    }
+    
+    .header-title h1 {
+        font-size: 1.3rem;
+    }
+    
+    .current-step-text {
+        font-size: 0.85rem;
+    }
+    
+    .btn-back-header {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .wizard-toggle {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .hamburger-line {
+        width: 20px;
+        height: 2.5px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+        transform: none !important;
+    }
+    
+    .btn:hover,
+    .btn:active {
+        transform: none !important;
+    }
+    
+    .step-content {
+        padding: 1.5rem;
+    }
+    
+    .step-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .sello-preview-card {
+        margin: 1.5rem 0;
+    }
+    
+    .sello-preview-content {
+        padding: 1.5rem;
+        min-height: 150px;
+    }
+    
+    .sello-preview-content img {
+        max-width: 180px;
+        max-height: 130px;
+        transform: none !important;
+    }
+    
+    .sello-preview-content img:hover {
+        transform: none !important;
+    }
+    
+    /* Remover animaciones y transformaciones de wizard steps en móvil */
+    .wizard-step {
+        transform: none !important;
+    }
+    
+    .wizard-step:hover,
+    .wizard-step.active {
+        transform: none !important;
+    }
+    
+    .producto-item,
+    .punto-item {
+        transform: none !important;
+    }
+    
+    .producto-item:hover,
+    .punto-item:hover {
+        transform: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-title h1 {
+        font-size: 1.1rem;
+    }
+    
+    .current-step-text {
+        display: none;
+    }
+    
+    .wizard-menu {
+        width: 100%;
+        max-width: 100vw;
+    }
+    
+    .step-content {
+        padding: 1rem;
+    }
+    
+    .step-content h2 {
+        font-size: 1.3rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .sello-preview-header {
+        padding: 1rem;
+    }
+    
+    .sello-preview-header h3 {
+        font-size: 1rem;
+    }
+    
+    .sello-preview-content {
+        padding: 1.25rem;
+    }
+}
+
+/* ============= DESKTOP: Mostrar vista tradicional ============= */
+@media (min-width: 1024px) {
+    .wizard-toggle {
+        display: none;
+    }
+    
+    .header-content {
+        justify-content: flex-start;
+    }
+    
+    .current-step-text {
+        margin-left: 2rem;
+    }
+    
+    .wizard-menu {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        box-shadow: none;
+        margin-bottom: 2rem;
+        background: transparent;
+        overflow: visible;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+    
+    .wizard-menu-header {
+        display: none;
+    }
+    
+    .wizard-overlay {
+        display: none !important;
+    }
+    
+    .wizard-step {
+        display: inline-flex;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+        padding: 1rem 0.75rem;
+        text-align: center;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .wizard-step:hover {
+        transform: translateY(-4px);
+    }
+    
+    .wizard-step.active {
+        transform: translateY(-4px);
+    }
+    
+    .wizard-step::before {
+        display: none;
+    }
+    
+    .wizard-step-number {
+        width: 44px;
+        height: 44px;
+        margin: 0 auto;
+        font-size: 1.4rem;
+    }
+    
+    .wizard-step-title {
+        text-align: center;
+        font-size: 0.88rem;
+        line-height: 1.3;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .wizard-step-status {
+        display: none;
+    }
+}
+
+/* Para pantallas más grandes, permitir texto más grande */
+@media (min-width: 1280px) {
+    .wizard-step {
+        padding: 1.25rem 1rem;
+    }
+    
+    .wizard-step-title {
+        font-size: 0.95rem;
+    }
+    
+    .wizard-step-number {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+}
+
+/* ============= LOADING ANIMATIONS ============= */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ============= SMOOTH SCROLLING ============= */
+html {
+    scroll-behavior: smooth;
+}

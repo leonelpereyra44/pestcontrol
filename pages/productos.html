@@ -4,39 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario - Sistema de Control de Plagas</title>
+    <!-- CSS standalone -->
     <link rel="stylesheet" href="../css/productos.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <h1>📦 Gestión de Inventario</h1>
-            <div class="header-actions">
-                <button class="btn btn-secondary" onclick="exportarCSV()">
-                    <span>⬇️</span> Exportar a CSV
-                </button>
-                <button class="btn btn-primary" onclick="abrirModalProducto()">
-                    <span>➕</span> Añadir Producto
-                </button>
-                <a href="../index.html" class="btn btn-back">← Dashboard</a>
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="header-title">📦 Gestión de Inventario</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-outline" onclick="exportarCSV()">
+                        ⬇️ Exportar a CSV
+                    </button>
+                    <button class="btn btn-primary" onclick="abrirModalProducto()">
+                        ➕ Añadir Producto
+                    </button>
+                    <a href="../index.html" class="btn btn-secondary">← Dashboard</a>
+                </div>
             </div>
-        </div>
+        </header>
 
         <!-- Estadísticas -->
-        <div class="stats-grid">
-            <div class="stat-card stat-warning">
+        <div class="stat-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card stat-card-warning">
                 <div class="stat-icon">⚠️</div>
                 <div class="stat-content">
-                    <h3>Productos con bajo stock</h3>
                     <div class="stat-value" id="statBajoStock">-</div>
+                    <div class="stat-label">Productos con bajo stock</div>
                 </div>
             </div>
             
-            <div class="stat-card stat-info">
+            <div class="stat-card stat-card-info">
                 <div class="stat-icon">📋</div>
                 <div class="stat-content">
-                    <h3>Total de Productos</h3>
                     <div class="stat-value" id="statTotalProductos">-</div>
+                    <div class="stat-label">Total de Productos</div>
                 </div>
             </div>
             
@@ -50,37 +54,48 @@
         </div>
 
         <!-- Filtros -->
-        <div class="filters-bar">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Buscar por nombre..."
-                    oninput="filtrarProductos()"
-                >
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-body">
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label for="searchInput">🔍 Buscar producto</label>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            class="form-control"
+                            placeholder="Buscar por nombre..."
+                            oninput="filtrarProductos()"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="filterTipo">Tipo de producto</label>
+                        <select id="filterTipo" class="form-control" onchange="filtrarProductos()">
+                            <option value="">Todos los tipos</option>
+                            <option value="Químico">Químico</option>
+                            <option value="Herramienta">Herramienta</option>
+                            <option value="Trampa">Trampa</option>
+                            <option value="Equipo">Equipo</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="filterStock">Nivel de stock</label>
+                        <select id="filterStock" class="form-control" onchange="filtrarProductos()">
+                            <option value="">Todos los niveles</option>
+                            <option value="bajo">Bajo stock</option>
+                            <option value="normal">Stock normal</option>
+                            <option value="alto">Stock alto</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            
-            <select id="filterTipo" class="filter-select" onchange="filtrarProductos()">
-                <option value="">Filtrar por tipo</option>
-                <option value="Químico">Químico</option>
-                <option value="Herramienta">Herramienta</option>
-                <option value="Trampa">Trampa</option>
-                <option value="Equipo">Equipo</option>
-                <option value="Otro">Otro</option>
-            </select>
-            
-            <select id="filterStock" class="filter-select" onchange="filtrarProductos()">
-                <option value="">Filtrar por stock</option>
-                <option value="bajo">Bajo stock</option>
-                <option value="normal">Stock normal</option>
-                <option value="alto">Stock alto</option>
-            </select>
         </div>
 
         <!-- Tabla de Productos -->
         <div class="table-container">
-            <table class="productos-table">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>
@@ -91,14 +106,16 @@
                         <th>CANTIDAD ACTUAL</th>
                         <th>UNIDAD</th>
                         <th>NIVEL DE ALERTA</th>
-                        <th>ACCIONES</th>
+                        <th class="text-center">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody id="productosTableBody">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px;">
-                            <div class="loading-spinner"></div>
-                            <p>Cargando productos...</p>
+                        <td colspan="7">
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                                <p>Cargando productos...</p>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -106,45 +123,49 @@
         </div>
 
         <!-- Sin resultados -->
-        <div id="noResults" style="display: none;" class="no-results">
-            <p>😕 No se encontraron productos</p>
+        <div id="noResults" style="display: none;" class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <h3 class="empty-state-title">No se encontraron productos</h3>
+            <p class="empty-state-message">Intenta ajustar los filtros o añade un nuevo producto</p>
         </div>
     </div>
 
     <!-- Modal para Agregar/Editar Producto -->
-    <div id="modalProducto" class="modal">
+    <div id="modalProducto" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">➕ Añadir Producto</h2>
-                <button class="btn-close" onclick="cerrarModalProducto()">✕</button>
+                <button class="modal-close" onclick="cerrarModalProducto()">✕</button>
             </div>
             
             <form id="formProducto" onsubmit="guardarProducto(event)">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="inputNombre">Nombre del Producto *</label>
-                        <input 
-                            type="text" 
-                            id="inputNombre" 
-                            class="form-control" 
-                            required
-                            placeholder="Ej: Insecticida Concentrado X"
-                        >
+                <div class="modal-body">
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="inputNombre">Nombre del Producto *</label>
+                            <input 
+                                type="text" 
+                                id="inputNombre" 
+                                class="form-control" 
+                                required
+                                placeholder="Ej: Insecticida Concentrado X"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputTipo">Tipo *</label>
+                            <select id="inputTipo" class="form-control" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Químico">Químico</option>
+                                <option value="Herramienta">Herramienta</option>
+                                <option value="Trampa">Trampa</option>
+                                <option value="Equipo">Equipo</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="inputTipo">Tipo *</label>
-                        <select id="inputTipo" class="form-control" required>
-                            <option value="">Seleccionar...</option>
-                            <option value="Químico">Químico</option>
-                            <option value="Herramienta">Herramienta</option>
-                            <option value="Trampa">Trampa</option>
-                            <option value="Equipo">Equipo</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group form-group-full">
                         <label for="inputDescripcion">Descripción</label>
                         <textarea 
                             id="inputDescripcion" 
@@ -154,61 +175,65 @@
                         ></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="inputCantidad">Cantidad Actual *</label>
-                        <input 
-                            type="number" 
-                            id="inputCantidad" 
-                            class="form-control" 
-                            required
-                            min="0"
-                            step="0.01"
-                            placeholder="0"
-                        >
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="inputCantidad">Cantidad Actual *</label>
+                            <input 
+                                type="number" 
+                                id="inputCantidad" 
+                                class="form-control" 
+                                required
+                                min="0"
+                                step="0.01"
+                                placeholder="0"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputUnidad">Unidad de Medida *</label>
+                            <select id="inputUnidad" class="form-control" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Litros">Litros</option>
+                                <option value="Kilogramos">Kilogramos</option>
+                                <option value="Gramos">Gramos</option>
+                                <option value="Unidades">Unidades</option>
+                                <option value="Cajas">Cajas</option>
+                                <option value="Paquetes">Paquetes</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="inputUnidad">Unidad de Medida *</label>
-                        <select id="inputUnidad" class="form-control" required>
-                            <option value="">Seleccionar...</option>
-                            <option value="Litros">Litros</option>
-                            <option value="Kilogramos">Kilogramos</option>
-                            <option value="Gramos">Gramos</option>
-                            <option value="Unidades">Unidades</option>
-                            <option value="Cajas">Cajas</option>
-                            <option value="Paquetes">Paquetes</option>
-                        </select>
-                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="inputNivelAlerta">Nivel de Alerta *</label>
+                            <input 
+                                type="number" 
+                                id="inputNivelAlerta" 
+                                class="form-control" 
+                                required
+                                min="0"
+                                step="0.01"
+                                placeholder="10"
+                            >
+                            <small>Se notificará cuando el stock esté en este nivel</small>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="inputNivelAlerta">Nivel de Alerta *</label>
-                        <input 
-                            type="number" 
-                            id="inputNivelAlerta" 
-                            class="form-control" 
-                            required
-                            min="0"
-                            step="0.01"
-                            placeholder="10"
-                        >
-                        <small>Se notificará cuando el stock esté en este nivel</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputPrecio">Precio Unitario</label>
-                        <input 
-                            type="number" 
-                            id="inputPrecio" 
-                            class="form-control"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                        >
-                        <small>Opcional - para cálculo de valor</small>
+                        <div class="form-group">
+                            <label for="inputPrecio">Precio Unitario</label>
+                            <input 
+                                type="number" 
+                                id="inputPrecio" 
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                            >
+                            <small>Opcional - para cálculo de valor</small>
+                        </div>
                     </div>
                 </div>
 
-                <div class="modal-footer">
+                <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="cerrarModalProducto()">
                         Cancelar
                     </button>
@@ -298,8 +323,10 @@
                 console.error('Error cargando productos:', error)
                 document.getElementById('productosTableBody').innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; color: #e74c3c; padding: 40px;">
-                            ❌ Error cargando productos: ${error.message || JSON.stringify(error)}
+                        <td colspan="7">
+                            <div class="alert alert-danger">
+                                ❌ Error cargando productos: ${error.message || JSON.stringify(error)}
+                            </div>
                         </td>
                     </tr>
                 `
@@ -314,8 +341,12 @@
             if (productos.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px;">
-                            No hay productos registrados
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📦</div>
+                                <h3 class="empty-state-title">No hay productos registrados</h3>
+                                <p class="empty-state-message">Comienza añadiendo tu primer producto al inventario</p>
+                            </div>
                         </td>
                     </tr>
                 `
@@ -339,22 +370,22 @@
                             ${p.descripcion ? `<br><small style="color: #999;">${p.descripcion.substring(0, 50)}...</small>` : ''}
                         </td>
                         <td>
-                            <span class="badge badge-tipo-${p.tipo.toLowerCase()}">${p.tipo}</span>
+                            <span class="badge badge-info">${p.tipo}</span>
                         </td>
                         <td class="${stockClass}">
                             ${stockBadge}
                         </td>
                         <td>${p.unidad_medida}</td>
                         <td>${p.nivel_alerta} ${p.unidad_medida}</td>
-                        <td>
+                        <td class="text-center">
                             <div class="action-buttons">
-                                <button class="btn-icon btn-edit" onclick="editarProducto('${p.producto_id}')" title="Editar">
+                                <button class="btn-icon-sm btn-edit" onclick="editarProducto('${p.producto_id}')" title="Editar">
                                     ✏️
                                 </button>
-                                <button class="btn-icon btn-history" onclick="verHistorial('${p.producto_id}')" title="Ver historial">
+                                <button class="btn-icon-sm btn-view" onclick="verHistorial('${p.producto_id}')" title="Ver historial">
                                     🔄
                                 </button>
-                                <button class="btn-icon btn-delete" onclick="eliminarProducto('${p.producto_id}')" title="Eliminar">
+                                <button class="btn-icon-sm btn-delete" onclick="eliminarProducto('${p.producto_id}')" title="Eliminar">
                                     🗑️
                                 </button>
                             </div>
@@ -417,11 +448,13 @@
             document.getElementById('modalTitle').innerHTML = '➕ Añadir Producto'
             document.getElementById('btnGuardarText').textContent = 'Guardar Producto'
             document.getElementById('formProducto').reset()
-            document.getElementById('modalProducto').style.display = 'flex'
+            document.getElementById('modalProducto').classList.add('active')
+            document.body.classList.add('modal-open')
         }
 
         function cerrarModalProducto() {
-            document.getElementById('modalProducto').style.display = 'none'
+            document.getElementById('modalProducto').classList.remove('active')
+            document.body.classList.remove('modal-open')
             productoEditando = null
         }
 
@@ -511,7 +544,8 @@
                 document.getElementById('inputNivelAlerta').value = data.nivel_alerta
                 document.getElementById('inputPrecio').value = data.precio_unitario || 0
 
-                document.getElementById('modalProducto').style.display = 'flex'
+                document.getElementById('modalProducto').classList.add('active')
+                document.body.classList.add('modal-open')
 
             } catch (error) {
                 console.error('Error cargando producto:', error)
@@ -588,5 +622,6 @@
             }
         }
     </script>
+    </div>
 </body>
 </html>

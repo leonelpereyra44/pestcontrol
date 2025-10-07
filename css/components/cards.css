@@ -1,0 +1,436 @@
+/**
+ * Componente: Tarjetas (Cards)
+ * Contenedores para agrupar contenido relacionado
+ */
+
+.card {
+    background: var(--color-white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* ============= CARD HEADER ============= */
+
+.card-header {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: var(--color-gray-50);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.card-header h2,
+.card-header h3,
+.card-header h4 {
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.card-header p {
+    margin: var(--spacing-xs) 0 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* ============= CARD BODY ============= */
+
+.card-body {
+    padding: var(--spacing-xl);
+}
+
+.card-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* ============= CARD FOOTER ============= */
+
+.card-footer {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: var(--color-gray-50);
+    border-top: 1px solid var(--color-border);
+}
+
+/* ============= CARD VARIANTES ============= */
+
+.card-primary {
+    border-top: 4px solid var(--color-primary);
+}
+
+.card-primary .card-header {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: var(--color-white);
+}
+
+.card-primary .card-header h2,
+.card-primary .card-header h3,
+.card-primary .card-header h4,
+.card-primary .card-header p {
+    color: var(--color-white);
+}
+
+.card-success {
+    border-top: 4px solid var(--color-success);
+}
+
+.card-danger {
+    border-top: 4px solid var(--color-danger);
+}
+
+.card-warning {
+    border-top: 4px solid var(--color-warning);
+}
+
+.card-info {
+    border-top: 4px solid var(--color-info);
+}
+
+/* ============= CARD CON GRADIENTE ============= */
+
+.card-gradient {
+    background: var(--color-primary-gradient);
+    color: var(--color-white);
+}
+
+.card-gradient .card-header,
+.card-gradient .card-body,
+.card-gradient .card-footer {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-gradient h2,
+.card-gradient h3,
+.card-gradient h4,
+.card-gradient p {
+    color: var(--color-white);
+}
+
+/* ============= STAT CARDS ============= */
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    background: var(--color-white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+}
+
+.stat-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-3xl);
+    color: var(--color-white);
+    flex-shrink: 0;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-content h3 {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+/* ============= CARD GRID ============= */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+    .card-grid,
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============= ITEM CARDS (Para listas) ============= */
+
+.item-card {
+    background: var(--color-gray-50);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid var(--color-primary);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.item-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-success));
+}
+
+.item-card:hover {
+    transform: translateX(8px);
+    box-shadow: var(--shadow-md);
+    background: var(--color-white);
+}
+
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.item-card-title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.item-card-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.item-card-body {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* Item card con contenido flexible */
+.item-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    background: var(--color-gray-50);
+    border: 2px solid var(--color-gray-200);
+    border-radius: 16px;
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.item-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.item-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.item-card-content h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.item-card-subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+.item-card-meta {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    margin: 0;
+}
+
+/* ============= PREVIEW CARDS ============= */
+
+.preview-card {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
+    border-radius: var(--border-radius-xl);
+    padding: 0;
+    margin: var(--spacing-xl) 0;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    animation: slideIn 0.4s ease-out;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.preview-card-header {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.preview-card-header h3 {
+    color: var(--color-white);
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.preview-card-body {
+    background: var(--color-white);
+    padding: var(--spacing-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    position: relative;
+}
+
+.preview-card-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+}
+
+/* ============= WORKER CARDS (para empresa-info) ============= */
+
+.worker-item {
+    background: var(--color-white);
+    border: 2px solid var(--color-gray-200);
+    border-radius: 16px;
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    transition: all 0.3s ease;
+}
+
+.worker-item:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.worker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-gray-100);
+}
+
+.worker-name {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0;
+}
+
+.worker-role {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.signature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.signature-item {
+    text-align: center;
+}
+
+.signature-item h4 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+}
+
+.signature-preview {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border: 2px solid var(--color-gray-200);
+    border-radius: 12px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.preview-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    margin-top: var(--spacing-md);
+    border: 2px solid var(--color-gray-200);
+    box-shadow: var(--shadow-sm);
+}

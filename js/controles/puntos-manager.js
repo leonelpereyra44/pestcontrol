@@ -64,7 +64,12 @@ class PuntosManager {
         if (!container) return;
         
         if (this.puntos.length === 0) {
-            container.innerHTML = '<p style="color: #999; font-style: italic;">No se han agregado puntos de control</p>';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    <p class="empty-state-message">No se han agregado puntos de control</p>
+                </div>
+            `;
             return;
         }
         
@@ -76,22 +81,29 @@ class PuntosManager {
                 'reemplazado': '🔄'
             }[p.estado] || '📍';
             
+            const estadoBadgeClass = {
+                'ok': 'badge-success',
+                'con_actividad': 'badge-warning',
+                'faltante': 'badge-danger',
+                'reemplazado': 'badge-info'
+            }[p.estado] || 'badge-primary';
+            
             return `
-                <div class="punto-item">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div style="flex: 1;">
-                            <strong>${estadoIcon} Punto #${p.numero} - ${this.formatTipoPlaga(p.tipo_plaga)}</strong><br>
-                            <span style="color: #666;">
-                                Estado: ${this.formatEstado(p.estado)}
-                                ${p.ubicacion ? ' | ' + p.ubicacion : ''}
-                            </span>
-                            ${p.tipo_dispositivo ? '<br><small>Dispositivo: ' + p.tipo_dispositivo + '</small>' : ''}
-                            ${p.accion_realizada ? '<br><small>Acción: ' + p.accion_realizada + '</small>' : ''}
+                <div class="item-card">
+                    <div class="item-card-content" style="flex: 1;">
+                        <div class="item-card-title">
+                            ${estadoIcon} Punto #${p.numero} - ${this.formatTipoPlaga(p.tipo_plaga)}
                         </div>
-                        <button class="btn btn-danger btn-sm" onclick="puntosManager.eliminar(${index})">
-                            🗑️
-                        </button>
+                        <div class="item-card-subtitle">
+                            <span class="${estadoBadgeClass}">${this.formatEstado(p.estado)}</span>
+                            ${p.ubicacion ? ' • ' + p.ubicacion : ''}
+                        </div>
+                        ${p.tipo_dispositivo ? `<div class="item-card-meta">Dispositivo: ${p.tipo_dispositivo}</div>` : ''}
+                        ${p.accion_realizada ? `<div class="item-card-meta">Acción: ${p.accion_realizada}</div>` : ''}
                     </div>
+                    <button class="btn btn-danger btn-sm btn-icon" onclick="puntosManager.eliminar(${index})" title="Eliminar punto">
+                        🗑️
+                    </button>
                 </div>
             `;
         }).join('');
