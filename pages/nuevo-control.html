@@ -19,7 +19,7 @@
                     <span class="hamburger-line"></span>
                 </button>
                 <div class="header-title">
-                    <h1>📋 Nuevo Control de Plagas</h1>
+                    <h1 id="pageTitle">📋 Nuevo Control de Plagas</h1>
                     <p class="current-step-text">Paso <span id="currentStepNumber">1</span> de 5: <span id="currentStepName">Información General</span></p>
                 </div>
             </div>
@@ -235,6 +235,10 @@
                 + Agregar Punto
             </button>
             
+            <button class="btn btn-secondary" onclick="mostrarListaPuntos()" style="margin-left: 12px;">
+                📋 Ver Lista
+            </button>
+            
             <div id="puntosAgregados">
                 <div class="empty-state">
                     <div class="empty-state-icon">📍</div>
@@ -293,10 +297,29 @@
                     ← Anterior
                 </button>
                 <button class="btn btn-success btn-lg" onclick="guardarControl()">
-                    💾 Guardar Control
+                    <span id="btnGuardarText">💾 Guardar Control</span>
                 </button>
             </div>
         </div>
+        </div>
+    </div>
+    </div> <!-- Cierre page-wrapper -->
+    
+    <!-- Modal para ver lista de puntos -->
+    <div class="modal-overlay" id="modalListaPuntos">
+        <div class="modal-content modal-lista-puntos">
+            <div class="modal-header">
+                <h3>📍 Lista de Puntos de Control</h3>
+                <button class="modal-close" onclick="cerrarModalPuntos()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="listaPuntosModal">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModalPuntos()">Cerrar</button>
+            </div>
         </div>
     </div>
     
@@ -320,11 +343,13 @@
         // Variables globales
         let workerProfile = null;
         let dataLoader = null;
-        let selloManager = null;
         let wizard = null;
         let productosManager = null;
         let puntosManager = null;
         let controlManager = null;
+        let selloManager = null;
+        let editMode = false; // Modo edición
+        let currentControlId = null; // ID del control que se está editando
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', async () => {
@@ -355,6 +380,17 @@
                 
                 console.log('✅ Usuario autenticado:', workerProfile);
                 
+                // Detectar modo edición
+                const urlParams = new URLSearchParams(window.location.search);
+                currentControlId = urlParams.get('id');
+                editMode = !!currentControlId;
+                
+                if (editMode) {
+                    console.log('📝 Modo edición - Control ID:', currentControlId);
+                    document.getElementById('pageTitle').textContent = 'Editar Control de Plagas';
+                    document.getElementById('btnGuardarText').textContent = '💾 Actualizar Control';
+                }
+                
                 // Inicializar managers
                 dataLoader = new DataLoader(supabase, workerProfile);
                 selloManager = new SelloManager(supabase);
@@ -367,6 +403,11 @@
                 
                 // Cargar datos iniciales
                 await inicializarFormulario();
+                
+                // Si estamos en modo edición, cargar datos del control
+                if (editMode) {
+                    await cargarControlExistente(currentControlId);
+                }
                 
                 // Configurar event listeners
                 configurarEventListeners();
@@ -404,6 +445,128 @@
             } catch (error) {
                 console.error('❌ Error inicializando formulario:', error);
                 throw error;
+            }
+        }
+        
+        /**
+         * Cargar datos de control existente para edición
+         */
+        async function cargarControlExistente(controlId) {
+            try {
+                console.log('📥 Cargando control existente:', controlId);
+                
+                // 1. Cargar datos del control
+                const { data: control, error: controlError } = await supabase
+                    .from('controles')
+                    .select(`
+                        *,
+                        cliente:clientes!controles_cliente_id_fkey(cliente_id, nombre),
+                        planta:plantas!controles_planta_id_fkey(planta_id, nombre),
+                        tecnico:worker!controles_tecnico_id_fkey(worker_id, nombre, puesto)
+                    `)
+                    .eq('control_id', controlId)
+                    .single();
+                
+                if (controlError) throw controlError;
+                if (!control) throw new Error('Control no encontrado');
+                
+                console.log('✅ Control cargado:', control);
+                
+                // 2. Pre-llenar formulario
+                document.getElementById('clienteId').value = control.cliente_id;
+                document.getElementById('fechaControl').value = control.fecha_control;
+                document.getElementById('tipoControl').value = control.tipo_control;
+                document.getElementById('observaciones').value = control.observaciones || '';
+                
+                // Cargar plantas del cliente seleccionado
+                if (control.cliente_id) {
+                    const plantas = await dataLoader.cargarPlantas(control.cliente_id);
+                    llenarSelect('plantaId', plantas, 'planta_id', 'nombre', true);
+                    if (control.planta_id) {
+                        document.getElementById('plantaId').value = control.planta_id;
+                    }
+                }
+                
+                // Seleccionar técnico
+                document.getElementById('tecnicoId').value = control.tecnico_id;
+                
+                // Cargar sello del técnico (primero intentar con el sello guardado, luego con el del técnico)
+                if (control.firma_tecnico) {
+                    // Si el control tiene un sello guardado, usarlo
+                    console.log('🔖 Cargando sello guardado:', control.firma_tecnico);
+                    selloManager.selloUrl = control.firma_tecnico;
+                    
+                    // Obtener URL firmada para mostrar
+                    const { data: urlData, error: urlError } = await supabase.storage
+                        .from('workers')
+                        .createSignedUrl(control.firma_tecnico, 3600);
+                    
+                    if (!urlError && urlData) {
+                        selloManager.mostrarImagen(urlData.signedUrl);
+                    }
+                } else {
+                    // Si no hay sello guardado, cargar el sello actual del técnico
+                    await selloManager.cargarSello(control.tecnico_id);
+                }
+                
+                // 3. Cargar productos
+                const { data: productos, error: prodError } = await supabase
+                    .from('control_productos')
+                    .select(`
+                        *,
+                        producto:productos!control_productos_producto_id_fkey(
+                            producto_id,
+                            nombre,
+                            tipo,
+                            unidad_medida
+                        )
+                    `)
+                    .eq('control_id', controlId);
+                
+                if (prodError) throw prodError;
+                
+                if (productos && productos.length > 0) {
+                    console.log(`📦 Cargando ${productos.length} productos...`);
+                    productos.forEach(p => {
+                        productosManager.agregar({
+                            producto_id: p.producto_id,
+                            nombre: p.producto?.nombre,
+                            tipo: p.producto?.tipo,
+                            cantidad: p.cantidad_usada,
+                            unidad: p.unidad
+                        });
+                    });
+                }
+                
+                // 4. Cargar puntos de control
+                const { data: puntos, error: puntosError } = await supabase
+                    .from('control_puntos')
+                    .select('*')
+                    .eq('control_id', controlId)
+                    .order('numero_punto', { ascending: true });
+                
+                if (puntosError) throw puntosError;
+                
+                if (puntos && puntos.length > 0) {
+                    console.log(`📍 Cargando ${puntos.length} puntos...`);
+                    puntos.forEach(p => {
+                        puntosManager.agregar({
+                            numero: p.numero_punto,
+                            tipo_plaga: p.tipo_plaga,
+                            tipo_dispositivo: p.tipo_dispositivo,
+                            ubicacion: p.ubicacion,
+                            estado: p.estado,
+                            accion_realizada: p.accion_realizada
+                        });
+                    });
+                }
+                
+                console.log('✅ Control cargado completamente');
+                
+            } catch (error) {
+                console.error('❌ Error cargando control:', error);
+                alert('Error al cargar el control: ' + error.message);
+                window.location.href = 'controles.html';
             }
         }
         
@@ -446,6 +609,46 @@
             });
             
             console.log('✅ Event listeners configurados');
+            
+            // Control del menú hamburguesa
+            const wizardToggle = document.getElementById('wizardToggle');
+            const wizardMenu = document.getElementById('wizardMenu');
+            const wizardOverlay = document.getElementById('wizardOverlay');
+            const wizardClose = document.getElementById('wizardClose');
+            
+            function abrirMenu() {
+                wizardMenu.classList.add('active');
+                wizardOverlay.classList.add('active');
+                wizardToggle.classList.add('active');
+                document.body.classList.add('menu-open');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function cerrarMenu() {
+                wizardMenu.classList.remove('active');
+                wizardOverlay.classList.remove('active');
+                wizardToggle.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                document.body.style.overflow = '';
+            }
+            
+            wizardToggle.addEventListener('click', () => {
+                if (wizardMenu.classList.contains('active')) {
+                    cerrarMenu();
+                } else {
+                    abrirMenu();
+                }
+            });
+            
+            wizardClose.addEventListener('click', cerrarMenu);
+            wizardOverlay.addEventListener('click', cerrarMenu);
+            
+            // Cerrar menú al hacer clic en un paso
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.addEventListener('click', () => {
+                    cerrarMenu();
+                });
+            });
         }
         
         /**
@@ -563,6 +766,154 @@
         }
         
         /**
+         * Mostrar modal con lista de puntos
+         */
+        function mostrarListaPuntos() {
+            try {
+                console.log('🔍 Mostrando lista de puntos...');
+                const puntos = puntosManager.getAll();
+                console.log('📊 Puntos obtenidos:', puntos);
+                
+                const modalContent = document.getElementById('listaPuntosModal');
+                
+                if (!puntos || puntos.length === 0) {
+                    console.warn('⚠️ No hay puntos para mostrar');
+                    modalContent.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📍</div>
+                            <p class="empty-state-message">No hay puntos de control agregados</p>
+                        </div>
+                    `;
+                } else {
+                    console.log(`✅ Procesando ${puntos.length} puntos...`);
+                    
+                    // Agrupar por tipo de plaga (normalizado a minúsculas)
+                    const grupos = {
+                        'roedores': [],
+                        'voladores': [],
+                        'rastreros': []
+                    };
+                    
+                    // Clasificar y ordenar puntos
+                    puntos.forEach(punto => {
+                        console.log('Procesando punto:', punto);
+                        const tipoPlaga = punto.tipo_plaga.toLowerCase(); // Normalizar a minúsculas
+                        if (grupos[tipoPlaga]) {
+                            grupos[tipoPlaga].push(punto);
+                        } else {
+                            console.warn(`⚠️ Tipo de plaga no reconocido: ${punto.tipo_plaga}`);
+                        }
+                    });
+                    
+                    console.log('📦 Grupos formados:', grupos);
+                    
+                    // Ordenar cada grupo por número de punto
+                    Object.keys(grupos).forEach(tipo => {
+                        grupos[tipo].sort((a, b) => a.numero - b.numero);
+                    });
+                    
+                    // Generar HTML
+                    let html = '';
+                    
+                    // Configuración de tipos con íconos y nombres capitalizados
+                    const tiposConfig = {
+                        'roedores': { icono: '🐭', nombre: 'Roedores' },
+                        'voladores': { icono: '🦟', nombre: 'Voladores' },
+                        'rastreros': { icono: '🐜', nombre: 'Rastreros' }
+                    };
+                    
+                    Object.keys(grupos).forEach(tipoPlaga => {
+                        if (grupos[tipoPlaga].length > 0) {
+                            const config = tiposConfig[tipoPlaga];
+                            
+                            html += `
+                                <div class="grupo-plagas">
+                                    <h4 class="grupo-titulo">${config.icono} ${config.nombre} (${grupos[tipoPlaga].length})</h4>
+                                    <div class="grupo-puntos">
+                                        ${grupos[tipoPlaga].map(punto => `
+                                            <div class="punto-card">
+                                                <div class="punto-header">
+                                                    <span class="punto-numero">Punto #${punto.numero}</span>
+                                                    <span class="punto-estado estado-${punto.estado}">${formatearEstado(punto.estado)}</span>
+                                                </div>
+                                                <div class="punto-info">
+                                                    ${punto.tipo_dispositivo ? `
+                                                        <div class="punto-info-item">
+                                                            <strong>🔧 Dispositivo:</strong> ${punto.tipo_dispositivo}
+                                                        </div>
+                                                    ` : ''}
+                                                    ${punto.ubicacion ? `
+                                                        <div class="punto-info-item">
+                                                            <strong>📍 Ubicación:</strong> ${punto.ubicacion}
+                                                        </div>
+                                                    ` : ''}
+                                                    ${punto.accion_realizada ? `
+                                                        <div class="punto-info-item">
+                                                            <strong>⚡ Acción:</strong> ${punto.accion_realizada}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    if (html === '') {
+                        console.warn('⚠️ No se generó HTML (todos los grupos vacíos)');
+                        modalContent.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📍</div>
+                                <p class="empty-state-message">No hay puntos de control válidos</p>
+                            </div>
+                        `;
+                    } else {
+                        console.log('✅ HTML generado correctamente');
+                        modalContent.innerHTML = html;
+                    }
+                }
+                
+                document.getElementById('modalListaPuntos').classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('✅ Modal abierto');
+                
+            } catch (error) {
+                console.error('❌ Error mostrando lista de puntos:', error);
+                alert('Error al mostrar la lista: ' + error.message);
+            }
+        }
+        
+        /**
+         * Cerrar modal de lista de puntos
+         */
+        function cerrarModalPuntos() {
+            document.getElementById('modalListaPuntos').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        document.getElementById('modalListaPuntos')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modalListaPuntos') {
+                cerrarModalPuntos();
+            }
+        });
+        
+        /**
+         * Formatear estado para mostrar
+         */
+        function formatearEstado(estado) {
+            const estados = {
+                'ok': 'OK',
+                'con_actividad': 'Con Actividad',
+                'faltante': 'Faltante',
+                'reemplazado': 'Reemplazado'
+            };
+            return estados[estado] || estado;
+        }
+        
+        /**
          * Guardar control completo
          */
         async function guardarControl() {
@@ -572,7 +923,7 @@
                     return;
                 }
                 
-                console.log('💾 Iniciando guardado...');
+                console.log(editMode ? '💾 Iniciando actualización...' : '💾 Iniciando guardado...');
                 
                 // Recopilar datos del formulario
                 const formData = controlManager.recopilarDatosFormulario();
@@ -584,7 +935,7 @@
                 
                 // Confirmar antes de guardar
                 const confirmar = confirm(
-                    `¿Desea guardar este control?\n\n` +
+                    `¿Desea ${editMode ? 'actualizar' : 'guardar'} este control?\n\n` +
                     `Productos: ${productos.length}\n` +
                     `Puntos: ${puntos.length}\n` +
                     `Sello: ${selloUrl ? 'Sí' : 'No'}`
@@ -608,73 +959,39 @@
                     accion_realizada: p.accion_realizada || null
                 }));
                 
-                // Guardar control
-                const control = await controlManager.guardar(
-                    formData,
-                    productosPreparados,
-                    puntosPreparados,
-                    selloUrl
-                );
+                let control;
                 
-                // Actualizar IDs en managers (ya no es necesario, pero se puede mantener para referencia)
-                console.log('✅ Control guardado con ID:', control.control_id);
-                
-                alert('✅ Control guardado exitosamente');
+                if (editMode) {
+                    // Modo edición: actualizar control existente
+                    control = await controlManager.actualizar(
+                        currentControlId,
+                        formData,
+                        productosPreparados,
+                        puntosPreparados,
+                        selloUrl
+                    );
+                    console.log('✅ Control actualizado con ID:', control.control_id);
+                    alert('✅ Control actualizado exitosamente');
+                } else {
+                    // Modo creación: guardar nuevo control
+                    control = await controlManager.guardar(
+                        formData,
+                        productosPreparados,
+                        puntosPreparados,
+                        selloUrl
+                    );
+                    console.log('✅ Control guardado con ID:', control.control_id);
+                    alert('✅ Control guardado exitosamente');
+                }
                 
                 // Redirigir a la lista de controles
-                window.location.href = '../controles.html';
+                window.location.href = 'controles.html';
                 
             } catch (error) {
                 console.error('❌ Error guardando control:', error);
                 alert('❌ Error al guardar control: ' + error.message);
             }
         }
-        
-        /**
-         * Control del menú hamburguesa
-         */
-        const wizardToggle = document.getElementById('wizardToggle');
-        const wizardMenu = document.getElementById('wizardMenu');
-        const wizardOverlay = document.getElementById('wizardOverlay');
-        const wizardClose = document.getElementById('wizardClose');
-        
-        function abrirMenu() {
-            wizardMenu.classList.add('active');
-            wizardOverlay.classList.add('active');
-            wizardToggle.classList.add('active');
-            // Agregar clase al body para controlar estilos
-            document.body.classList.add('menu-open');
-            // Solo bloquear scroll cuando el menú está abierto
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function cerrarMenu() {
-            wizardMenu.classList.remove('active');
-            wizardOverlay.classList.remove('active');
-            wizardToggle.classList.remove('active');
-            // Remover clase del body
-            document.body.classList.remove('menu-open');
-            // Restaurar scroll
-            document.body.style.overflow = '';
-        }
-        
-        wizardToggle.addEventListener('click', () => {
-            if (wizardMenu.classList.contains('active')) {
-                cerrarMenu();
-            } else {
-                abrirMenu();
-            }
-        });
-        
-        wizardClose.addEventListener('click', cerrarMenu);
-        wizardOverlay.addEventListener('click', cerrarMenu);
-        
-        // Cerrar menú al hacer clic en un paso
-        document.querySelectorAll('.wizard-step').forEach(step => {
-            step.addEventListener('click', () => {
-                cerrarMenu();
-            });
-        });
         
         /**
          * Actualizar indicador de paso actual en el header
@@ -699,6 +1016,5 @@
             actualizarIndicadorPaso(paso);
         };
     </script>
-    </div> <!-- Cierre page-wrapper -->
 </body>
 </html>

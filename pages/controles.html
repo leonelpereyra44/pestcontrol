@@ -287,11 +287,9 @@
                                 <button class="btn-icon-sm btn-view" onclick="verControl('${control.control_id}')" title="Ver detalles">
                                     👁️
                                 </button>
-                                ${control.estado !== 'completado' ? `
-                                    <button class="btn-icon-sm btn-edit" onclick="editarControl('${control.control_id}')" title="Editar">
-                                        ✏️
-                                    </button>
-                                ` : ''}
+                                <button class="btn-icon-sm btn-edit" onclick="editarControl('${control.control_id}')" title="Editar">
+                                    ✏️
+                                </button>
                                 ${control.pdf_url ? `
                                     <button class="btn-icon-sm btn-info" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
                                         📄
@@ -312,76 +310,6 @@
         }
 
         window.aplicarFiltros = function() {
-            let filtrados = [...controles];
-
-            const clienteId = document.getElementById('filterCliente').value;
-            const tecnicoId = document.getElementById('filterTecnico').value;
-            const estado = document.getElementById('filterEstado').value;
-            const fechaDesde = document.getElementById('filterFechaDesde').value;
-            const fechaHasta = document.getElementById('filterFechaHasta').value;
-
-            if (clienteId) {
-                filtrados = filtrados.filter(c => c.cliente_id === clienteId);
-            }
-
-            if (tecnicoId) {
-                filtrados = filtrados.filter(c => c.tecnico_id === tecnicoId);
-            }
-
-            if (estado) {
-                filtrados = filtrados.filter(c => c.estado === estado);
-            }
-
-            if (fechaDesde) {
-                filtrados = filtrados.filter(c => new Date(c.fecha_control) >= new Date(fechaDesde));
-            }
-
-            if (fechaHasta) {
-                filtrados = filtrados.filter(c => new Date(c.fecha_control) <= new Date(fechaHasta));
-            }
-
-            renderizarControles(filtrados);
-            actualizarEstadisticas(filtrados);
-        };
-
-        window.limpiarFiltros = function() {
-            document.getElementById('filterCliente').value = '';
-            document.getElementById('filterTecnico').value = '';
-            document.getElementById('filterEstado').value = '';
-            document.getElementById('filterFechaDesde').value = '';
-            document.getElementById('filterFechaHasta').value = '';
-            
-            renderizarControles(controles);
-            actualizarEstadisticas(controles);
-        };
-
-        window.verControl = function(controlId) {
-            window.location.href = `ver-control.html?id=${controlId}`;
-        };
-
-        window.editarControl = function(controlId) {
-            window.location.href = `nuevo-control.html?id=${controlId}`;
-        };
-
-        window.descargarPDF = function(url) {
-            window.open(url, '_blank');
-        };
-
-        function mostrarError(mensaje) {
-            const tbody = document.getElementById('controlesTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7">
-                        <div class="alert alert-danger">
-                            ⚠️ ${mensaje}
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
-    </script>
-</body>
-</html>
             let filtrados = [...controles];
 
             const clienteId = document.getElementById('filterCliente').value;

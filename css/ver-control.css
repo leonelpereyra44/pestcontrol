@@ -223,6 +223,27 @@ body {
     color: var(--primary);
 }
 
+/* ===== GRUPOS DE PUNTOS DE CONTROL ===== */
+.grupo-puntos-control {
+    margin-bottom: 32px;
+}
+
+.grupo-puntos-control:last-child {
+    margin-bottom: 0;
+}
+
+.grupo-titulo-control {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* ===== TABLES ===== */
 .table-container {
     overflow-x: auto;
@@ -446,6 +467,16 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
     
+    .grupo-titulo-control {
+        font-size: 16px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+    }
+    
+    .grupo-puntos-control {
+        margin-bottom: 28px;
+    }
+    
     .card-header,
     .card-body {
         padding: 20px 16px;
@@ -466,5 +497,15 @@ tbody tr:hover {
     .sello-container {
         padding: 20px;
         min-height: 200px;
+    }
+    
+    .grupo-titulo-control {
+        font-size: 15px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+    }
+    
+    .grupo-puntos-control {
+        margin-bottom: 24px;
     }
 }
