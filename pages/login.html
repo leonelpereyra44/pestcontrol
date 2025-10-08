@@ -73,7 +73,7 @@
                 <input type="checkbox" id="rememberMe">
                 <span>Recuérdame</span>
               </label>
-              <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+              <a href="#" class="forgot-password" onclick="openForgotPasswordModal(); return false;">¿Olvidaste tu contraseña?</a>
             </div>
             
             <button type="submit" class="btn btn-primary btn-lg btn-block btn-submit" id="loginBtn">
@@ -92,6 +92,45 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Recuperación de Contraseña -->
+  <div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔑 Recuperar Contraseña</h3>
+        <button class="modal-close" onclick="closeForgotPasswordModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 20px; color: var(--color-text-secondary);">
+          Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.
+        </p>
+        <div id="resetMessage"></div>
+        <form onsubmit="sendPasswordReset(); return false;">
+          <div class="form-group">
+            <label for="resetEmail">Email</label>
+            <div class="input-with-icon">
+              <span class="input-icon">📧</span>
+              <input 
+                type="email" 
+                id="resetEmail" 
+                class="form-control" 
+                placeholder="correo@ejemplo.com" 
+                required 
+              />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeForgotPasswordModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="resetBtn">
+              Enviar Enlace
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -118,9 +157,32 @@
       }, 5000)
     }
 
+    function showResetMessage(message, type) {
+      const messageDiv = document.getElementById('resetMessage')
+      messageDiv.textContent = message
+      messageDiv.className = type === 'error' ? 'alert alert-danger' : 'alert alert-success'
+      messageDiv.style.display = 'block'
+      
+      // Ocultar mensaje después de 5 segundos
+      setTimeout(() => {
+        messageDiv.style.display = 'none'
+        messageDiv.textContent = ''
+      }, 5000)
+    }
+
+    // Cargar preferencia de "Recordarme" al cargar la página
+    window.addEventListener('load', () => {
+      const savedEmail = localStorage.getItem('rememberedEmail')
+      if (savedEmail) {
+        document.getElementById('loginEmail').value = savedEmail
+        document.getElementById('rememberMe').checked = true
+      }
+    })
+
     async function signIn() {
       const email = document.getElementById("loginEmail").value
       const password = document.getElementById("loginPassword").value
+      const rememberMe = document.getElementById("rememberMe").checked
       const loginBtn = document.getElementById("loginBtn")
       const loadingOverlay = document.getElementById("loadingOverlay")
 
@@ -149,6 +211,13 @@
         if (error) {
           showMessage("Error: " + error.message, "error")
         } else {
+          // Guardar email si "Recordarme" está activado
+          if (rememberMe) {
+            localStorage.setItem('rememberedEmail', email)
+          } else {
+            localStorage.removeItem('rememberedEmail')
+          }
+
           // Mensaje de bienvenida personalizado
           const userName = data.user.email.split('@')[0]
           showMessage("¡Bienvenido " + userName + "! 🎉", "success")
@@ -167,10 +236,73 @@
       }
     }
 
+    // Abrir modal de recuperación de contraseña
+    function openForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.add('active')
+      document.getElementById('resetEmail').focus()
+    }
+
+    // Cerrar modal de recuperación de contraseña
+    function closeForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.remove('active')
+      document.getElementById('resetEmail').value = ''
+      document.getElementById('resetMessage').style.display = 'none'
+    }
+
+    // Enviar email de recuperación de contraseña
+    async function sendPasswordReset() {
+      const email = document.getElementById('resetEmail').value
+      const resetBtn = document.getElementById('resetBtn')
+
+      if (!email) {
+        showResetMessage("Por favor ingresa tu email", "error")
+        return
+      }
+
+      try {
+        resetBtn.disabled = true
+        resetBtn.textContent = 'Enviando...'
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/pages/reset-password.html'
+        })
+
+        resetBtn.disabled = false
+        resetBtn.textContent = 'Enviar Enlace'
+
+        if (error) {
+          showResetMessage("Error: " + error.message, "error")
+        } else {
+          showResetMessage("✅ Se ha enviado un enlace de recuperación a tu email", "success")
+          
+          // Cerrar modal después de 3 segundos
+          setTimeout(() => {
+            closeForgotPasswordModal()
+          }, 3000)
+        }
+      } catch (error) {
+        resetBtn.disabled = false
+        resetBtn.textContent = 'Enviar Enlace'
+        showResetMessage("Error de conexión: " + error.message, "error")
+      }
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
+      if (e.target.id === 'forgotPasswordModal') {
+        closeForgotPasswordModal()
+      }
+    })
+
     // Permitir login con Enter
     document.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        signIn()
+        const modal = document.getElementById('forgotPasswordModal')
+        if (modal.classList.contains('active')) {
+          sendPasswordReset()
+        } else {
+          signIn()
+        }
       }
     })
 
