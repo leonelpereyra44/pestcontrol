@@ -89,9 +89,9 @@ class DataLoader {
             
             const { data, error } = await this.supabase
                 .from('productos')
-                .select('producto_id, nombre, tipo, unidad_medida')
+                .select('producto_id, nombre, tipo_producto, principio_activo, laboratorio, certificado, unidad_medida')
                 .eq('empresa_id', this.worker.empresa_id)
-                .order('tipo, nombre');
+                .order('tipo_producto, nombre');
             
             if (error) throw error;
             

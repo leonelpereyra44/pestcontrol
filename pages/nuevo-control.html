@@ -601,7 +601,7 @@
                 
                 // Cargar productos
                 const productos = await dataLoader.cargarProductos();
-                llenarSelect('productoSelect', productos, 'producto_id', (p) => `${p.nombre} (${p.tipo})`);
+                llenarSelect('productoSelect', productos, 'producto_id', (p) => `${p.nombre} (${p.tipo_producto || 'N/A'})`);
                 
                 // Establecer fecha actual
                 document.getElementById('fechaControl').valueAsDate = new Date();
@@ -743,7 +743,7 @@
                         productosManager.agregar({
                             producto_id: p.producto_id,
                             nombre: p.producto?.nombre,
-                            tipo: p.producto?.tipo,
+                            tipo: p.producto?.tipo_producto || p.producto?.tipo,
                             cantidad: p.cantidad_usada,
                             unidad: p.unidad
                         });
@@ -866,7 +866,7 @@
                         productosManager.agregar({
                             producto_id: p.producto_id,
                             nombre: p.nombre,
-                            tipo: p.tipo,
+                            tipo: p.tipo_producto || p.tipo,
                             cantidad: p.cantidad,
                             unidad: p.unidad
                         });
