@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ver Control - Sistema de Control de Plagas</title>
     <link rel="stylesheet" href="../css/ver-control.css">
+    <!-- Bibliotecas para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="page-wrapper">
@@ -171,7 +174,7 @@
                     .from('control_productos')
                     .select(`
                         *,
-                        producto:productos!control_productos_producto_id_fkey(producto_id, nombre, unidad_medida)
+                        producto:productos!control_productos_producto_id_fkey(producto_id, nombre, tipo_producto, principio_activo, laboratorio, certificado, unidad_medida)
                     `)
                     .eq('control_id', controlId);
 
@@ -188,6 +191,10 @@
 
                 console.log('✅ Productos:', productos?.length || 0);
                 console.log('✅ Puntos:', puntos?.length || 0);
+
+                // GUARDAR productos y puntos en controlData para el PDF
+                controlData.productos = productos || [];
+                controlData.puntos = puntos || [];
 
                 // Renderizar todo
                 renderizarControl(control, productos, puntos);
@@ -494,11 +501,438 @@
         }
 
         /**
-         * Generar PDF del control
+         * Generar PDF del control usando HTML
          */
-        function generarPDF() {
-            alert('🚧 Función de generar PDF en desarrollo');
-            // TODO: Implementar generación de PDF
+        async function generarPDF() {
+            if (!controlData) {
+                alert('No hay datos del control para generar PDF');
+                return;
+            }
+
+            try {
+                console.log('Iniciando generación de PDF...');
+                
+                // Mostrar estado de carga
+                const btnGenerarPDF = event.target;
+                const btnTextoOriginal = btnGenerarPDF ? btnGenerarPDF.innerHTML : null;
+                if (btnGenerarPDF) {
+                    btnGenerarPDF.disabled = true;
+                    btnGenerarPDF.innerHTML = 'Generando PDF...';
+                }
+
+                // ===== CARGAR LOGO DE LA EMPRESA =====
+                let logoBase64 = '';
+                try {
+                    const { data: files, error: filesError } = await supabase.storage
+                        .from('empresas')
+                        .list(`${workerProfile.empresa_id}/logo`);
+
+                    if (!filesError && files && files.length > 0) {
+                        const logoFile = files[0];
+                        const logoPath = `${workerProfile.empresa_id}/logo/${logoFile.name}`;
+                        
+                        const { data: signedUrlData, error: urlError } = await supabase.storage
+                            .from('empresas')
+                            .createSignedUrl(logoPath, 60);
+
+                        if (!urlError && signedUrlData?.signedUrl) {
+                            logoBase64 = await urlToBase64(signedUrlData.signedUrl);
+                            console.log('Logo cargado');
+                        }
+                    }
+                } catch (error) {
+                    console.warn('No se pudo cargar logo:', error);
+                }
+
+                // ===== CARGAR FIRMA DEL TÉCNICO =====
+                let firmaBase64 = '';
+                if (controlData.firma_tecnico) {
+                    try {
+                        let storagePath = controlData.firma_tecnico;
+                        if (storagePath.startsWith('workers/')) {
+                            storagePath = storagePath.replace('workers/', '');
+                        }
+
+                        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                            .from('workers')
+                            .createSignedUrl(storagePath, 60);
+
+                        if (!signedUrlError && signedUrlData?.signedUrl) {
+                            firmaBase64 = await urlToBase64(signedUrlData.signedUrl);
+                            console.log('Firma cargada');
+                        }
+                    } catch (error) {
+                        console.error('Error cargando firma:', error);
+                    }
+                }
+
+                // ===== GENERAR HTML COMPLETO (sin firma, la agregaremos después) =====
+                const htmlContent = generarHTMLParaPDF(logoBase64, null, controlData);
+
+                // ===== CONVERTIR HTML A PDF =====
+                const element = document.createElement('div');
+                element.innerHTML = htmlContent;
+                element.style.width = '210mm'; // A4 width
+                element.style.backgroundColor = 'white';
+                element.style.padding = '0';
+                document.body.appendChild(element);
+
+                // Usar html2canvas para capturar el HTML
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+
+                document.body.removeChild(element);
+
+                // Crear PDF con jsPDF
+                const { jsPDF } = window.jspdf;
+                const imgWidth = 210; // A4 width in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                let position = 0;
+                const pageHeight = 297; // A4 height in mm
+
+                // Si el contenido es más alto que una página, dividir en múltiples páginas
+                if (imgHeight > pageHeight) {
+                    let heightLeft = imgHeight;
+                    
+                    while (heightLeft > 0) {
+                        if (position > 0) {
+                            pdf.addPage();
+                        }
+                        
+                        pdf.addImage(
+                            canvas.toDataURL('image/png'),
+                            'PNG',
+                            0,
+                            position === 0 ? 0 : -position,
+                            imgWidth,
+                            imgHeight
+                        );
+                        
+                        heightLeft -= pageHeight;
+                        position += pageHeight;
+                    }
+                } else {
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+                }
+
+                // ===== AGREGAR FIRMA EN LA ÚLTIMA PÁGINA (sin cortes) =====
+                if (firmaBase64) {
+                    // Crear un elemento temporal para la firma
+                    const firmaElement = document.createElement('div');
+                    firmaElement.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: white;">
+                            <img src="${firmaBase64}" alt="Firma" style="width: 200px; height: auto; margin-bottom: 10px;" />
+                            <p style="font-size: 14px; color: #333; margin: 0;">Firmado por: ${controlData.tecnico?.nombre || 'Técnico'}</p>
+                        </div>
+                    `;
+                    firmaElement.style.width = '210mm';
+                    firmaElement.style.backgroundColor = 'white';
+                    document.body.appendChild(firmaElement);
+
+                    // Capturar solo la firma
+                    const firmaCanvas = await html2canvas(firmaElement, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    document.body.removeChild(firmaElement);
+
+                    // Calcular posición para la firma en la última página
+                    const firmaHeight = (firmaCanvas.height * imgWidth) / firmaCanvas.width;
+                    const espacioDisponible = pageHeight - ((imgHeight % pageHeight) || pageHeight);
+                    
+                    // Si no hay suficiente espacio, agregar nueva página
+                    if (espacioDisponible < firmaHeight + 20) {
+                        pdf.addPage();
+                        pdf.addImage(firmaCanvas.toDataURL('image/png'), 'PNG', 5, 20, 200, firmaHeight);
+                    } else {
+                        // Agregar en el espacio disponible de la última página
+                        const yPosition = (imgHeight % pageHeight) || (imgHeight - pageHeight);
+                        pdf.addImage(firmaCanvas.toDataURL('image/png'), 'PNG', 5, yPosition + 10, 200, firmaHeight);
+                    }
+                }
+
+                // Guardar PDF
+                const fecha = controlData.fecha_control.replace(/-/g, '');
+                const cliente = (controlData.cliente?.nombre || 'Control').substring(0, 15).replace(/\s+/g, '_');
+                const nombreArchivo = `MIP_SanAgustin_${cliente}_${fecha}.pdf`;
+                pdf.save(nombreArchivo);
+
+                console.log('PDF generado exitosamente:', nombreArchivo);
+
+                // Restaurar botón
+                if (btnGenerarPDF && btnTextoOriginal) {
+                    btnGenerarPDF.disabled = false;
+                    btnGenerarPDF.innerHTML = btnTextoOriginal;
+                }
+
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                alert('Error al generar el PDF: ' + error.message);
+                
+                const btnGenerarPDF = event.target;
+                if (btnGenerarPDF) {
+                    btnGenerarPDF.disabled = false;
+                    btnGenerarPDF.innerHTML = 'Generar PDF';
+                }
+            }
+        }
+
+        /**
+         * Generar HTML para PDF (similar a la app actual)
+         */
+        function generarHTMLParaPDF(logoBase64, firmaBase64, controlData) {
+            // Estilos base más cercanos al PDF real
+            const estiloTitulo = 'margin: 15px 0 8px 0; font-size: 14px; font-weight: bold; color: #000;';
+            const estiloHeaderTabla = 'border: 0.5px solid #666; padding: 6px 8px; text-align: center; font-weight: bold; background-color: #f5f5f5; font-size: 11px;';
+            const estiloCeldaTabla = 'border: 0.5px solid #666; padding: 6px 8px; text-align: center; font-size: 10px;';
+            
+            let html = `
+                <div style="margin: 30px; padding: 20px; font-family: Arial, sans-serif; background: white;">
+                    <!-- ENCABEZADO CON LOGO -->
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 30px;">
+                        ${logoBase64 ? `<img src="${logoBase64}" alt="Logo" style="width: 80px; height: auto; margin-right: 20px;"/>` : ''}
+                        <h1 style="margin: 0; color: #000; font-size: 20px; font-weight: bold;">Planilla de M.I.P SAN AGUSTIN</h1>
+                    </div>
+            `;
+
+            // ===== TABLA EMPRESA =====
+            html += `
+                <h2 style="${estiloTitulo}">Empresa</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <th style="${estiloHeaderTabla}">Cliente</th>
+                        <th style="${estiloHeaderTabla}">Planta</th>
+                        <th style="${estiloHeaderTabla}">Fecha</th>
+                    </tr>
+                    <tr>
+                        <td style="${estiloCeldaTabla}">${controlData.cliente?.nombre || 'N/A'}</td>
+                        <td style="${estiloCeldaTabla}">${controlData.planta?.nombre || 'N/A'}</td>
+                        <td style="${estiloCeldaTabla}">${formatearFecha(controlData.fecha_control)}</td>
+                    </tr>
+                </table>
+            `;
+
+            // ===== TABLA PRODUCTOS =====
+            if (controlData.productos && controlData.productos.length > 0) {
+                html += `
+                    <h2 style="${estiloTitulo}">Productos</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <th style="${estiloHeaderTabla}">Producto</th>
+                            <th style="${estiloHeaderTabla}">Tipo</th>
+                            <th style="${estiloHeaderTabla}">PrincipioActivo</th>
+                            <th style="${estiloHeaderTabla}">Laboratorio</th>
+                            <th style="${estiloHeaderTabla}">Certificado</th>
+                        </tr>
+                `;
+                
+                controlData.productos.forEach(producto => {
+                    html += `
+                        <tr>
+                            <td style="${estiloCeldaTabla}">${producto.producto?.nombre || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${producto.producto?.tipo_producto || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${producto.producto?.principio_activo || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${producto.producto?.laboratorio || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${producto.producto?.certificado || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table>`;
+            }
+
+            // ===== TABLA ROEDORES =====
+            const roedores = controlData.puntos ? controlData.puntos.filter(p => p.tipo_plaga.toLowerCase() === 'roedores') : [];
+            if (roedores.length > 0) {
+                html += `
+                    <h2 style="${estiloTitulo}">Roedores</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <th style="${estiloHeaderTabla}">Caja</th>
+                            <th style="${estiloHeaderTabla}">Vivos</th>
+                            <th style="${estiloHeaderTabla}">Muertos</th>
+                            <th style="${estiloHeaderTabla}">TipoTrampa</th>
+                            <th style="${estiloHeaderTabla}">MateriaFecal</th>
+                            <th style="${estiloHeaderTabla}">ConsumoCebos</th>
+                            <th style="${estiloHeaderTabla}">Reposición</th>
+                            <th style="${estiloHeaderTabla}">Observaciones</th>
+                        </tr>
+                `;
+                
+                roedores.forEach(punto => {
+                    let datosAdicionales = {};
+                    if (punto.descripcion_actividad) {
+                        try {
+                            datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                        } catch (e) {}
+                    }
+                    const p = { ...punto, ...datosAdicionales };
+                    
+                    html += `
+                        <tr>
+                            <td style="${estiloCeldaTabla}">${p.caja_n || p.numero_punto || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.vivos || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.muertos || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.tipo_trampa || p.tipo_dispositivo || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.materia_fecal || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.consumo || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.reposicion || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.observaciones || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table>`;
+            }
+
+            // ===== TABLA VOLADORES =====
+            const voladores = controlData.puntos ? controlData.puntos.filter(p => p.tipo_plaga.toLowerCase() === 'voladores') : [];
+            if (voladores.length > 0) {
+                html += `
+                    <h2 style="${estiloTitulo}">Voladores</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <th style="${estiloHeaderTabla}">UV</th>
+                            <th style="${estiloHeaderTabla}">Densidad</th>
+                            <th style="${estiloHeaderTabla}">Reposición</th>
+                            <th style="${estiloHeaderTabla}">Observaciones</th>
+                        </tr>
+                `;
+                
+                voladores.forEach(punto => {
+                    let datosAdicionales = {};
+                    if (punto.descripcion_actividad) {
+                        try {
+                            datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                        } catch (e) {}
+                    }
+                    const p = { ...punto, ...datosAdicionales };
+                    
+                    // Usar el campo densidad directamente (baja, media, alta)
+                    const densidad = p.densidad || p.nivel_infestacion || '-';
+                    
+                    html += `
+                        <tr>
+                            <td style="${estiloCeldaTabla}">${p.caja_uv_n || p.numero_punto || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${densidad}</td>
+                            <td style="${estiloCeldaTabla}">${p.reposicion || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.observaciones || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table>`;
+            }
+
+            // ===== TABLA RASTREROS =====
+            const rastreros = controlData.puntos ? controlData.puntos.filter(p => p.tipo_plaga.toLowerCase() === 'rastreros') : [];
+            if (rastreros.length > 0) {
+                html += `
+                    <h2 style="${estiloTitulo}">Rastreros</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <th style="${estiloHeaderTabla}">Área</th>
+                            <th style="${estiloHeaderTabla}">Plaga</th>
+                            <th style="${estiloHeaderTabla}">Nivel</th>
+                            <th style="${estiloHeaderTabla}">Producto</th>
+                            <th style="${estiloHeaderTabla}">Observaciones</th>
+                        </tr>
+                `;
+                
+                rastreros.forEach(punto => {
+                    let datosAdicionales = {};
+                    if (punto.descripcion_actividad) {
+                        try {
+                            datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                        } catch (e) {}
+                    }
+                    const p = { ...punto, ...datosAdicionales };
+                    
+                    html += `
+                        <tr>
+                            <td style="${estiloCeldaTabla}">${p.area || p.numero_punto || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.nombre_plaga || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.nivel_infestacion || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.producto_aplicado_nombre || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.observaciones || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table>`;
+            }
+
+            // ===== OBSERVACIONES =====
+            if (controlData.observaciones) {
+                html += `
+                    <h2 style="${estiloTitulo}">Observaciones</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr>
+                            <th style="${estiloHeaderTabla}">Observaciones</th>
+                        </tr>
+                        <tr>
+                            <td style="${estiloCeldaTabla} text-align: left; padding: 12px;">${controlData.observaciones}</td>
+                        </tr>
+                    </table>
+                `;
+            }
+
+            // ===== LEYENDA R.P. y N.A. =====
+            html += `
+                <div style="margin-top: 20px; margin-bottom: 30px; padding: 12px; border: 0.5px solid #666; background-color: #f9f9f9;">
+                    <ul style="font-size: 10px; padding-left: 20px; color: #000; margin: 5px 0; list-style-type: disc;">
+                        <li><strong>R.P</strong>: Refuerzo Provisorio</li>
+                        <li><strong>N.A</strong>: No Aplica</li>
+                    </ul>
+                </div>
+            `;
+
+            // ===== FIRMA (solo si se proporciona) =====
+            if (firmaBase64) {
+                html += `
+                    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+                        <img src="${firmaBase64}" alt="Firma" style="width: 200px; height: auto;" />
+                        <p style="font-size: 11px; color: #333; margin-top: 10px; font-weight: bold;">Firmado por: ${controlData.tecnico?.nombre || 'Técnico'}</p>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            
+            return html;
+        }
+
+        /**
+         * Convertir URL de imagen a Base64
+         */
+        async function urlToBase64(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const dataURL = canvas.toDataURL('image/png');
+                    resolve(dataURL);
+                };
+                img.onerror = function(error) {
+                    console.error('Error al cargar imagen:', error);
+                    reject(error);
+                };
+                img.src = url;
+            });
         }
 
         /**

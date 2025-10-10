@@ -1,9 +1,10 @@
 -- =====================================================================
 -- SISTEMA DE CONTROLES DE PLAGAS - ESTRUCTURA DE BASE DE DATOS
+-- Versión: 2.0 (Actualizado: 2025-10-10)
 -- =====================================================================
 
 -- Tabla principal de controles
-CREATE TABLE controles (
+CREATE TABLE IF NOT EXISTS controles (
     control_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     empresa_id UUID NOT NULL REFERENCES empresa(empresa_id) ON DELETE CASCADE,
     cliente_id UUID NOT NULL REFERENCES clientes(cliente_id) ON DELETE CASCADE,
@@ -32,8 +33,12 @@ CREATE TABLE controles (
     pdf_url TEXT
 );
 
+COMMENT ON TABLE controles IS 'Tabla principal de controles de plagas';
+COMMENT ON COLUMN controles.estado IS 'Estado del control completo';
+COMMENT ON COLUMN controles.tipo_control IS 'Tipo de control realizado';
+
 -- Tabla de productos utilizados en el control
-CREATE TABLE control_productos (
+CREATE TABLE IF NOT EXISTS control_productos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     control_id UUID NOT NULL REFERENCES controles(control_id) ON DELETE CASCADE,
     producto_id UUID NOT NULL REFERENCES productos(producto_id) ON DELETE RESTRICT,
@@ -43,8 +48,10 @@ CREATE TABLE control_productos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Tabla de cebaderos/puntos de control
-CREATE TABLE control_puntos (
+COMMENT ON TABLE control_productos IS 'Productos utilizados en cada control';
+
+-- Tabla de cebaderos/puntos de control (ACTUALIZADA)
+CREATE TABLE IF NOT EXISTS control_puntos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     control_id UUID NOT NULL REFERENCES controles(control_id) ON DELETE CASCADE,
     
@@ -54,10 +61,10 @@ CREATE TABLE control_puntos (
     tipo_dispositivo VARCHAR(100), -- Ej: "Cebadero", "Trampa de luz", "Aplicación en grietas"
     ubicacion VARCHAR(255), -- Descripción de la ubicación
     
-    -- Estado del punto
-    estado VARCHAR(50) NOT NULL CHECK (estado IN ('ok', 'con_actividad', 'faltante', 'reemplazado')),
+    -- Estado del punto (SIN restricciones para mayor flexibilidad)
+    estado VARCHAR(50) NOT NULL,
     actividad_detectada BOOLEAN DEFAULT FALSE,
-    descripcion_actividad TEXT,
+    descripcion_actividad TEXT, -- JSON con datos específicos: {caja_n, vivos, muertos, densidad, etc.}
     
     -- Acciones realizadas
     accion_realizada TEXT,
@@ -73,8 +80,13 @@ CREATE TABLE control_puntos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+COMMENT ON TABLE control_puntos IS 'Puntos de control revisados (roedores, voladores, rastreros)';
+COMMENT ON COLUMN control_puntos.numero_punto IS 'Número entero del punto. Generado automáticamente si no es numérico';
+COMMENT ON COLUMN control_puntos.estado IS 'Estado flexible: ok, con_actividad, baja, media, alta, na, etc.';
+COMMENT ON COLUMN control_puntos.descripcion_actividad IS 'JSON con datos específicos: {caja_n, vivos, muertos, densidad, reposicion, etc.}';
+
 -- Tabla de fotos adicionales del control
-CREATE TABLE control_fotos (
+CREATE TABLE IF NOT EXISTS control_fotos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     control_id UUID NOT NULL REFERENCES controles(control_id) ON DELETE CASCADE,
     foto_url TEXT NOT NULL,
@@ -82,15 +94,18 @@ CREATE TABLE control_fotos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+COMMENT ON TABLE control_fotos IS 'Fotos adicionales del control (evidencias)';
+
 -- Índices para mejorar performance
-CREATE INDEX idx_controles_empresa ON controles(empresa_id);
-CREATE INDEX idx_controles_cliente ON controles(cliente_id);
-CREATE INDEX idx_controles_fecha ON controles(fecha_control DESC);
-CREATE INDEX idx_controles_tecnico ON controles(tecnico_id);
-CREATE INDEX idx_controles_estado ON controles(estado);
-CREATE INDEX idx_control_productos_control ON control_productos(control_id);
-CREATE INDEX idx_control_puntos_control ON control_puntos(control_id);
-CREATE INDEX idx_control_puntos_tipo ON control_puntos(tipo_plaga);
+CREATE INDEX IF NOT EXISTS idx_controles_empresa ON controles(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_controles_cliente ON controles(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_controles_fecha ON controles(fecha_control DESC);
+CREATE INDEX IF NOT EXISTS idx_controles_tecnico ON controles(tecnico_id);
+CREATE INDEX IF NOT EXISTS idx_controles_estado ON controles(estado);
+CREATE INDEX IF NOT EXISTS idx_control_productos_control ON control_productos(control_id);
+CREATE INDEX IF NOT EXISTS idx_control_puntos_control ON control_puntos(control_id);
+CREATE INDEX IF NOT EXISTS idx_control_puntos_tipo ON control_puntos(tipo_plaga);
+CREATE INDEX IF NOT EXISTS idx_control_puntos_numero ON control_puntos(control_id, numero_punto);
 
 -- Trigger para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()

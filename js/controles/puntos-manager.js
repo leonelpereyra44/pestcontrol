@@ -15,17 +15,32 @@ class PuntosManager {
             throw new Error('Faltan datos obligatorios del punto');
         }
         
+        // Asegurar que numero sea un número entero
+        let numeroFinal = punto.numero;
+        if (typeof numeroFinal !== 'number') {
+            const numeroParseado = parseInt(numeroFinal);
+            numeroFinal = isNaN(numeroParseado) ? this.puntos.length + 1 : numeroParseado;
+        }
+        
+        // Validar duplicados SOLO para roedores y voladores (no para rastreros)
+        if (punto.tipo_plaga !== 'rastreros') {
+            const puntoExistente = this.puntos.find(
+                p => p.numero === numeroFinal && p.tipo_plaga === punto.tipo_plaga
+            );
+            
+            if (puntoExistente) {
+                throw new Error(`Ya existe un punto #${numeroFinal} para ${punto.tipo_plaga}. Use otro número o elimine el punto existente.`);
+            }
+        }
+        
+        // Guardar TODOS los campos del punto (incluidos los específicos por tipo de plaga)
         this.puntos.push({
-            numero: parseInt(punto.numero),
-            tipo_plaga: punto.tipo_plaga,
-            tipo_dispositivo: punto.tipo_dispositivo || '',
-            ubicacion: punto.ubicacion || '',
-            estado: punto.estado,
-            accion_realizada: punto.accion_realizada || '',
+            ...punto, // Spread operator para copiar TODOS los campos
+            numero: numeroFinal,
             actividad_detectada: punto.estado === 'con_actividad'
         });
         
-        console.log(`✅ Punto #${punto.numero} agregado`);
+        console.log(`✅ Punto #${numeroFinal} agregado con campos:`, Object.keys(punto));
         this.renderizar();
     }
 
@@ -57,56 +72,13 @@ class PuntosManager {
 
     /**
      * Renderizar la lista de puntos en el DOM
+     * NOTA: Esta función ya no se usa porque cada tipo de plaga tiene su propia vista
+     * La visualización se maneja con actualizarVistaPuntos() en nuevo-control.html
      */
     renderizar() {
-        const container = document.getElementById('puntosAgregados');
-        
-        if (!container) return;
-        
-        if (this.puntos.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📍</div>
-                    <p class="empty-state-message">No se han agregado puntos de control</p>
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = this.puntos.map((p, index) => {
-            const estadoIcon = {
-                'ok': '✅',
-                'con_actividad': '⚠️',
-                'faltante': '❌',
-                'reemplazado': '🔄'
-            }[p.estado] || '📍';
-            
-            const estadoBadgeClass = {
-                'ok': 'badge-success',
-                'con_actividad': 'badge-warning',
-                'faltante': 'badge-danger',
-                'reemplazado': 'badge-info'
-            }[p.estado] || 'badge-primary';
-            
-            return `
-                <div class="item-card">
-                    <div class="item-card-content" style="flex: 1;">
-                        <div class="item-card-title">
-                            ${estadoIcon} Punto #${p.numero} - ${this.formatTipoPlaga(p.tipo_plaga)}
-                        </div>
-                        <div class="item-card-subtitle">
-                            <span class="${estadoBadgeClass}">${this.formatEstado(p.estado)}</span>
-                            ${p.ubicacion ? ' • ' + p.ubicacion : ''}
-                        </div>
-                        ${p.tipo_dispositivo ? `<div class="item-card-meta">Dispositivo: ${p.tipo_dispositivo}</div>` : ''}
-                        ${p.accion_realizada ? `<div class="item-card-meta">Acción: ${p.accion_realizada}</div>` : ''}
-                    </div>
-                    <button class="btn btn-danger btn-sm btn-icon" onclick="puntosManager.eliminar(${index})" title="Eliminar punto">
-                        🗑️
-                    </button>
-                </div>
-            `;
-        }).join('');
+        // No renderizar el listado general
+        // Las vistas específicas se manejan por tipo de plaga en actualizarVistaPuntos()
+        console.log('📊 Puntos actuales:', this.puntos.length);
     }
 
     /**

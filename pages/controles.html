@@ -15,15 +15,21 @@
             <!-- Header -->
             <header class="page-header">
                 <div class="header-content">
-                    <div class="back-button">
-                        <a href="/pages/dashboard.html" class="btn btn-secondary btn-sm">
-                            ← Volver al Dashboard
-                        </a>
+                    <a href="/pages/dashboard.html" class="btn-back-mobile" aria-label="Volver">
+                        ←
+                    </a>
+                    <div class="header-title-wrapper">
+                        <h1 class="header-title">📋 Gestión de Controles</h1>
+                        <p class="header-subtitle">Registros de controles de plagas</p>
                     </div>
-                    <h1 class="header-title">📋 Gestión de Controles</h1>
-                    <p class="header-subtitle">Registros de controles de plagas realizados</p>
+                    <a href="nuevo-control.html" class="btn-icon-mobile" aria-label="Nuevo control" title="Crear nuevo control">
+                        ➕
+                    </a>
                 </div>
-                <div class="header-actions">
+                <div class="header-desktop-actions">
+                    <a href="/pages/dashboard.html" class="btn btn-secondary">
+                        ← Volver al Dashboard
+                    </a>
                     <button class="btn btn-primary" onclick="window.location.href='nuevo-control.html'">
                         ➕ Nuevo Control
                     </button>
@@ -33,24 +39,21 @@
         <!-- Estadísticas -->
         <div class="stat-grid">
             <div class="stat-card">
+                <div class="stat-icon">📋</div>
                 <div class="stat-content">
                     <h3 class="stat-label">Total Controles</h3>
                     <div class="stat-value" id="statTotal">0</div>
                 </div>
             </div>
             <div class="stat-card stat-card-warning">
+                <div class="stat-icon">⏳</div>
                 <div class="stat-content">
                     <h3 class="stat-label">Pendientes</h3>
                     <div class="stat-value" id="statPendientes">0</div>
                 </div>
             </div>
-            <div class="stat-card stat-card-info">
-                <div class="stat-content">
-                    <h3 class="stat-label">En Progreso</h3>
-                    <div class="stat-value" id="statEnProgreso">0</div>
-                </div>
-            </div>
             <div class="stat-card stat-card-success">
+                <div class="stat-icon">✅</div>
                 <div class="stat-content">
                     <h3 class="stat-label">Completados</h3>
                     <div class="stat-value" id="statCompletados">0</div>
@@ -79,7 +82,6 @@
                         <select id="filterEstado" class="form-control">
                             <option value="">Todos los estados</option>
                             <option value="pendiente">Pendiente</option>
-                            <option value="en_progreso">En Progreso</option>
                             <option value="completado">Completado</option>
                             <option value="cancelado">Cancelado</option>
                         </select>
@@ -129,6 +131,7 @@
     </div>
     </div>
 
+    <script src="../js/controles/indexeddb-manager.js"></script>
     <script>
         // Usar el cliente de Supabase del auth.js
         const supabase = window.supabaseClient || supabase.createClient(
@@ -140,6 +143,7 @@
         let clientes = [];
         let tecnicos = [];
         let workerProfile = null;
+        let dbManager = null;
 
         // Cargar al inicio - IGUAL que clientes.html
         window.addEventListener('DOMContentLoaded', async () => {
@@ -158,6 +162,10 @@
             }
             
             console.log('✅ Worker info:', workerProfile);
+            
+            // Inicializar IndexedDB para cargar borradores junto con controles
+            dbManager = new IndexedDBManager();
+            await dbManager.init();
             
             await cargarDatosIniciales();
             await cargarControles();
@@ -204,6 +212,7 @@
 
         async function cargarControles() {
             try {
+                // 1. Cargar controles de Supabase
                 const { data, error } = await supabase
                     .from('controles')
                     .select(`
@@ -212,11 +221,45 @@
                         planta:plantas!controles_planta_id_fkey(nombre),
                         tecnico:worker!controles_tecnico_id_fkey(nombre)
                     `)
+                    .eq('empresa_id', workerProfile.empresa_id)
                     .order('fecha_control', { ascending: false });
 
                 if (error) throw error;
 
-                controles = data || [];
+                const controlesSupabase = data || [];
+                
+                // 2. Cargar borradores de IndexedDB
+                const todosLosBorradores = await dbManager.obtenerTodosControles();
+                const borradoresEmpresa = todosLosBorradores.filter(b => b.empresa_id === workerProfile.empresa_id);
+                
+                // 3. Convertir borradores al formato esperado
+                const borradoresFormateados = borradoresEmpresa.map(b => {
+                    // Buscar nombres en los mapas cargados
+                    const clienteObj = clientes.find(c => c.cliente_id === b.cliente_id);
+                    const tecnicoObj = tecnicos.find(t => t.worker_id === b.tecnico_id);
+                    
+                    return {
+                        control_id: null, // No tiene ID de Supabase
+                        local_id: b.local_id, // ID de IndexedDB
+                        isDraft: true, // Marcador de borrador
+                        fecha_control: b.fecha_control,
+                        tipo_control: b.tipo_control,
+                        estado: 'pendiente', // Estado especial para borradores
+                        cliente: { nombre: clienteObj?.nombre || 'Cliente desconocido' },
+                        planta: { nombre: null },
+                        tecnico: { nombre: tecnicoObj?.nombre || 'Técnico desconocido' },
+                        created_at: b.created_at,
+                        updated_at: b.updated_at
+                    };
+                });
+                
+                // 4. Combinar y ordenar por fecha
+                controles = [...controlesSupabase, ...borradoresFormateados].sort((a, b) => {
+                    return new Date(b.fecha_control) - new Date(a.fecha_control);
+                });
+                
+                console.log(`✅ Cargados ${controlesSupabase.length} controles de Supabase y ${borradoresFormateados.length} borradores`);
+                
                 renderizarControles(controles);
                 actualizarEstadisticas(controles);
 
@@ -273,28 +316,45 @@
                 }
                 
                 const tipoBadge = control.tipo_control ? control.tipo_control.charAt(0).toUpperCase() + control.tipo_control.slice(1) : 'Preventivo';
+                
+                // Determinar si es borrador o control completo
+                const isDraft = control.isDraft === true;
+                const id = isDraft ? control.local_id : control.control_id;
+                const clickHandler = isDraft ? '' : `onclick="verControl('${id}')" style="cursor: pointer;"`;
 
                 return `
-                    <tr onclick="verControl('${control.control_id}')" style="cursor: pointer;">
+                    <tr ${clickHandler}>
                         <td>${fecha}</td>
-                        <td><strong>${clienteNombre}</strong></td>
+                        <td><strong>${clienteNombre}</strong>${isDraft ? ' <span style="color: #f59e0b; font-size: 0.8em;">●</span>' : ''}</td>
                         <td>${plantaNombre}</td>
                         <td>${tecnicoNombre}</td>
                         <td><span class="badge badge-primary">${tipoBadge}</span></td>
                         <td>${estadoBadge}</td>
                         <td class="text-center" onclick="event.stopPropagation()">
                             <div class="action-buttons">
-                                <button class="btn-icon-sm btn-view" onclick="verControl('${control.control_id}')" title="Ver detalles">
-                                    👁️
-                                </button>
-                                <button class="btn-icon-sm btn-edit" onclick="editarControl('${control.control_id}')" title="Editar">
-                                    ✏️
-                                </button>
-                                ${control.pdf_url ? `
-                                    <button class="btn-icon-sm btn-info" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
-                                        📄
+                                ${isDraft ? `
+                                    <button class="btn-icon-sm btn-edit" onclick="continuarBorrador(${id})" title="Continuar control">
+                                        ▶️
                                     </button>
-                                ` : ''}
+                                    <button class="btn-icon-sm btn-danger" onclick="eliminarBorrador(${id})" title="Eliminar borrador">
+                                        🗑️
+                                    </button>
+                                ` : `
+                                    <button class="btn-icon-sm btn-view" onclick="verControl('${id}')" title="Ver detalles">
+                                        👁️
+                                    </button>
+                                    <button class="btn-icon-sm btn-edit" onclick="editarControl('${id}')" title="Editar">
+                                        ✏️
+                                    </button>
+                                    <button class="btn-icon-sm btn-danger" onclick="eliminarControl('${id}')" title="Eliminar control">
+                                        🗑️
+                                    </button>
+                                    ${control.pdf_url ? `
+                                        <button class="btn-icon-sm btn-info" onclick="descargarPDF('${control.pdf_url}')" title="Descargar PDF">
+                                            📄
+                                        </button>
+                                    ` : ''}
+                                `}
                             </div>
                         </td>
                     </tr>
@@ -305,7 +365,6 @@
         function actualizarEstadisticas(data) {
             document.getElementById('statTotal').textContent = data.length;
             document.getElementById('statPendientes').textContent = data.filter(c => c.estado === 'pendiente').length;
-            document.getElementById('statEnProgreso').textContent = data.filter(c => c.estado === 'en_progreso').length;
             document.getElementById('statCompletados').textContent = data.filter(c => c.estado === 'completado').length;
         }
 
@@ -361,8 +420,61 @@
             window.location.href = `nuevo-control.html?id=${controlId}`;
         };
 
+        window.eliminarControl = async function(controlId) {
+            if (!confirm('⚠️ ¿Estás seguro de eliminar este control?\n\nEsta acción eliminará:\n- El control completo\n- Todos los productos asociados\n- Todos los puntos de control\n- Las fotos del control\n\nEsta acción NO se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ Eliminando control:', controlId);
+
+                // Eliminar control (los productos y puntos se eliminarán automáticamente por CASCADE)
+                const { error } = await supabase
+                    .from('controles')
+                    .delete()
+                    .eq('control_id', controlId)
+                    .eq('empresa_id', workerProfile.empresa_id); // Seguridad: solo eliminar de su empresa
+
+                if (error) throw error;
+
+                console.log('✅ Control eliminado exitosamente');
+                
+                // Recargar la lista
+                await cargarControles();
+                
+                alert('✅ Control eliminado exitosamente');
+            } catch (error) {
+                console.error('❌ Error eliminando control:', error);
+                alert('❌ Error al eliminar el control: ' + error.message);
+            }
+        };
+
         window.descargarPDF = function(url) {
             window.open(url, '_blank');
+        };
+
+        window.continuarBorrador = function(localId) {
+            console.log('▶️ Continuando borrador:', localId);
+            window.location.href = `nuevo-control.html?draft=${localId}`;
+        };
+
+        window.eliminarBorrador = async function(localId) {
+            if (!confirm('¿Estás seguro de eliminar este borrador?\n\nEsta acción no se puede deshacer y perderás todos los datos guardados.')) {
+                return;
+            }
+
+            try {
+                console.log('🗑️ Eliminando borrador:', localId);
+                await dbManager.eliminarControl(localId);
+                
+                // Recargar la lista
+                await cargarControles();
+                
+                alert('✅ Borrador eliminado exitosamente');
+            } catch (error) {
+                console.error('❌ Error eliminando borrador:', error);
+                alert('❌ Error al eliminar el borrador: ' + error.message);
+            }
         };
 
         function mostrarError(mensaje) {

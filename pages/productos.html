@@ -72,6 +72,8 @@
                         <label for="filterTipo">Tipo de producto</label>
                         <select id="filterTipo" class="form-control" onchange="filtrarProductos()">
                             <option value="">Todos los tipos</option>
+                            <option value="INSECTICIDA">INSECTICIDA</option>
+                            <option value="ROEDORES">ROEDORES</option>
                             <option value="Químico">Químico</option>
                             <option value="Herramienta">Herramienta</option>
                             <option value="Trampa">Trampa</option>
@@ -103,15 +105,17 @@
                         </th>
                         <th>NOMBRE DEL PRODUCTO</th>
                         <th>TIPO</th>
-                        <th>CANTIDAD ACTUAL</th>
+                        <th>PRINCIPIO ACTIVO</th>
+                        <th>LABORATORIO</th>
+                        <th>CERTIFICADO</th>
+                        <th>CANTIDAD</th>
                         <th>UNIDAD</th>
-                        <th>NIVEL DE ALERTA</th>
                         <th class="text-center">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody id="productosTableBody">
                     <tr>
-                        <td colspan="7">
+                        <td colspan="9">
                             <div class="loading-container">
                                 <div class="loading-spinner"></div>
                                 <p>Cargando productos...</p>
@@ -155,7 +159,9 @@
                         <div class="form-group">
                             <label for="inputTipo">Tipo *</label>
                             <select id="inputTipo" class="form-control" required>
-                                <option value="">Seleccionar...</option>
+                                <option value="">Seleccione un tipo</option>
+                                <option value="INSECTICIDA">INSECTICIDA</option>
+                                <option value="ROEDORES">ROEDORES</option>
                                 <option value="Químico">Químico</option>
                                 <option value="Herramienta">Herramienta</option>
                                 <option value="Trampa">Trampa</option>
@@ -163,6 +169,38 @@
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="inputPrincipioActivo">Principio Activo</label>
+                            <input 
+                                type="text" 
+                                id="inputPrincipioActivo" 
+                                class="form-control"
+                                placeholder="Ej: Deltametrina, Bromadiolona"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputLaboratorio">Laboratorio</label>
+                            <input 
+                                type="text" 
+                                id="inputLaboratorio" 
+                                class="form-control"
+                                placeholder="Ej: ECO-WORLD, GLEBA S.A"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputCertificado">Certificado</label>
+                        <input 
+                            type="text" 
+                            id="inputCertificado" 
+                            class="form-control"
+                            placeholder="Ej: C.S-2611 / C.A-0250006"
+                        >
                     </div>
 
                     <div class="form-group">
@@ -323,7 +361,7 @@
                 console.error('Error cargando productos:', error)
                 document.getElementById('productosTableBody').innerHTML = `
                     <tr>
-                        <td colspan="7">
+                        <td colspan="9">
                             <div class="alert alert-danger">
                                 ❌ Error cargando productos: ${error.message || JSON.stringify(error)}
                             </div>
@@ -341,7 +379,7 @@
             if (productos.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7">
+                        <td colspan="9">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📦</div>
                                 <h3 class="empty-state-title">No hay productos registrados</h3>
@@ -367,16 +405,18 @@
                         </td>
                         <td>
                             <strong>${p.nombre}</strong>
-                            ${p.descripcion ? `<br><small style="color: #999;">${p.descripcion.substring(0, 50)}...</small>` : ''}
+                            ${p.descripcion ? `<br><small style="color: #999;">${p.descripcion.substring(0, 40)}...</small>` : ''}
                         </td>
                         <td>
-                            <span class="badge badge-info">${p.tipo}</span>
+                            <span class="badge badge-info">${p.tipo_producto || p.tipo || '-'}</span>
                         </td>
+                        <td>${p.principio_activo || '-'}</td>
+                        <td>${p.laboratorio || '-'}</td>
+                        <td>${p.certificado || '-'}</td>
                         <td class="${stockClass}">
                             ${stockBadge}
                         </td>
                         <td>${p.unidad_medida}</td>
-                        <td>${p.nivel_alerta} ${p.unidad_medida}</td>
                         <td class="text-center">
                             <div class="action-buttons">
                                 <button class="btn-icon-sm btn-edit" onclick="editarProducto('${p.producto_id}')" title="Editar">
@@ -408,8 +448,9 @@
                     p.nombre.toLowerCase().includes(searchTerm) ||
                     (p.descripcion && p.descripcion.toLowerCase().includes(searchTerm))
 
-                // Filtro de tipo
-                const matchTipo = !tipoFilter || p.tipo === tipoFilter
+                // Filtro de tipo (buscar en tipo_producto o tipo)
+                const tipoProducto = p.tipo_producto || p.tipo || ''
+                const matchTipo = !tipoFilter || tipoProducto === tipoFilter
 
                 // Filtro de stock
                 let matchStock = true
@@ -465,7 +506,10 @@
 
             const productoData = {
                 nombre: document.getElementById('inputNombre').value.trim(),
-                tipo: document.getElementById('inputTipo').value,
+                tipo_producto: document.getElementById('inputTipo').value,
+                principio_activo: document.getElementById('inputPrincipioActivo').value.trim() || null,
+                laboratorio: document.getElementById('inputLaboratorio').value.trim() || null,
+                certificado: document.getElementById('inputCertificado').value.trim() || null,
                 descripcion: document.getElementById('inputDescripcion').value.trim() || null,
                 cantidad_actual: parseFloat(document.getElementById('inputCantidad').value),
                 unidad_medida: document.getElementById('inputUnidad').value,
@@ -537,7 +581,10 @@
 
                 // Llenar formulario
                 document.getElementById('inputNombre').value = data.nombre
-                document.getElementById('inputTipo').value = data.tipo
+                document.getElementById('inputTipo').value = data.tipo_producto || data.tipo
+                document.getElementById('inputPrincipioActivo').value = data.principio_activo || ''
+                document.getElementById('inputLaboratorio').value = data.laboratorio || ''
+                document.getElementById('inputCertificado').value = data.certificado || ''
                 document.getElementById('inputDescripcion').value = data.descripcion || ''
                 document.getElementById('inputCantidad').value = data.cantidad_actual
                 document.getElementById('inputUnidad').value = data.unidad_medida

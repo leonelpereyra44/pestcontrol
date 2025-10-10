@@ -148,6 +148,22 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Botón de regreso para mobile */
+.btn-back-mobile {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 24px;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+}
+
 /* ===== WIZARD STEPS ===== */
 .wizard-steps {
     margin-bottom: 24px;
@@ -170,9 +186,12 @@ body {
 
 .wizard-menu {
     background: white;
-    padding: 24px;
+    padding: 20px 24px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
 }
 
 .wizard-menu-header {
@@ -214,21 +233,26 @@ body {
 .wizard-step {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
+    padding: 14px 18px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
-    margin-bottom: 8px;
+    flex: 1;
+    min-width: 160px;
+    white-space: nowrap;
 }
 
 .wizard-step:hover {
     background: var(--gray-50);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .wizard-step.active {
     background: var(--primary);
     color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
 .wizard-step.completed {
@@ -236,15 +260,15 @@ body {
 }
 
 .wizard-step-number {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--gray-200);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     flex-shrink: 0;
 }
 
@@ -261,13 +285,14 @@ body {
 .wizard-step-title {
     flex: 1;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .wizard-step-status {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0;
     transition: opacity 0.2s;
+    flex-shrink: 0;
 }
 
 .wizard-step.completed .wizard-step-status {
@@ -475,6 +500,24 @@ tbody tr:hover {
     background: var(--gray-50);
 }
 
+/* Tabla de roedores con muchas columnas */
+.table-container table th,
+.table-container table td {
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.table-container table th:first-child,
+.table-container table td:first-child {
+    min-width: 90px;
+}
+
+.table-container table th:last-child,
+.table-container table td:last-child {
+    min-width: 70px;
+    text-align: center;
+}
+
 /* ===== EMPTY STATE ===== */
 .empty-state {
     text-align: center;
@@ -545,16 +588,42 @@ tbody tr:hover {
 .btn-danger {
     background: var(--danger);
     color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Botón circular pequeño para eliminar (en listas) */
+.btn-icon-sm {
     width: 36px;
     height: 36px;
     padding: 0;
     border-radius: 50%;
     flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.btn-danger:hover {
+.btn-icon-sm.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-icon-sm.btn-danger:hover {
     background: #dc2626;
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .btn-lg {
@@ -575,11 +644,16 @@ tbody tr:hover {
 
 /* ===== WIZARD NAVIGATION ===== */
 .wizard-navigation {
+    display: none; /* Ocultar botones de navegación, usamos solo el wizard */
+}
+
+/* Botones de acción principales (como Completar Control) */
+.action-buttons {
     margin-top: 32px;
     padding-top: 24px;
     border-top: 2px solid var(--color-border);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 16px;
 }
 
@@ -648,6 +722,27 @@ tbody tr:hover {
     color: var(--danger);
 }
 
+/* Badges para densidad de voladores */
+.badge-baja {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-media {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-alta {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-na {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .form-row {
@@ -657,26 +752,70 @@ tbody tr:hover {
 
 @media (max-width: 768px) {
     .page-wrapper {
-        padding: 16px;
+        padding: 0;
     }
     
     .header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
+        flex-direction: row;
+        gap: 0;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 0;
+        border-radius: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: white;
     }
     
     .header-content {
-        flex-direction: column;
+        flex-direction: row;
         gap: 12px;
+        align-items: center;
+        flex: 1;
+        width: 100%;
+    }
+    
+    .btn-back-mobile {
+        display: flex;
+        flex-shrink: 0;
+    }
+    
+    .header-title {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .header-title h1 {
+        font-size: 16px;
+        margin: 0;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .current-step-text {
+        font-size: 11px;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .btn-back-header {
+        display: none;
     }
     
     .wizard-toggle {
         display: flex;
+        flex-shrink: 0;
     }
     
     .wizard-steps {
         position: relative;
+        margin-bottom: 0;
     }
     
     .wizard-menu {
@@ -689,6 +828,9 @@ tbody tr:hover {
         transition: left 0.3s ease;
         border-radius: 0;
         overflow-y: auto;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
     }
     
     .wizard-menu.active {
@@ -699,8 +841,17 @@ tbody tr:hover {
         display: flex;
     }
     
+    .wizard-step {
+        margin-bottom: 0;
+        min-width: auto;
+    }
+    
     .step-content {
-        padding: 24px 20px;
+        padding: 20px 16px;
+    }
+    
+    .step-content h2 {
+        font-size: 20px;
     }
     
     .form-row {
@@ -712,6 +863,14 @@ tbody tr:hover {
     }
     
     .wizard-navigation .btn {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
         width: 100%;
     }
     
@@ -727,12 +886,43 @@ tbody tr:hover {
 }
 
 @media (max-width: 480px) {
-    .header-title h1 {
+    .header {
+        padding: 10px 12px;
+    }
+    
+    .header-content {
+        gap: 8px;
+    }
+    
+    .btn-back-mobile {
+        width: 32px;
+        height: 32px;
         font-size: 20px;
     }
     
+    .header-title h1 {
+        font-size: 15px;
+    }
+    
     .current-step-text {
-        font-size: 13px;
+        font-size: 10px;
+    }
+    
+    .wizard-toggle {
+        width: 28px;
+        height: 20px;
+    }
+    
+    .hamburger-line {
+        height: 2.5px;
+    }
+    
+    .step-content {
+        padding: 16px 12px;
+    }
+    
+    .step-content h2 {
+        font-size: 18px;
     }
     
     .step-content h2 {
@@ -919,6 +1109,15 @@ tbody tr:hover {
     margin-right: 4px;
 }
 
+.punto-info-item .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
 /* Grupos de plagas */
 .grupo-plagas {
     margin-bottom: 28px;
@@ -1012,5 +1211,146 @@ tbody tr:hover {
         font-size: 15px;
         margin-bottom: 10px;
         padding-bottom: 8px;
+    }
+}
+
+/* ===== TOAST NOTIFICACIONES ===== */
+.toast {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gray-900);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    transition: bottom 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast.show {
+    bottom: 24px;
+}
+
+.toast.success {
+    background: var(--success);
+}
+
+.toast.error {
+    background: var(--danger);
+}
+
+.toast.info {
+    background: var(--info);
+}
+
+@media (max-width: 768px) {
+    .toast {
+        bottom: -100px;
+        max-width: calc(100% - 32px);
+        font-size: 13px;
+        padding: 10px 20px;
+    }
+    
+    .toast.show {
+        bottom: 16px;
+    }
+}
+/* ===== TABS PARA PUNTOS DE CONTROL ===== */
+.tabs-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--gray-200);
+    padding-bottom: 0;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--gray-600);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    bottom: -2px;
+}
+
+.tab-button:hover {
+    color: var(--primary);
+    background: var(--gray-50);
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--gray-50);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive para tabs */
+@media (max-width: 768px) {
+    .tabs-container {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 4px;
+    }
+    
+    .tab-button {
+        flex: 0 0 auto;
+        font-size: 14px;
+        padding: 10px 16px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabs-container {
+        gap: 2px;
+        margin-bottom: 16px;
+    }
+    
+    .tab-button {
+        flex: 0 0 auto;
+        font-size: 12px;
+        padding: 8px 10px;
+        white-space: nowrap;
     }
 }

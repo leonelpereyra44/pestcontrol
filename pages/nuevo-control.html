@@ -13,15 +13,18 @@
         <!-- Header -->
         <div class="header">
             <div class="header-content">
+                <a href="controles.html" class="btn-back-mobile" aria-label="Volver">
+                    ←
+                </a>
+                <div class="header-title">
+                    <h1 id="pageTitle">Nuevo Control de Plagas</h1>
+                    <p class="current-step-text">Paso <span id="currentStepNumber">1</span> de 5: <span id="currentStepName">Información General</span></p>
+                </div>
                 <button class="wizard-toggle" id="wizardToggle" aria-label="Menú de navegación">
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                 </button>
-                <div class="header-title">
-                    <h1 id="pageTitle">📋 Nuevo Control de Plagas</h1>
-                    <p class="current-step-text">Paso <span id="currentStepNumber">1</span> de 5: <span id="currentStepName">Información General</span></p>
-                </div>
             </div>
             <a href="controles.html" class="btn btn-secondary btn-back-header">
                 ← Volver
@@ -123,9 +126,9 @@
                 </div>
             </div>
             
-            <div class="wizard-navigation">
-                <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
-                    Siguiente →
+            <div class="action-buttons">
+                <button class="btn btn-success btn-lg" id="btnComenzarControl" onclick="comenzarControl()">
+                    🚀 Comenzar Control
                 </button>
             </div>
         </div>
@@ -180,70 +183,212 @@
         
         <!-- Step 3: Puntos de Control -->
         <div class="step-content" data-step="3">
-            <h2>Puntos de Control</h2>
+            <h2>📍 Puntos de Control por Tipo de Plaga</h2>
             
             <div class="alert alert-info">
-                <p>💡 Registre los puntos de control revisados. Puede dejar esta sección vacía si no revisó puntos específicos.</p>
+                <p>💡 Puede dejar secciones vacías si no aplican.</p>
             </div>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="numeroPunto">Número de Punto *</label>
-                    <input type="number" id="numeroPunto" class="form-control" min="1">
+            <!-- Tabs de Navegación -->
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="roedores" onclick="cambiarTab('roedores')">
+                    🐭 Roedores
+                </button>
+                <button class="tab-button" data-tab="voladores" onclick="cambiarTab('voladores')">
+                    🦟 Voladores
+                </button>
+                <button class="tab-button" data-tab="rastreros" onclick="cambiarTab('rastreros')">
+                    🐜 Rastreros
+                </button>
+            </div>
+            
+            <!-- Sección Roedores -->
+            <div class="tab-content active" id="tab-roedores">
+                <h3>🐭 Control de Roedores</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cajaNRoedores">Caja N° *</label>
+                        <input type="text" id="cajaNRoedores" class="form-control" placeholder="Número de caja">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vivosRoedores">Vivos *</label>
+                        <select id="vivosRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="muertosRoedores">Muertos *</label>
+                        <select id="muertosRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="tipoPlaga">Tipo de Plaga *</label>
-                    <select id="tipoPlaga" class="form-control">
-                        <option value="">Seleccione tipo</option>
-                        <option value="roedores">Roedores</option>
-                        <option value="voladores">Voladores</option>
-                        <option value="rastreros">Rastreros</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipoTrampaRoedores">Tipo de Trampa *</label>
+                        <select id="tipoTrampaRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="pega">Pega</option>
+                            <option value="trampa">Trampa</option>
+                            <option value="cebo">Cebo</option>
+                            <option value="otra">Otra</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="materiaFecalRoedores">Materia Fecal *</label>
+                        <select id="materiaFecalRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consumoRoedores">Consumo *</label>
+                        <select id="consumoRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="tipoDispositivo">Tipo de Dispositivo</label>
-                    <input type="text" id="tipoDispositivo" class="form-control" placeholder="Ej: Cebadero, Trampa">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="ubicacionPunto">Ubicación</label>
-                    <input type="text" id="ubicacionPunto" class="form-control" placeholder="Descripción de la ubicación">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reposicionRoedores">Reposición *</label>
+                        <select id="reposicionRoedores" class="form-control">
+                            <option value="">Seleccione</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                            <option value="rp">R.P</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacionesRoedores">Observaciones</label>
+                        <input type="text" id="observacionesRoedores" class="form-control" placeholder="Observaciones del punto">
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="estadoPunto">Estado *</label>
-                    <select id="estadoPunto" class="form-control">
-                        <option value="">Seleccione estado</option>
-                        <option value="ok">OK</option>
-                        <option value="con_actividad">Con Actividad</option>
-                        <option value="faltante">Faltante</option>
-                        <option value="reemplazado">Reemplazado</option>
-                    </select>
+                <button class="btn btn-primary" onclick="agregarPunto('roedores')">
+                    + Agregar Punto de Roedores
+                </button>
+                
+                <div id="puntosAgregadosRoedores" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🐭</div>
+                        <p class="empty-state-message">No se han agregado puntos de roedores</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="form-group">
-                <label for="accionRealizada">Acción Realizada</label>
-                <textarea id="accionRealizada" class="form-control" rows="3" placeholder="Describa la acción realizada en este punto"></textarea>
+            <!-- Sección Voladores -->
+            <div class="tab-content" id="tab-voladores">
+                <h3>🦟 Control de Voladores</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cajaUVVoladores">Caja UV N° *</label>
+                        <input type="text" id="cajaUVVoladores" class="form-control" placeholder="Número de caja UV">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="densidadVoladores">Densidad *</label>
+                        <select id="densidadVoladores" class="form-control">
+                            <option value="">Seleccione densidad</option>
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="na">N.A</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reposicionVoladores">Reposición</label>
+                        <select id="reposicionVoladores" class="form-control">
+                            <option value="">Seleccione reposición</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                            <option value="na">N.A</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacionesVoladores">Observaciones</label>
+                        <input type="text" id="observacionesVoladores" class="form-control" placeholder="Observaciones del punto">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="agregarPunto('voladores')">
+                    + Agregar Punto de Voladores
+                </button>
+                
+                <div id="puntosAgregadosVoladores" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🦟</div>
+                        <p class="empty-state-message">No se han agregado puntos de voladores</p>
+                    </div>
+                </div>
             </div>
             
-            <button class="btn btn-primary" onclick="agregarPunto()">
-                + Agregar Punto
-            </button>
-            
-            <button class="btn btn-secondary" onclick="mostrarListaPuntos()" style="margin-left: 12px;">
-                📋 Ver Lista
-            </button>
-            
-            <div id="puntosAgregados">
-                <div class="empty-state">
-                    <div class="empty-state-icon">📍</div>
-                    <p class="empty-state-message">No se han agregado puntos de control</p>
+            <!-- Sección Rastreros -->
+            <div class="tab-content" id="tab-rastreros">
+                <h3>🐜 Control de Rastreros</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ubicacionRastreros">Ubicación *</label>
+                        <input type="text" id="ubicacionRastreros" class="form-control" placeholder="Descripción de la ubicación">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacionesRastreros">Observaciones</label>
+                        <input type="text" id="observacionesRastreros" class="form-control" placeholder="Observaciones del punto">
+                    </div>
                 </div>
+                
+                <button class="btn btn-primary" onclick="agregarPunto('rastreros')">
+                    + Agregar Punto de Rastreros
+                </button>
+                
+                <div id="puntosAgregadosRastreros" style="margin-top: 20px;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🐜</div>
+                        <p class="empty-state-message">No se han agregado puntos de rastreros</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botón para ver lista completa -->
+            <div style="margin-top: 24px; text-align: center; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="mostrarListaPuntos()">
+                    📋 Ver Todos los Puntos
+                </button>
+                <button class="btn btn-danger" onclick="limpiarTodosPuntos()">
+                    🗑️ Limpiar Todos los Puntos
+                </button>
             </div>
             
             <div class="wizard-navigation">
@@ -253,8 +398,6 @@
                 <button class="btn btn-primary btn-lg" onclick="wizard.nextStep()">
                     Siguiente →
                 </button>
-            </div>
-        </div>
             </div>
         </div>
         
@@ -292,12 +435,9 @@
                 <img id="selloTecnicoImg" class="hidden" alt="Sello del técnico">
             </div>
             
-            <div class="wizard-navigation">
-                <button class="btn btn-secondary" onclick="wizard.prevStep()">
-                    ← Anterior
-                </button>
-                <button class="btn btn-success btn-lg" onclick="guardarControl()">
-                    <span id="btnGuardarText">💾 Guardar Control</span>
+            <div class="action-buttons">
+                <button class="btn btn-success btn-lg" onclick="completarControl()">
+                    <span id="btnCompletarText">✅ Completar Control</span>
                 </button>
             </div>
         </div>
@@ -323,11 +463,17 @@
         </div>
     </div>
     
+    <!-- Toast para notificaciones -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+    
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../ts/auth.js"></script>
     
     <!-- Módulos -->
+    <script src="../js/controles/indexeddb-manager.js"></script>
     <script src="../js/controles/data-loader.js"></script>
     <script src="../js/controles/sello-manager.js"></script>
     <script src="../js/controles/wizard-manager.js"></script>
@@ -348,8 +494,12 @@
         let puntosManager = null;
         let controlManager = null;
         let selloManager = null;
-        let editMode = false; // Modo edición
-        let currentControlId = null; // ID del control que se está editando
+        let dbManager = null; // IndexedDB Manager
+        let localControlId = null; // ID del control local (IndexedDB)
+        let editMode = false; // Modo edición (Supabase)
+        let currentControlId = null; // ID del control que se está editando (Supabase)
+        let draftMode = false; // Modo borrador (IndexedDB)
+        let currentControlData = null; // Datos del control actual (para borradores)
         
         // Inicialización
         document.addEventListener('DOMContentLoaded', async () => {
@@ -380,15 +530,27 @@
                 
                 console.log('✅ Usuario autenticado:', workerProfile);
                 
-                // Detectar modo edición
+                // Inicializar IndexedDB
+                dbManager = new IndexedDBManager();
+                await dbManager.init();
+                console.log('✅ IndexedDB inicializada');
+                
+                // Detectar modo edición (Supabase) o draft (IndexedDB)
                 const urlParams = new URLSearchParams(window.location.search);
-                currentControlId = urlParams.get('id');
+                currentControlId = urlParams.get('id'); // ID de Supabase
+                const draftId = urlParams.get('draft'); // ID de IndexedDB
+                
                 editMode = !!currentControlId;
+                draftMode = !!draftId;
                 
                 if (editMode) {
                     console.log('📝 Modo edición - Control ID:', currentControlId);
-                    document.getElementById('pageTitle').textContent = 'Editar Control de Plagas';
-                    document.getElementById('btnGuardarText').textContent = '💾 Actualizar Control';
+                    document.getElementById('pageTitle').textContent = '✏️ Editar Control de Plagas';
+                    document.getElementById('btnCompletarText').textContent = '💾 Actualizar Control';
+                } else if (draftMode) {
+                    console.log('📄 Modo borrador - Draft ID:', draftId);
+                    localControlId = parseInt(draftId);
+                    document.getElementById('pageTitle').textContent = '📄 Continuar Control';
                 }
                 
                 // Inicializar managers
@@ -404,9 +566,13 @@
                 // Cargar datos iniciales
                 await inicializarFormulario();
                 
-                // Si estamos en modo edición, cargar datos del control
+                // Si estamos en modo edición (Supabase), cargar datos del control
                 if (editMode) {
                     await cargarControlExistente(currentControlId);
+                }
+                // Si estamos en modo borrador (IndexedDB), cargar datos del draft
+                else if (draftMode) {
+                    await cargarControlDraft(localControlId);
                 }
                 
                 // Configurar event listeners
@@ -472,11 +638,41 @@
                 
                 console.log('✅ Control cargado:', control);
                 
-                // 2. Pre-llenar formulario
+                // 2. Pre-llenar formulario (DESPUÉS de que dataLoader haya cargado los selects)
+                // Esperar a que los selects estén poblados verificando que tengan opciones
+                let intentos = 0;
+                while (intentos < 20) { // Máximo 2 segundos (20 x 100ms)
+                    const clienteSelect = document.getElementById('clienteId');
+                    const tecnicoSelect = document.getElementById('tecnicoId');
+                    
+                    if (clienteSelect.options.length > 1 && tecnicoSelect.options.length > 1) {
+                        console.log('✅ Selects poblados, procediendo a llenar formulario');
+                        break;
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    intentos++;
+                }
+                
+                if (intentos >= 20) {
+                    console.warn('⚠️ Timeout esperando que los selects se pueblen');
+                }
+                
+                // Asignar valores básicos
                 document.getElementById('clienteId').value = control.cliente_id;
-                document.getElementById('fechaControl').value = control.fecha_control;
+                document.getElementById('fechaControl').value = control.fecha_control.split('T')[0]; // Formato YYYY-MM-DD
                 document.getElementById('tipoControl').value = control.tipo_control;
                 document.getElementById('observaciones').value = control.observaciones || '';
+                document.getElementById('tecnicoId').value = control.tecnico_id;
+                
+                console.log('📝 Valores asignados al formulario:', {
+                    cliente_id: control.cliente_id,
+                    fecha: control.fecha_control.split('T')[0],
+                    tipo: control.tipo_control,
+                    tecnico: control.tecnico_id,
+                    clienteSelect_value: document.getElementById('clienteId').value,
+                    tecnicoSelect_value: document.getElementById('tecnicoId').value
+                });
                 
                 // Cargar plantas del cliente seleccionado
                 if (control.cliente_id) {
@@ -487,25 +683,41 @@
                     }
                 }
                 
-                // Seleccionar técnico
-                document.getElementById('tecnicoId').value = control.tecnico_id;
+                console.log('✅ Formulario pre-llenado completamente');
                 
-                // Cargar sello del técnico (primero intentar con el sello guardado, luego con el del técnico)
+                // Cargar sello del técnico
                 if (control.firma_tecnico) {
                     // Si el control tiene un sello guardado, usarlo
-                    console.log('🔖 Cargando sello guardado:', control.firma_tecnico);
+                    console.log('🔖 Cargando sello guardado del control:', control.firma_tecnico);
+                    
+                    // Guardar la URL del sello
                     selloManager.selloUrl = control.firma_tecnico;
+                    
+                    // Extraer solo el path (puede venir con o sin prefijo del bucket)
+                    let selloPath = control.firma_tecnico;
+                    if (selloPath.startsWith('workers/')) {
+                        selloPath = selloPath.substring(8); // Eliminar 'workers/'
+                    }
+                    
+                    console.log('📂 Path del sello:', selloPath);
                     
                     // Obtener URL firmada para mostrar
                     const { data: urlData, error: urlError } = await supabase.storage
                         .from('workers')
-                        .createSignedUrl(control.firma_tecnico, 3600);
+                        .createSignedUrl(selloPath, 3600);
                     
-                    if (!urlError && urlData) {
+                    if (urlError) {
+                        console.error('❌ Error generando URL firmada:', urlError);
+                        console.log('ℹ️ Intentando cargar sello del técnico seleccionado...');
+                        // Si falla, intentar cargar el sello actual del técnico
+                        await selloManager.cargarSello(control.tecnico_id);
+                    } else if (urlData) {
+                        console.log('✅ URL firmada generada correctamente');
                         selloManager.mostrarImagen(urlData.signedUrl);
                     }
-                } else {
+                } else if (control.tecnico_id) {
                     // Si no hay sello guardado, cargar el sello actual del técnico
+                    console.log('🔖 Cargando sello actual del técnico:', control.tecnico_id);
                     await selloManager.cargarSello(control.tecnico_id);
                 }
                 
@@ -549,16 +761,49 @@
                 
                 if (puntos && puntos.length > 0) {
                     console.log(`📍 Cargando ${puntos.length} puntos...`);
+                    
+                    // Agregar puntos directamente al array sin renderizar cada uno
                     puntos.forEach(p => {
-                        puntosManager.agregar({
+                        // Parsear descripcion_actividad si existe
+                        let datosAdicionales = {};
+                        if (p.descripcion_actividad) {
+                            try {
+                                datosAdicionales = JSON.parse(p.descripcion_actividad);
+                            } catch (e) {
+                                console.warn('Error parseando descripcion_actividad:', e);
+                            }
+                        }
+                        
+                        const puntoCompleto = {
                             numero: p.numero_punto,
                             tipo_plaga: p.tipo_plaga,
                             tipo_dispositivo: p.tipo_dispositivo,
                             ubicacion: p.ubicacion,
                             estado: p.estado,
-                            accion_realizada: p.accion_realizada
-                        });
+                            accion_realizada: p.accion_realizada,
+                            actividad_detectada: p.estado === 'con_actividad',
+                            ...datosAdicionales // Expandir los datos adicionales
+                        };
+                        
+                        // Agregar directamente al array sin llamar a agregar() para evitar validación de duplicados en carga
+                        puntosManager.puntos.push(puntoCompleto);
                     });
+                    
+                    // Actualizar la vista de cada tipo de plaga (sin renderizar el listado general)
+                    const tiposPlagas = [...new Set(puntos.map(p => p.tipo_plaga))];
+                    tiposPlagas.forEach(tipo => {
+                        if (tipo) {
+                            actualizarVistaPuntos(tipo);
+                        }
+                    });
+                    
+                    console.log(`✅ ${puntos.length} puntos cargados y mostrados en tablas específicas`);
+                }
+                
+                // Ocultar botón "Comenzar Control" en modo edición
+                const btnComenzar = document.getElementById('btnComenzarControl');
+                if (btnComenzar) {
+                    btnComenzar.style.display = 'none';
                 }
                 
                 console.log('✅ Control cargado completamente');
@@ -567,6 +812,175 @@
                 console.error('❌ Error cargando control:', error);
                 alert('Error al cargar el control: ' + error.message);
                 window.location.href = 'controles.html';
+            }
+        }
+        
+        /**
+         * Cargar datos de control desde IndexedDB (modo borrador)
+         */
+        async function cargarControlDraft(localId) {
+            try {
+                console.log('📥 Cargando control draft desde IndexedDB:', localId);
+                
+                // 1. Cargar datos del control
+                const control = await dbManager.obtenerControl(localId);
+                
+                if (!control) {
+                    throw new Error('Control draft no encontrado en IndexedDB');
+                }
+                
+                console.log('✅ Control draft cargado:', control);
+                
+                // Guardar datos del control actual
+                currentControlData = control;
+                
+                // 2. Pre-llenar formulario
+                document.getElementById('clienteId').value = control.cliente_id;
+                document.getElementById('fechaControl').value = control.fecha_control;
+                document.getElementById('tipoControl').value = control.tipo_control;
+                document.getElementById('observaciones').value = control.observaciones || '';
+                
+                // Cargar plantas del cliente seleccionado
+                if (control.cliente_id) {
+                    const plantas = await dataLoader.cargarPlantas(control.cliente_id);
+                    llenarSelect('plantaId', plantas, 'planta_id', 'nombre', true);
+                    if (control.planta_id) {
+                        document.getElementById('plantaId').value = control.planta_id;
+                    }
+                }
+                
+                // Seleccionar técnico
+                document.getElementById('tecnicoId').value = control.tecnico_id;
+                
+                // Cargar sello del técnico
+                if (control.tecnico_id) {
+                    await selloManager.cargarSello(control.tecnico_id);
+                }
+                
+                // 3. Cargar productos
+                const productos = await dbManager.obtenerProductos(localId);
+                
+                if (productos && productos.length > 0) {
+                    console.log(`📦 Cargando ${productos.length} productos desde draft...`);
+                    productos.forEach(p => {
+                        productosManager.agregar({
+                            producto_id: p.producto_id,
+                            nombre: p.nombre,
+                            tipo: p.tipo,
+                            cantidad: p.cantidad,
+                            unidad: p.unidad
+                        });
+                    });
+                }
+                
+                // 4. Cargar puntos de control
+                const puntos = await dbManager.obtenerPuntos(localId);
+                
+                if (puntos && puntos.length > 0) {
+                    console.log(`📍 Cargando ${puntos.length} puntos desde draft...`);
+                    puntos.forEach(p => {
+                        console.log('📊 Punto desde IndexedDB:', p);
+                        // Usar spread operator para mantener TODOS los campos
+                        puntosManager.agregar({
+                            ...p, // Copia TODOS los campos del punto (incluidos los específicos)
+                            numero: p.numero,
+                            tipo_plaga: p.tipo_plaga
+                        });
+                    });
+                    
+                    // Actualizar la vista de cada tipo de plaga
+                    const tiposPlagas = [...new Set(puntos.map(p => p.tipo_plaga))];
+                    tiposPlagas.forEach(tipo => {
+                        if (tipo) {
+                            actualizarVistaPuntos(tipo);
+                        }
+                    });
+                }
+                
+                console.log('✅ Control draft cargado completamente');
+                
+                // Habilitar navegación a otros pasos
+                document.getElementById('btnComenzarControl').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ Error cargando control draft:', error);
+                alert('Error al cargar el borrador: ' + error.message);
+                window.location.href = 'controles.html';
+            }
+        }
+        
+        /**
+         * Comenzar nuevo control (guardar en IndexedDB)
+         */
+        async function comenzarControl() {
+            try {
+                // Validar campos obligatorios (IDs son UUIDs, no integers)
+                const clienteId = document.getElementById('clienteId').value;
+                const plantaId = document.getElementById('plantaId').value || null;
+                const tecnicoId = document.getElementById('tecnicoId').value;
+                const fechaControl = document.getElementById('fechaControl').value;
+                const tipoControl = document.getElementById('tipoControl').value;
+                
+                console.log('📋 Valores del formulario:', {
+                    clienteId,
+                    plantaId,
+                    tecnicoId,
+                    fechaControl,
+                    tipoControl
+                });
+                
+                if (!clienteId || clienteId === '') {
+                    alert('⚠️ Debe seleccionar un cliente');
+                    return;
+                }
+                
+                if (!tecnicoId || tecnicoId === '') {
+                    alert('⚠️ Debe seleccionar un técnico responsable');
+                    return;
+                }
+                
+                if (!fechaControl) {
+                    alert('⚠️ Debe seleccionar una fecha');
+                    return;
+                }
+                
+                if (!tipoControl) {
+                    alert('⚠️ Debe seleccionar un tipo de control');
+                    return;
+                }
+                
+                console.log('🚀 Creando control en IndexedDB...');
+                
+                // Crear control en IndexedDB
+                const controlData = {
+                    empresa_id: workerProfile.empresa_id,
+                    cliente_id: clienteId,
+                    planta_id: plantaId,
+                    tecnico_id: tecnicoId,
+                    fecha_control: fechaControl,
+                    tipo_control: tipoControl,
+                    observaciones: null,
+                    estado: 'borrador'
+                };
+                
+                localControlId = await dbManager.guardarControl(controlData);
+                console.log('✅ Control creado en IndexedDB con ID:', localControlId);
+                
+                // Guardar datos del control actual
+                currentControlData = controlData;
+                
+                // Cambiar botón
+                document.getElementById('btnComenzarControl').style.display = 'none';
+                
+                // Mostrar mensaje
+                alert('✅ Control iniciado. Puedes continuar agregando productos y puntos.');
+                
+                // Avanzar al siguiente paso
+                wizard.nextStep();
+                
+            } catch (error) {
+                console.error('❌ Error creando control:', error);
+                alert('Error al crear el control: ' + error.message);
             }
         }
         
@@ -690,7 +1104,7 @@
         /**
          * Agregar producto a la lista
          */
-        function agregarProducto() {
+        async function agregarProducto() {
             try {
                 const productoSelect = document.getElementById('productoSelect');
                 const cantidad = document.getElementById('cantidadProducto').value;
@@ -706,6 +1120,13 @@
                     return;
                 }
                 
+                // Verificar que existe un control iniciado
+                if (!localControlId && !editMode) {
+                    alert('⚠️ Debe comenzar el control primero (Paso 1)');
+                    wizard.goToStep(1);
+                    return;
+                }
+                
                 const producto = {
                     producto_id: productoSelect.value,
                     nombre: productoSelect.options[productoSelect.selectedIndex].text,
@@ -714,6 +1135,15 @@
                 };
                 
                 productosManager.agregar(producto);
+                
+                // Guardar en IndexedDB si estamos en modo draft
+                if (localControlId && !editMode) {
+                    await dbManager.sincronizarProductos(localControlId, productosManager.getAll());
+                    console.log('✅ Productos guardados en IndexedDB');
+                    mostrarToast(`💾 Producto "${nombre}" guardado en borrador`, 'success', 2000);
+                } else if (editMode) {
+                    mostrarToast(`✅ Producto agregado (se guardará al completar)`, 'info', 2000);
+                }
                 
                 // Limpiar campos
                 productoSelect.value = '';
@@ -727,42 +1157,412 @@
         }
         
         /**
-         * Agregar punto de control a la lista
+         * Agregar punto de control a la lista (con tipo de plaga)
          */
-        function agregarPunto() {
+        async function agregarPunto(tipoPlaga) {
             try {
-                const numero = document.getElementById('numeroPunto').value;
-                const tipoPlaga = document.getElementById('tipoPlaga').value;
-                const estado = document.getElementById('estadoPunto').value;
+                let punto = {};
                 
-                if (!numero || !tipoPlaga || !estado) {
-                    alert('⚠️ Complete los campos obligatorios: Número, Tipo de Plaga y Estado');
+                // Verificar que existe un control iniciado
+                if (!localControlId && !editMode) {
+                    alert('⚠️ Debe comenzar el control primero (Paso 1)');
+                    wizard.goToStep(1);
                     return;
                 }
                 
-                const punto = {
-                    numero: parseInt(numero),
-                    tipo_plaga: tipoPlaga,
-                    tipo_dispositivo: document.getElementById('tipoDispositivo').value,
-                    ubicacion: document.getElementById('ubicacionPunto').value,
-                    estado: estado,
-                    accion_realizada: document.getElementById('accionRealizada').value
-                };
+                // Campos específicos por tipo de plaga
+                if (tipoPlaga === 'voladores') {
+                    // Formulario de voladores: Caja UV, Densidad, Reposición, Observaciones
+                    const cajaUV = document.getElementById('cajaUVVoladores').value;
+                    const densidad = document.getElementById('densidadVoladores').value;
+                    const reposicion = document.getElementById('reposicionVoladores').value;
+                    const observaciones = document.getElementById('observacionesVoladores').value;
+                    
+                    if (!cajaUV || !densidad) {
+                        alert('⚠️ Complete los campos obligatorios: Caja UV N° y Densidad');
+                        return;
+                    }
+                    
+                    // Convertir cajaUV a número si es posible, sino usar secuencial
+                    let numeroPunto = parseInt(cajaUV);
+                    if (isNaN(numeroPunto)) {
+                        const puntosVoladores = puntosManager.getAll().filter(p => p.tipo_plaga === 'voladores');
+                        numeroPunto = puntosVoladores.length + 1;
+                    }
+                    
+                    punto = {
+                        numero: numeroPunto,
+                        tipo_plaga: 'voladores',
+                        tipo_dispositivo: 'Caja UV',
+                        ubicacion: null,
+                        estado: densidad, // Usar densidad directamente como estado
+                        accion_realizada: reposicion ? `Reposición: ${reposicion}` : null,
+                        observaciones: observaciones || null,
+                        // Campos adicionales específicos
+                        caja_uv: cajaUV, // Mantener el valor original como string
+                        densidad: densidad, // También en datos adicionales para consistencia
+                        reposicion: reposicion
+                    };
+                    
+                } else if (tipoPlaga === 'rastreros') {
+                    // Formulario de rastreros: Ubicación y Observaciones
+                    const ubicacion = document.getElementById('ubicacionRastreros').value;
+                    const observaciones = document.getElementById('observacionesRastreros').value;
+                    
+                    if (!ubicacion) {
+                        alert('⚠️ Complete el campo obligatorio: Ubicación');
+                        return;
+                    }
+                    
+                    // Generar número secuencial para rastreros
+                    const puntosRastreros = puntosManager.getAll().filter(p => p.tipo_plaga === 'rastreros');
+                    const numeroRastrero = puntosRastreros.length + 1;
+                    
+                    punto = {
+                        numero: numeroRastrero, // Usar número secuencial
+                        tipo_plaga: 'rastreros',
+                        tipo_dispositivo: 'Aplicación',
+                        ubicacion: ubicacion,
+                        estado: 'ok',
+                        accion_realizada: null,
+                        observaciones: observaciones || null
+                    };
+                    
+                } else if (tipoPlaga === 'roedores') {
+                    // Formulario de roedores con campos específicos
+                    const cajaN = document.getElementById('cajaNRoedores').value;
+                    const vivos = document.getElementById('vivosRoedores').value;
+                    const muertos = document.getElementById('muertosRoedores').value;
+                    const tipoTrampa = document.getElementById('tipoTrampaRoedores').value;
+                    const materiaFecal = document.getElementById('materiaFecalRoedores').value;
+                    const consumo = document.getElementById('consumoRoedores').value;
+                    const reposicion = document.getElementById('reposicionRoedores').value;
+                    const observaciones = document.getElementById('observacionesRoedores').value;
+                    
+                    console.log('📊 Valores capturados de roedores:', {
+                        cajaN, vivos, muertos, tipoTrampa, materiaFecal, consumo, reposicion, observaciones
+                    });
+                    
+                    if (!cajaN || !vivos || !muertos || !tipoTrampa || !materiaFecal || !consumo || !reposicion) {
+                        alert('⚠️ Complete todos los campos obligatorios');
+                        return;
+                    }
+                    
+                    // Convertir cajaN a número si es posible, sino usar secuencial
+                    let numeroPunto = parseInt(cajaN);
+                    if (isNaN(numeroPunto)) {
+                        const puntosRoedores = puntosManager.getAll().filter(p => p.tipo_plaga === 'roedores');
+                        numeroPunto = puntosRoedores.length + 1;
+                    }
+                    
+                    punto = {
+                        numero: numeroPunto,
+                        tipo_plaga: 'roedores',
+                        tipo_dispositivo: tipoTrampa,
+                        ubicacion: null,
+                        estado: vivos === 'si' || muertos === 'si' ? 'con_actividad' : 'ok',
+                        accion_realizada: reposicion === 'si' ? 'Reposición realizada' : null,
+                        observaciones: observaciones || null,
+                        // Campos adicionales específicos de roedores
+                        caja_n: cajaN, // Mantener el valor original como string
+                        vivos: vivos,
+                        muertos: muertos,
+                        tipo_trampa: tipoTrampa,
+                        materia_fecal: materiaFecal,
+                        consumo: consumo,
+                        reposicion: reposicion
+                    };
+                    
+                    console.log('✅ Punto creado para roedores:', punto);
+                }
                 
                 puntosManager.agregar(punto);
                 
-                // Limpiar campos
-                document.getElementById('numeroPunto').value = '';
-                document.getElementById('tipoPlaga').value = '';
-                document.getElementById('tipoDispositivo').value = '';
-                document.getElementById('ubicacionPunto').value = '';
-                document.getElementById('estadoPunto').value = '';
-                document.getElementById('accionRealizada').value = '';
+                // Guardar en IndexedDB si estamos en modo draft
+                if (localControlId && !editMode) {
+                    await dbManager.sincronizarPuntos(localControlId, puntosManager.getAll());
+                    console.log('✅ Puntos guardados en IndexedDB');
+                    console.log(`📊 Total de puntos en borrador: ${puntosManager.getAll().length}`);
+                    
+                    // Mostrar notificación
+                    const tipoNombre = {
+                        'roedores': 'Roedores',
+                        'voladores': 'Voladores',
+                        'rastreros': 'Rastreros'
+                    };
+                    mostrarToast(`💾 Punto de ${tipoNombre[tipoPlaga]} guardado en borrador`, 'success', 2000);
+                } else if (editMode) {
+                    console.log('ℹ️ Modo edición - Los puntos se guardarán al completar el control');
+                    mostrarToast(`✅ Punto agregado (se guardará al completar)`, 'info', 2000);
+                } else {
+                    console.warn('⚠️ No hay control iniciado - Inicie el control en el Paso 1');
+                }
+                
+                // Limpiar campos específicos por tipo
+                if (tipoPlaga === 'voladores') {
+                    document.getElementById('cajaUVVoladores').value = '';
+                    document.getElementById('densidadVoladores').value = '';
+                    document.getElementById('reposicionVoladores').value = '';
+                    document.getElementById('observacionesVoladores').value = '';
+                } else if (tipoPlaga === 'rastreros') {
+                    document.getElementById('ubicacionRastreros').value = '';
+                    document.getElementById('observacionesRastreros').value = '';
+                } else if (tipoPlaga === 'roedores') {
+                    document.getElementById('cajaNRoedores').value = '';
+                    document.getElementById('vivosRoedores').value = '';
+                    document.getElementById('muertosRoedores').value = '';
+                    document.getElementById('tipoTrampaRoedores').value = '';
+                    document.getElementById('materiaFecalRoedores').value = '';
+                    document.getElementById('consumoRoedores').value = '';
+                    document.getElementById('reposicionRoedores').value = '';
+                    document.getElementById('observacionesRoedores').value = '';
+                }
+                
+                // Actualizar la vista de puntos agregados para esta plaga
+                actualizarVistaPuntos(tipoPlaga);
                 
             } catch (error) {
                 console.error('❌ Error agregando punto:', error);
                 alert('Error: ' + error.message);
             }
+        }
+        
+        /**
+         * Capitalizar primera letra
+         */
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        /**
+         * Actualizar vista de puntos agregados por tipo
+         */
+        function actualizarVistaPuntos(tipoPlaga) {
+            const puntos = puntosManager.getAll().filter(p => p.tipo_plaga === tipoPlaga);
+            const container = document.getElementById(`puntosAgregados${capitalize(tipoPlaga)}`);
+            
+            if (puntos.length === 0) {
+                const iconos = {
+                    'roedores': '🐭',
+                    'voladores': '🦟',
+                    'rastreros': '🐜'
+                };
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">${iconos[tipoPlaga]}</div>
+                        <p class="empty-state-message">No se han agregado puntos de ${tipoPlaga}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ordenar por número
+            puntos.sort((a, b) => {
+                const numA = typeof a.numero === 'number' ? a.numero : parseInt(a.numero) || 0;
+                const numB = typeof b.numero === 'number' ? b.numero : parseInt(b.numero) || 0;
+                return numA - numB;
+            });
+            
+            // Tabla específica para voladores
+            if (tipoPlaga === 'voladores') {
+                container.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Caja UV N°</th>
+                                    <th>Densidad</th>
+                                    <th>Reposición</th>
+                                    <th>Observaciones</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${puntos.map((p, idx) => {
+                                    const allPuntos = puntosManager.getAll();
+                                    const globalIdx = allPuntos.findIndex(punto => 
+                                        punto.numero === p.numero && 
+                                        punto.tipo_plaga === p.tipo_plaga &&
+                                        punto.estado === p.estado
+                                    );
+                                    
+                                    return `
+                                        <tr>
+                                            <td><strong>${p.caja_uv || p.numero}</strong></td>
+                                            <td><span class="badge badge-${p.densidad || p.estado}">${p.densidad || p.estado}</span></td>
+                                            <td>${p.reposicion || '-'}</td>
+                                            <td>${p.observaciones || '-'}</td>
+                                            <td>
+                                                <button class="btn-icon-sm btn-danger" onclick="eliminarPuntoLocal(${globalIdx})">
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else if (tipoPlaga === 'rastreros') {
+                // Tabla específica para rastreros
+                container.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ubicación</th>
+                                    <th>Observaciones</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${puntos.map((p, idx) => {
+                                    const allPuntos = puntosManager.getAll();
+                                    const globalIdx = allPuntos.findIndex(punto => 
+                                        punto.ubicacion === p.ubicacion && 
+                                        punto.tipo_plaga === p.tipo_plaga
+                                    );
+                                    
+                                    return `
+                                        <tr>
+                                            <td><strong>${p.ubicacion}</strong></td>
+                                            <td>${p.observaciones || '-'}</td>
+                                            <td>
+                                                <button class="btn-icon-sm btn-danger" onclick="eliminarPuntoLocal(${globalIdx})">
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else if (tipoPlaga === 'roedores') {
+                // Tabla específica para roedores
+                console.log('🐭 Mostrando tabla de roedores. Puntos:', puntos);
+                
+                container.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Caja N°</th>
+                                    <th>Vivos</th>
+                                    <th>Muertos</th>
+                                    <th>Tipo Trampa</th>
+                                    <th>M. Fecal</th>
+                                    <th>Consumo</th>
+                                    <th>Reposición</th>
+                                    <th>Observ.</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${puntos.map((p, idx) => {
+                                    console.log('📊 Procesando punto roedor completo:', JSON.stringify(p, null, 2));
+                                    console.log('🔍 Campos específicos:', {
+                                        caja_n: p.caja_n,
+                                        vivos: p.vivos,
+                                        muertos: p.muertos,
+                                        tipo_trampa: p.tipo_trampa,
+                                        materia_fecal: p.materia_fecal,
+                                        consumo: p.consumo,
+                                        reposicion: p.reposicion
+                                    });
+                                    
+                                    const allPuntos = puntosManager.getAll();
+                                    const globalIdx = allPuntos.findIndex(punto => 
+                                        punto.numero === p.numero && 
+                                        punto.tipo_plaga === p.tipo_plaga
+                                    );
+                                    
+                                    return `
+                                        <tr>
+                                            <td><strong>${p.caja_n || p.numero}</strong></td>
+                                            <td>${p.vivos ? p.vivos.toUpperCase() : '-'}</td>
+                                            <td>${p.muertos ? p.muertos.toUpperCase() : '-'}</td>
+                                            <td>${p.tipo_trampa || p.tipo_dispositivo || '-'}</td>
+                                            <td>${p.materia_fecal ? p.materia_fecal.toUpperCase() : '-'}</td>
+                                            <td>${p.consumo ? p.consumo.toUpperCase() : '-'}</td>
+                                            <td>${p.reposicion ? p.reposicion.toUpperCase() : '-'}</td>
+                                            <td>${p.observaciones ? p.observaciones.substring(0, 20) + (p.observaciones.length > 20 ? '...' : '') : '-'}</td>
+                                            <td>
+                                                <button class="btn-icon-sm btn-danger" onclick="eliminarPuntoLocal(${globalIdx})">
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
+         * Eliminar punto localmente
+         */
+        async function eliminarPuntoLocal(index) {
+            if (!confirm('¿Eliminar este punto?')) return;
+            
+            const puntos = puntosManager.getAll();
+            const puntoEliminado = puntos[index];
+            
+            puntosManager.eliminar(index);
+            
+            // Actualizar IndexedDB si estamos en modo draft
+            if (localControlId && !editMode) {
+                await dbManager.sincronizarPuntos(localControlId, puntosManager.getAll());
+            }
+            
+            // Actualizar la vista correspondiente
+            actualizarVistaPuntos(puntoEliminado.tipo_plaga);
+        }
+        
+        /**
+         * Limpiar todos los puntos (útil para borrar puntos de prueba)
+         */
+        async function limpiarTodosPuntos() {
+            if (!confirm('⚠️ ¿Está seguro de eliminar TODOS los puntos? Esta acción no se puede deshacer.')) return;
+            
+            // Limpiar el manager
+            while (puntosManager.getAll().length > 0) {
+                puntosManager.eliminar(0);
+            }
+            
+            // Actualizar IndexedDB si estamos en modo draft
+            if (localControlId && !editMode) {
+                await dbManager.sincronizarPuntos(localControlId, []);
+                console.log('✅ Todos los puntos eliminados de IndexedDB');
+            }
+            
+            // Actualizar todas las vistas
+            actualizarVistaPuntos('roedores');
+            actualizarVistaPuntos('voladores');
+            actualizarVistaPuntos('rastreros');
+            
+            alert('✅ Todos los puntos han sido eliminados');
+        }
+        
+        /**
+         * Cambiar tab activo
+         */
+        function cambiarTab(tipoPlaga) {
+            // Desactivar todas las tabs
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activar la tab seleccionada
+            document.querySelector(`[data-tab="${tipoPlaga}"]`).classList.add('active');
+            document.getElementById(`tab-${tipoPlaga}`).classList.add('active');
+            
+            // Actualizar vista de puntos
+            actualizarVistaPuntos(tipoPlaga);
         }
         
         /**
@@ -830,31 +1630,93 @@
                                 <div class="grupo-plagas">
                                     <h4 class="grupo-titulo">${config.icono} ${config.nombre} (${grupos[tipoPlaga].length})</h4>
                                     <div class="grupo-puntos">
-                                        ${grupos[tipoPlaga].map(punto => `
-                                            <div class="punto-card">
-                                                <div class="punto-header">
-                                                    <span class="punto-numero">Punto #${punto.numero}</span>
-                                                    <span class="punto-estado estado-${punto.estado}">${formatearEstado(punto.estado)}</span>
+                                        ${grupos[tipoPlaga].map(punto => {
+                                            // Generar contenido específico por tipo de plaga
+                                            let infoHTML = '';
+                                            
+                                            if (tipoPlaga === 'roedores') {
+                                                // Mostrar campos específicos de roedores
+                                                infoHTML = `
+                                                    <div class="punto-info">
+                                                        <div class="punto-info-item">
+                                                            <strong>📦 Caja N°:</strong> ${punto.caja_n || punto.numero}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>👀 Vivos:</strong> ${punto.vivos ? punto.vivos.toUpperCase() : '-'}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>💀 Muertos:</strong> ${punto.muertos ? punto.muertos.toUpperCase() : '-'}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>🪤 Tipo Trampa:</strong> ${punto.tipo_trampa || punto.tipo_dispositivo || '-'}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>💩 Materia Fecal:</strong> ${punto.materia_fecal ? punto.materia_fecal.toUpperCase() : '-'}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>🍽️ Consumo:</strong> ${punto.consumo ? punto.consumo.toUpperCase() : '-'}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>🔄 Reposición:</strong> ${punto.reposicion ? punto.reposicion.toUpperCase() : '-'}
+                                                        </div>
+                                                        ${punto.observaciones ? `
+                                                            <div class="punto-info-item">
+                                                                <strong>� Observaciones:</strong> ${punto.observaciones}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                `;
+                                            } else if (tipoPlaga === 'voladores') {
+                                                // Mostrar campos específicos de voladores
+                                                infoHTML = `
+                                                    <div class="punto-info">
+                                                        <div class="punto-info-item">
+                                                            <strong>💡 Caja UV N°:</strong> ${punto.caja_uv || punto.numero}
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>📊 Densidad:</strong> <span class="badge badge-${punto.densidad || punto.estado}">${punto.densidad ? punto.densidad.toUpperCase() : '-'}</span>
+                                                        </div>
+                                                        <div class="punto-info-item">
+                                                            <strong>🔄 Reposición:</strong> ${punto.reposicion ? punto.reposicion.toUpperCase() : '-'}
+                                                        </div>
+                                                        ${punto.observaciones ? `
+                                                            <div class="punto-info-item">
+                                                                <strong>� Observaciones:</strong> ${punto.observaciones}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                `;
+                                            } else if (tipoPlaga === 'rastreros') {
+                                                // Mostrar campos específicos de rastreros
+                                                infoHTML = `
+                                                    <div class="punto-info">
+                                                        <div class="punto-info-item">
+                                                            <strong>📍 Ubicación:</strong> ${punto.ubicacion || '-'}
+                                                        </div>
+                                                        ${punto.observaciones ? `
+                                                            <div class="punto-info-item">
+                                                                <strong>📝 Observaciones:</strong> ${punto.observaciones}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                `;
+                                            }
+                                            
+                                            // Determinar el estado para roedores
+                                            let estadoBadge = '';
+                                            if (tipoPlaga === 'roedores') {
+                                                const tieneActividad = punto.vivos === 'si' || punto.muertos === 'si';
+                                                estadoBadge = `<span class="punto-estado estado-${tieneActividad ? 'con_actividad' : 'ok'}">${tieneActividad ? 'Con Actividad' : 'OK'}</span>`;
+                                            } else {
+                                                estadoBadge = `<span class="punto-estado estado-${punto.estado}">${formatearEstado(punto.estado)}</span>`;
+                                            }
+                                            
+                                            return `
+                                                <div class="punto-card">
+                                                    ${infoHTML}
                                                 </div>
-                                                <div class="punto-info">
-                                                    ${punto.tipo_dispositivo ? `
-                                                        <div class="punto-info-item">
-                                                            <strong>🔧 Dispositivo:</strong> ${punto.tipo_dispositivo}
-                                                        </div>
-                                                    ` : ''}
-                                                    ${punto.ubicacion ? `
-                                                        <div class="punto-info-item">
-                                                            <strong>📍 Ubicación:</strong> ${punto.ubicacion}
-                                                        </div>
-                                                    ` : ''}
-                                                    ${punto.accion_realizada ? `
-                                                        <div class="punto-info-item">
-                                                            <strong>⚡ Acción:</strong> ${punto.accion_realizada}
-                                                        </div>
-                                                    ` : ''}
-                                                </div>
-                                            </div>
-                                        `).join('')}
+                                            `;
+                                        }).join('')}
                                     </div>
                                 </div>
                             `;
@@ -914,19 +1776,58 @@
         }
         
         /**
-         * Guardar control completo
+         * Mostrar notificación toast
          */
-        async function guardarControl() {
+        function mostrarToast(mensaje, tipo = 'success', duracion = 2000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = mensaje;
+            toast.className = `toast ${tipo}`;
+            
+            // Mostrar toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Ocultar toast después de la duración
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duracion);
+        }
+        
+        /**
+         * Completar control (subir a Supabase y eliminar de IndexedDB)
+         */
+        async function completarControl() {
             try {
-                // Validar wizard
-                if (!wizard.validarPasoActual()) {
+                // Siempre recopilar datos del formulario (funciona para edición y nuevos)
+                const formData = controlManager.recopilarDatosFormulario();
+                console.log('📋 Datos recopilados del formulario:', formData);
+                console.log('🔍 Valores individuales:', {
+                    cliente_id: formData.cliente_id,
+                    cliente_id_type: typeof formData.cliente_id,
+                    cliente_id_isNaN: isNaN(formData.cliente_id),
+                    tecnico_id: formData.tecnico_id,
+                    tecnico_id_type: typeof formData.tecnico_id,
+                    fecha_control: formData.fecha_control,
+                    tipo_control: formData.tipo_control
+                });
+                
+                // Validar que hay datos mínimos
+                if (!formData.cliente_id || !formData.tecnico_id || !formData.fecha_control || !formData.tipo_control) {
+                    console.error('❌ Validación fallida. Valores:', {
+                        cliente_id: formData.cliente_id,
+                        tecnico_id: formData.tecnico_id,
+                        fecha_control: formData.fecha_control,
+                        tipo_control: formData.tipo_control
+                    });
+                    alert('⚠️ Complete la información básica del control en el Paso 1');
+                    wizard.goToStep(1);
                     return;
                 }
                 
-                console.log(editMode ? '💾 Iniciando actualización...' : '💾 Iniciando guardado...');
-                
-                // Recopilar datos del formulario
-                const formData = controlManager.recopilarDatosFormulario();
+                console.log(editMode ? '💾 Actualizando control en Supabase...' : '💾 Completando control y subiendo a Supabase...');
                 
                 // Obtener productos y puntos
                 const productos = productosManager.getAll();
@@ -935,34 +1836,76 @@
                 
                 // Confirmar antes de guardar
                 const confirmar = confirm(
-                    `¿Desea ${editMode ? 'actualizar' : 'guardar'} este control?\n\n` +
+                    `¿Desea ${editMode ? 'actualizar' : 'completar'} este control?\n\n` +
                     `Productos: ${productos.length}\n` +
                     `Puntos: ${puntos.length}\n` +
-                    `Sello: ${selloUrl ? 'Sí' : 'No'}`
+                    `Sello: ${selloUrl ? 'Sí' : 'No'}\n\n` +
+                    (localControlId ? 'El borrador se eliminará después de completar.' : '')
                 );
                 
                 if (!confirmar) return;
                 
-                // Preparar productos y puntos SIN control_id (se asignará después de crear el control)
-                const productosPreparados = productosManager.getAll().map(p => ({
+                // Preparar productos y puntos para Supabase
+                const productosPreparados = productos.map(p => ({
                     producto_id: p.producto_id,
                     cantidad_usada: p.cantidad,
                     unidad: p.unidad
                 }));
                 
-                const puntosPreparados = puntosManager.getAll().map(p => ({
-                    numero_punto: p.numero,
-                    tipo_plaga: p.tipo_plaga,
-                    tipo_dispositivo: p.tipo_dispositivo || null,
-                    ubicacion: p.ubicacion || null,
-                    estado: p.estado,
-                    accion_realizada: p.accion_realizada || null
-                }));
+                const puntosPreparados = puntos.map(p => {
+                    // Campos base para todos los tipos
+                    const puntoBase = {
+                        numero_punto: p.numero,
+                        tipo_plaga: p.tipo_plaga,
+                        tipo_dispositivo: p.tipo_dispositivo || null,
+                        ubicacion: p.ubicacion || null,
+                        estado: p.estado || 'ok',
+                        accion_realizada: p.accion_realizada || null
+                    };
+                    
+                    // Preparar información adicional en formato JSON para descripcion_actividad
+                    let infoAdicional = {};
+                    
+                    // Agregar campos específicos según el tipo de plaga
+                    if (p.tipo_plaga.toLowerCase() === 'roedores') {
+                        infoAdicional = {
+                            caja_n: p.caja_n || p.numero,
+                            vivos: p.vivos || null,
+                            muertos: p.muertos || null,
+                            tipo_trampa: p.tipo_trampa || p.tipo_dispositivo,
+                            materia_fecal: p.materia_fecal || null,
+                            consumo: p.consumo || null,
+                            reposicion: p.reposicion || null,
+                            observaciones: p.observaciones || null
+                        };
+                    } else if (p.tipo_plaga.toLowerCase() === 'voladores') {
+                        infoAdicional = {
+                            caja_uv: p.caja_uv || p.numero,
+                            densidad: p.densidad || null,
+                            reposicion: p.reposicion || null,
+                            observaciones: p.observaciones || null
+                        };
+                    } else if (p.tipo_plaga.toLowerCase() === 'rastreros') {
+                        infoAdicional = {
+                            ubicacion_detalle: p.ubicacion,
+                            observaciones: p.observaciones || null
+                        };
+                    }
+                    
+                    // Combinar info adicional con observaciones
+                    const descripcion = JSON.stringify(infoAdicional);
+                    
+                    return {
+                        ...puntoBase,
+                        descripcion_actividad: descripcion,
+                        actividad_detectada: p.estado === 'con_actividad' || false
+                    };
+                });
                 
                 let control;
                 
                 if (editMode) {
-                    // Modo edición: actualizar control existente
+                    // Modo edición: actualizar control existente en Supabase
                     control = await controlManager.actualizar(
                         currentControlId,
                         formData,
@@ -970,26 +1913,33 @@
                         puntosPreparados,
                         selloUrl
                     );
-                    console.log('✅ Control actualizado con ID:', control.control_id);
+                    console.log('✅ Control actualizado en Supabase con ID:', control.control_id);
                     alert('✅ Control actualizado exitosamente');
                 } else {
-                    // Modo creación: guardar nuevo control
+                    // Modo nuevo: subir a Supabase
                     control = await controlManager.guardar(
                         formData,
                         productosPreparados,
                         puntosPreparados,
                         selloUrl
                     );
-                    console.log('✅ Control guardado con ID:', control.control_id);
-                    alert('✅ Control guardado exitosamente');
+                    console.log('✅ Control completado y subido a Supabase con ID:', control.control_id);
+                    
+                    // Eliminar draft de IndexedDB si existe
+                    if (localControlId) {
+                        await dbManager.eliminarControl(localControlId);
+                        console.log('✅ Borrador eliminado de IndexedDB');
+                    }
+                    
+                    alert('✅ Control completado exitosamente');
                 }
                 
                 // Redirigir a la lista de controles
                 window.location.href = 'controles.html';
                 
             } catch (error) {
-                console.error('❌ Error guardando control:', error);
-                alert('❌ Error al guardar control: ' + error.message);
+                console.error('❌ Error completando control:', error);
+                alert('❌ Error al completar control: ' + error.message);
             }
         }
         

@@ -109,14 +109,35 @@ class ControlManager {
      * Recopilar datos del formulario
      */
     recopilarDatosFormulario() {
-        return {
-            cliente_id: document.getElementById('clienteId')?.value,
-            planta_id: document.getElementById('plantaId')?.value || null,
-            tecnico_id: document.getElementById('tecnicoId')?.value,
-            fecha_control: document.getElementById('fechaControl')?.value,
-            tipo_control: document.getElementById('tipoControl')?.value,
-            observaciones: document.getElementById('observaciones')?.value || null
+        const clienteValue = document.getElementById('clienteId')?.value;
+        const plantaValue = document.getElementById('plantaId')?.value;
+        const tecnicoValue = document.getElementById('tecnicoId')?.value;
+        const fechaValue = document.getElementById('fechaControl')?.value;
+        const tipoValue = document.getElementById('tipoControl')?.value;
+        const observacionesValue = document.querySelector('textarea[placeholder*="observaciones"]')?.value || '';
+        
+        console.log('📋 Recopilando datos del formulario:', {
+            clienteValue,
+            plantaValue,
+            tecnicoValue,
+            fechaValue,
+            tipoValue,
+            observacionesValue
+        });
+        
+        // NOTA: No usar parseInt() porque son UUIDs, no integers
+        const formData = {
+            cliente_id: clienteValue,
+            planta_id: plantaValue || null,
+            tecnico_id: tecnicoValue,
+            fecha_control: fechaValue,
+            tipo_control: tipoValue,
+            observaciones: observacionesValue
         };
+        
+        console.log('✅ Datos recopilados (UUIDs preservados):', formData);
+        
+        return formData;
     }
 
     /**

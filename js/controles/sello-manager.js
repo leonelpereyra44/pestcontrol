@@ -81,14 +81,28 @@ class SelloManager {
      * Mostrar la imagen del sello en el DOM
      */
     mostrarImagen(url) {
+        console.log('🖼️ mostrarImagen() llamado con URL:', url);
+        
         // Actualizar en el paso 5 (final)
         const img = document.getElementById('selloTecnicoImg');
         const placeholder = document.getElementById('selloTecnicoPlaceholder');
         
+        console.log('🔍 Elementos encontrados:', {
+            img: img ? 'SÍ' : 'NO',
+            placeholder: placeholder ? 'SÍ' : 'NO'
+        });
+        
         if (img && placeholder) {
             img.src = url;
             img.style.display = 'block';
+            img.classList.remove('hidden'); // Remover clase hidden
             placeholder.style.display = 'none';
+            console.log('✅ Imagen del sello actualizada en paso 5');
+            console.log('📸 URL de la imagen:', img.src);
+            console.log('🎨 Display de imagen:', img.style.display);
+            console.log('🎨 Classes de imagen:', img.className);
+        } else {
+            console.warn('⚠️ No se encontraron elementos del sello en paso 5');
         }
         
         // Actualizar preview en el paso 1
@@ -96,11 +110,21 @@ class SelloManager {
         const previewPlaceholder = document.getElementById('selloPreviewPlaceholder');
         const previewContainer = document.getElementById('selloPreviewContainer');
         
+        console.log('🔍 Elementos preview encontrados:', {
+            previewImg: previewImg ? 'SÍ' : 'NO',
+            previewPlaceholder: previewPlaceholder ? 'SÍ' : 'NO',
+            previewContainer: previewContainer ? 'SÍ' : 'NO'
+        });
+        
         if (previewImg && previewPlaceholder && previewContainer) {
             previewImg.src = url;
             previewImg.style.display = 'block';
+            previewImg.classList.remove('hidden');
             previewPlaceholder.style.display = 'none';
             previewContainer.style.display = 'block';
+            console.log('✅ Preview del sello actualizado en paso 1');
+        } else {
+            console.warn('⚠️ No se encontraron elementos del preview del sello');
         }
     }
 
