@@ -334,16 +334,20 @@
                         <thead>
                             <tr>
                                 <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Unidad</th>
+                                <th>Tipo</th>
+                                <th>Principio Activo</th>
+                                <th>Laboratorio</th>
+                                <th>Certificado</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${productos.map(p => `
                                 <tr>
                                     <td><strong>${p.producto?.nombre || 'Producto desconocido'}</strong></td>
-                                    <td>${p.cantidad_usada}</td>
-                                    <td>${p.unidad || p.producto?.unidad_medida || 'N/A'}</td>
+                                    <td>${p.producto?.tipo_producto || '-'}</td>
+                                    <td>${p.producto?.principio_activo || '-'}</td>
+                                    <td>${p.producto?.laboratorio || '-'}</td>
+                                    <td>${p.producto?.certificado || '-'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -396,41 +400,135 @@
             
             let html = '';
             
-            Object.keys(grupos).forEach(tipoPlaga => {
-                if (grupos[tipoPlaga].length > 0) {
-                    const config = tiposConfig[tipoPlaga];
-                    
-                    html += `
-                        <div class="grupo-puntos-control">
-                            <h3 class="grupo-titulo-control">${config.icono} ${config.nombre} (${grupos[tipoPlaga].length} puntos)</h3>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Punto</th>
-                                            <th>Dispositivo</th>
-                                            <th>Ubicación</th>
-                                            <th>Estado</th>
-                                            <th>Acción Realizada</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${grupos[tipoPlaga].map(p => `
+            // ===== ROEDORES =====
+            if (grupos.roedores.length > 0) {
+                html += `
+                    <div class="grupo-puntos-control">
+                        <h3 class="grupo-titulo-control">🐭 Roedores (${grupos.roedores.length} puntos)</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Caja</th>
+                                        <th>Vivos</th>
+                                        <th>Muertos</th>
+                                        <th>Tipo Trampa</th>
+                                        <th>Materia Fecal</th>
+                                        <th>Consumo Cebos</th>
+                                        <th>Reposición</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${grupos.roedores.map(punto => {
+                                        let datosAdicionales = {};
+                                        if (punto.descripcion_actividad) {
+                                            try {
+                                                datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                                            } catch (e) {}
+                                        }
+                                        const p = { ...punto, ...datosAdicionales };
+                                        
+                                        return `
                                             <tr>
-                                                <td><strong>#${p.numero_punto}</strong></td>
-                                                <td>${p.tipo_dispositivo || '-'}</td>
-                                                <td>${p.ubicacion || '-'}</td>
-                                                <td><span class="badge badge-${p.estado}">${formatearEstadoPunto(p.estado)}</span></td>
-                                                <td>${p.accion_realizada || '-'}</td>
+                                                <td>${p.caja_n || p.numero_punto || '-'}</td>
+                                                <td>${p.vivos || '-'}</td>
+                                                <td>${p.muertos || '-'}</td>
+                                                <td>${p.tipo_trampa || p.tipo_dispositivo || '-'}</td>
+                                                <td>${p.materia_fecal || '-'}</td>
+                                                <td>${p.consumo || '-'}</td>
+                                                <td>${p.reposicion || '-'}</td>
+                                                <td>${p.observaciones || '-'}</td>
                                             </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
                         </div>
-                    `;
-                }
-            });
+                    </div>
+                `;
+            }
+            
+            // ===== VOLADORES =====
+            if (grupos.voladores.length > 0) {
+                html += `
+                    <div class="grupo-puntos-control">
+                        <h3 class="grupo-titulo-control">🦟 Voladores (${grupos.voladores.length} puntos)</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>UV</th>
+                                        <th>Densidad</th>
+                                        <th>Reposición</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${grupos.voladores.map(punto => {
+                                        let datosAdicionales = {};
+                                        if (punto.descripcion_actividad) {
+                                            try {
+                                                datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                                            } catch (e) {}
+                                        }
+                                        const p = { ...punto, ...datosAdicionales };
+                                        
+                                        // Usar el campo densidad directamente (baja, media, alta)
+                                        const densidad = p.densidad || p.nivel_infestacion || '-';
+                                        
+                                        return `
+                                            <tr>
+                                                <td>${p.caja_uv_n || p.numero_punto || '-'}</td>
+                                                <td><span class="badge badge-${densidad.toLowerCase()}">${densidad.toUpperCase()}</span></td>
+                                                <td>${p.reposicion || '-'}</td>
+                                                <td>${p.observaciones || '-'}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // ===== RASTREROS =====
+            if (grupos.rastreros.length > 0) {
+                html += `
+                    <div class="grupo-puntos-control">
+                        <h3 class="grupo-titulo-control">🐜 Rastreros (${grupos.rastreros.length} puntos)</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ubicación</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${grupos.rastreros.map(punto => {
+                                        let datosAdicionales = {};
+                                        if (punto.descripcion_actividad) {
+                                            try {
+                                                datosAdicionales = JSON.parse(punto.descripcion_actividad);
+                                            } catch (e) {}
+                                        }
+                                        const p = { ...punto, ...datosAdicionales };
+                                        
+                                        return `
+                                            <tr>
+                                                <td>${p.ubicacion || p.area || '-'}</td>
+                                                <td>${p.observaciones || '-'}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
             
             container.innerHTML = html;
         }
@@ -954,10 +1052,7 @@
                     <h2 style="${estiloTitulo}">Rastreros</h2>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                         <tr>
-                            <th style="${estiloHeaderTabla}">Área</th>
-                            <th style="${estiloHeaderTabla}">Plaga</th>
-                            <th style="${estiloHeaderTabla}">Nivel</th>
-                            <th style="${estiloHeaderTabla}">Producto</th>
+                            <th style="${estiloHeaderTabla}">Ubicación</th>
                             <th style="${estiloHeaderTabla}">Observaciones</th>
                         </tr>
                 `;
@@ -973,10 +1068,7 @@
                     
                     html += `
                         <tr>
-                            <td style="${estiloCeldaTabla}">${p.area || p.numero_punto || '-'}</td>
-                            <td style="${estiloCeldaTabla}">${p.nombre_plaga || '-'}</td>
-                            <td style="${estiloCeldaTabla}">${p.nivel_infestacion || '-'}</td>
-                            <td style="${estiloCeldaTabla}">${p.producto_aplicado_nombre || '-'}</td>
+                            <td style="${estiloCeldaTabla}">${p.ubicacion || p.area || '-'}</td>
                             <td style="${estiloCeldaTabla}">${p.observaciones || '-'}</td>
                         </tr>
                     `;
