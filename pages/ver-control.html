@@ -22,6 +22,7 @@
             <div id="controlContent" style="display: none;">
                 <!-- Header -->
                 <div class="header">
+                    <!-- Desktop Header -->
                     <div class="header-title">
                         <h1 id="controlTitle">📋 Control de Plagas</h1>
                         <p class="header-subtitle" id="controlSubtitle"></p>
@@ -31,6 +32,44 @@
                         <button class="btn btn-primary" onclick="editarControl()">✏️ Editar</button>
                         <button class="btn btn-success" onclick="generarPDF()">📄 Generar PDF</button>
                         <button class="btn btn-danger" onclick="eliminarControl()">🗑️ Eliminar</button>
+                    </div>
+
+                    <!-- Mobile Header -->
+                    <div class="header-content-mobile">
+                        <button class="btn-back-mobile" onclick="window.location.href='controles.html'">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <div class="header-title-mobile">
+                            <h1 id="controlTitleMobile">📋 Control</h1>
+                            <p class="header-subtitle" id="controlSubtitleMobile"></p>
+                        </div>
+                        <button class="btn-menu-mobile" onclick="toggleMobileMenu()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 10H17M3 5H17M3 15H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Overlay -->
+                <div class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+                <div class="mobile-menu">
+                    <div class="mobile-menu-header">
+                        <h3>Acciones</h3>
+                        <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+                    </div>
+                    <div class="mobile-menu-items">
+                        <button class="mobile-menu-item" onclick="editarControl()">
+                            <span>✏️</span> Editar Control
+                        </button>
+                        <button class="mobile-menu-item" onclick="generarPDF()">
+                            <span>📄</span> Generar PDF
+                        </button>
+                        <button class="mobile-menu-item danger" onclick="eliminarControl()">
+                            <span>🗑️</span> Eliminar Control
+                        </button>
                     </div>
                 </div>
 
@@ -219,6 +258,13 @@
             
             document.getElementById('controlSubtitle').textContent = 
                 `Control de ${control.tipo_control} - ${formatearFecha(control.fecha_control)}`;
+
+            // Título Mobile
+            document.getElementById('controlTitleMobile').textContent = 
+                `📋 Control #${control.control_id.split('-')[0]}`;
+            
+            document.getElementById('controlSubtitleMobile').textContent = 
+                `${control.tipo_control} - ${formatearFecha(control.fecha_control)}`;
 
             // Información general
             const infoGeneral = document.getElementById('infoGeneral');
@@ -962,6 +1008,17 @@
                 console.error('❌ Error eliminando control:', error);
                 alert('Error al eliminar control: ' + error.message);
             }
+        }
+
+        /**
+         * Toggle menú mobile
+         */
+        function toggleMobileMenu() {
+            const menu = document.querySelector('.mobile-menu');
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
     </script>
 </body>

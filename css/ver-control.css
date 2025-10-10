@@ -468,11 +468,31 @@ tbody tr:hover {
 /* ===== MOBILE MENU ===== */
 .header-content-mobile {
     display: none;
+    width: 100%;
 }
 
 .header-title-mobile {
     flex: 1;
     min-width: 0;
+}
+
+.header-title-mobile h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-title-mobile .header-subtitle {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .btn-back-mobile,
@@ -511,7 +531,6 @@ tbody tr:hover {
     background: white;
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-    padding: 20px;
     transform: translateY(100%);
     transition: transform 0.3s ease;
     z-index: 1001;
@@ -520,6 +539,34 @@ tbody tr:hover {
 
 .mobile-menu.active {
     transform: translateY(0);
+}
+
+.mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.mobile-menu-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--gray-600);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+}
+
+.mobile-menu-items {
+    padding: 20px;
 }
 
 .mobile-menu-overlay {
@@ -556,6 +603,11 @@ tbody tr:hover {
     font-size: 16px;
     font-weight: 500;
     color: var(--color-text-primary);
+    text-align: left;
+}
+
+.mobile-menu-item span {
+    font-size: 20px;
 }
 
 .mobile-menu-item:last-child {
@@ -566,7 +618,7 @@ tbody tr:hover {
     transform: scale(0.98);
 }
 
-.mobile-menu-item-danger {
+.mobile-menu-item.danger {
     background: var(--danger-light);
     color: var(--danger);
 }
@@ -589,6 +641,8 @@ tbody tr:hover {
     
     .header {
         padding: 16px;
+        flex-direction: column;
+        gap: 0;
     }
     
     /* Ocultar header desktop */
@@ -605,6 +659,7 @@ tbody tr:hover {
         display: flex;
         align-items: center;
         gap: 12px;
+        width: 100%;
     }
     
     .header-title-mobile h1 {
