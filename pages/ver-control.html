@@ -236,7 +236,7 @@
                 controlData.puntos = puntos || [];
 
                 // Renderizar todo
-                renderizarControl(control, productos, puntos);
+                await renderizarControl(control, productos, puntos);
 
                 // Ocultar loading y mostrar contenido
                 document.getElementById('loadingState').style.display = 'none';
@@ -251,7 +251,7 @@
         /**
          * Renderizar información del control
          */
-        function renderizarControl(control, productos, puntos) {
+        async function renderizarControl(control, productos, puntos) {
             // Título
             document.getElementById('controlTitle').textContent = 
                 `📋 Control #${control.control_id.split('-')[0]}`;
@@ -308,8 +308,8 @@
             // Observaciones
             renderizarObservaciones(control.observaciones);
 
-            // Sello
-            renderizarSello(control.firma_tecnico);
+            // Sello - cargar desde el storage del worker
+            await cargarSelloTecnico(control.tecnico_id);
         }
 
         /**
@@ -455,6 +455,67 @@
         }
 
         /**
+         * Cargar sello del técnico desde storage
+         */
+        async function cargarSelloTecnico(tecnicoId) {
+            const container = document.getElementById('selloContainer');
+            
+            if (!tecnicoId) {
+                console.warn('⚠️ No hay tecnico_id para cargar el sello');
+                renderizarSello(null);
+                return;
+            }
+            
+            try {
+                console.log('📝 Cargando sello del técnico:', tecnicoId);
+                
+                // Listar archivos en la carpeta del técnico
+                const { data: files, error: listError } = await supabase.storage
+                    .from('workers')
+                    .list(`${tecnicoId}/sello`);
+
+                if (listError) {
+                    console.error('❌ Error listando archivos de sello:', listError);
+                    renderizarSello(null);
+                    return;
+                }
+
+                if (!files || files.length === 0) {
+                    console.log('⚠️ No se encontró sello para el técnico');
+                    renderizarSello(null);
+                    return;
+                }
+
+                // Obtener el primer archivo (debería haber solo uno)
+                const selloFile = files[0];
+                const selloPath = `${tecnicoId}/sello/${selloFile.name}`;
+
+                // Crear URL firmada temporal (válida por 1 hora)
+                const { data: urlData, error: urlError } = await supabase.storage
+                    .from('workers')
+                    .createSignedUrl(selloPath, 3600); // 1 hora de validez
+
+                if (urlError) {
+                    console.error('❌ Error generando URL firmada:', urlError);
+                    renderizarSello(null);
+                    return;
+                }
+
+                if (urlData?.signedUrl) {
+                    console.log('✅ Sello cargado correctamente');
+                    renderizarSello(urlData.signedUrl);
+                } else {
+                    console.log('❌ No se pudo generar URL del sello');
+                    renderizarSello(null);
+                }
+
+            } catch (error) {
+                console.error('❌ Error cargando sello del técnico:', error);
+                renderizarSello(null);
+            }
+        }
+
+        /**
          * Renderizar sello del técnico
          */
         function renderizarSello(selloUrl) {
@@ -592,24 +653,31 @@
 
                 // ===== CARGAR FIRMA DEL TÉCNICO =====
                 let firmaBase64 = '';
-                if (controlData.firma_tecnico) {
-                    try {
-                        let storagePath = controlData.firma_tecnico;
-                        if (storagePath.startsWith('workers/')) {
-                            storagePath = storagePath.replace('workers/', '');
-                        }
+                try {
+                    const tecnicoId = controlData.tecnico_id;
+                    console.log('📝 Cargando sello del técnico para PDF:', tecnicoId);
+                    
+                    const { data: files, error: listError } = await supabase.storage
+                        .from('workers')
+                        .list(`${tecnicoId}/sello`);
 
+                    if (!listError && files && files.length > 0) {
+                        const selloFile = files[0];
+                        const selloPath = `${tecnicoId}/sello/${selloFile.name}`;
+                        
                         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
                             .from('workers')
-                            .createSignedUrl(storagePath, 60);
+                            .createSignedUrl(selloPath, 60);
 
                         if (!signedUrlError && signedUrlData?.signedUrl) {
                             firmaBase64 = await urlToBase64(signedUrlData.signedUrl);
-                            console.log('Firma cargada');
+                            console.log('✅ Firma cargada para PDF');
                         }
-                    } catch (error) {
-                        console.error('Error cargando firma:', error);
+                    } else {
+                        console.log('No se encontró sello del técnico');
                     }
+                } catch (error) {
+                    console.error('Error cargando firma:', error);
                 }
 
                 // ===== GENERAR HTML COMPLETO (sin firma, la agregaremos después) =====
