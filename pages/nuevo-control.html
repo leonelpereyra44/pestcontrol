@@ -14,16 +14,18 @@
         <div class="header">
             <div class="header-content">
                 <a href="controles.html" class="btn-back-mobile" aria-label="Volver">
-                    ←
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </a>
                 <div class="header-title">
                     <h1 id="pageTitle">Nuevo Control de Plagas</h1>
                     <p class="current-step-text">Paso <span id="currentStepNumber">1</span> de 5: <span id="currentStepName">Información General</span></p>
                 </div>
                 <button class="wizard-toggle" id="wizardToggle" aria-label="Menú de navegación">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M3 10H17M3 5H17M3 15H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
                 </button>
             </div>
             <a href="controles.html" class="btn btn-secondary btn-back-header">
@@ -35,6 +37,7 @@
         <div class="wizard-steps" id="wizardSteps">
             <div class="wizard-overlay" id="wizardOverlay"></div>
             <div class="wizard-menu" id="wizardMenu">
+                <div class="wizard-drag-handle" aria-hidden="true"></div>
                 <div class="wizard-menu-header">
                     <h3>Pasos del Control</h3>
                     <button class="wizard-close" id="wizardClose">✕</button>
@@ -183,14 +186,15 @@
         
         <!-- Step 3: Puntos de Control -->
         <div class="step-content" data-step="3">
-            <h2>📍 Puntos de Control por Tipo de Plaga</h2>
+            <!-- Ocultos en mobile por CSS para ahorrar espacio visual -->
+            <h2 class="ocultar-mobile">📍 Puntos de Control por Tipo de Plaga</h2>
             
-            <div class="alert alert-info">
+            <div class="alert alert-info ocultar-mobile">
                 <p>💡 Puede dejar secciones vacías si no aplican.</p>
             </div>
             
             <!-- Tabs de Navegación -->
-            <div class="tabs-container">
+            <div class="tabs-container tabs-centradas-mobile">
                 <button class="tab-button active" data-tab="roedores" onclick="cambiarTab('roedores')">
                     🐭 Roedores
                 </button>
@@ -209,7 +213,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cajaNRoedores">Caja N° *</label>
-                        <input type="text" id="cajaNRoedores" class="form-control" placeholder="Número de caja">
+                        <input type="number" id="cajaNRoedores" class="form-control" placeholder="Número de caja" inputmode="numeric" pattern="[0-9]*" min="0" step="1" autocomplete="off">
                     </div>
                     
                     <div class="form-group">
@@ -309,7 +313,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cajaUVVoladores">Caja UV N° *</label>
-                        <input type="text" id="cajaUVVoladores" class="form-control" placeholder="Número de caja UV">
+                        <input type="number" id="cajaUVVoladores" class="form-control" placeholder="Número de caja UV" inputmode="numeric" pattern="[0-9]*" min="0" step="1" autocomplete="off">
                     </div>
                     
                     <div class="form-group">
@@ -385,9 +389,6 @@
             <div style="margin-top: 24px; text-align: center; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                 <button class="btn btn-secondary" onclick="mostrarListaPuntos()">
                     📋 Ver Todos los Puntos
-                </button>
-                <button class="btn btn-danger" onclick="limpiarTodosPuntos()">
-                    🗑️ Limpiar Todos los Puntos
                 </button>
             </div>
             
@@ -557,6 +558,30 @@
                 dataLoader = new DataLoader(supabase, workerProfile);
                 selloManager = new SelloManager(supabase);
                 wizard = new WizardManager();
+                // Enforce numeric-only for Caja N (roedores) and Caja UV (voladores) and show numeric keyboard
+                const enforcers = [
+                    document.getElementById('cajaNRoedores'),
+                    document.getElementById('cajaUVVoladores')
+                ];
+                enforcers.forEach(el => {
+                    if (!el) return;
+                    // sanitize on input
+                    el.addEventListener('input', () => {
+                        // Keep only digits
+                        const digits = el.value.replace(/\D+/g, '');
+                        if (el.value !== digits) el.value = digits;
+                    });
+                    // On blur: normalize to remove leading zeros (e.g., '0012' -> '12', '000' -> '0')
+                    el.addEventListener('blur', () => {
+                        const digits = (el.value || '').replace(/\D+/g, '');
+                        if (digits === '') {
+                            el.value = '';
+                            return;
+                        }
+                        const normalized = String(parseInt(digits, 10));
+                        el.value = isNaN(Number(normalized)) ? '' : normalized;
+                    });
+                });
                 productosManager = new ProductosManager();
                 puntosManager = new PuntosManager();
                 controlManager = new ControlManager(supabase, workerProfile);
@@ -1140,7 +1165,7 @@
                 if (localControlId && !editMode) {
                     await dbManager.sincronizarProductos(localControlId, productosManager.getAll());
                     console.log('✅ Productos guardados en IndexedDB');
-                    mostrarToast(`💾 Producto "${nombre}" guardado en borrador`, 'success', 2000);
+                    mostrarToast(`💾 Producto "${producto.nombre}" guardado en borrador`, 'success', 2000);
                 } else if (editMode) {
                     mostrarToast(`✅ Producto agregado (se guardará al completar)`, 'info', 2000);
                 }
@@ -1524,30 +1549,7 @@
             actualizarVistaPuntos(puntoEliminado.tipo_plaga);
         }
         
-        /**
-         * Limpiar todos los puntos (útil para borrar puntos de prueba)
-         */
-        async function limpiarTodosPuntos() {
-            if (!confirm('⚠️ ¿Está seguro de eliminar TODOS los puntos? Esta acción no se puede deshacer.')) return;
-            
-            // Limpiar el manager
-            while (puntosManager.getAll().length > 0) {
-                puntosManager.eliminar(0);
-            }
-            
-            // Actualizar IndexedDB si estamos en modo draft
-            if (localControlId && !editMode) {
-                await dbManager.sincronizarPuntos(localControlId, []);
-                console.log('✅ Todos los puntos eliminados de IndexedDB');
-            }
-            
-            // Actualizar todas las vistas
-            actualizarVistaPuntos('roedores');
-            actualizarVistaPuntos('voladores');
-            actualizarVistaPuntos('rastreros');
-            
-            alert('✅ Todos los puntos han sido eliminados');
-        }
+        
         
         /**
          * Cambiar tab activo

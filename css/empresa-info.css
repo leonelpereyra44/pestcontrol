@@ -65,6 +65,39 @@ body {
     gap: 0.75rem;
 }
 
+/* Alinear flecha y título en una misma línea */
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Botón back para mobile (estilo chip) */
+.btn-back-mobile {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #f3f4f6; /* gray-100 */
+    border: none;
+    border-radius: 8px;
+    color: #111827; /* text primary */
+    font-size: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-back-mobile:hover {
+    background: #e5e7eb; /* gray-200 */
+}
+
+.btn-back-mobile:active {
+    transform: scale(0.96);
+}
+
 /* ============= CARDS PRINCIPALES ============= */
 .card {
     background: white;
@@ -571,6 +604,12 @@ textarea.form-control {
 
     .header-actions {
         display: none; /* Ocultar botón dashboard en mobile */
+    }
+
+    /* Mostrar botón back en mobile */
+    .btn-back-mobile {
+        display: inline-flex;
+        margin-right: 8px;
     }
 
     .card {

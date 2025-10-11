@@ -76,9 +76,7 @@ class ProductosManager {
                     <div class="item-card-title">${p.nombre}</div>
                     <div class="item-card-subtitle">Cantidad: ${p.cantidad} ${p.unidad}</div>
                 </div>
-                <button class="btn btn-danger btn-sm btn-icon" onclick="productosManager.eliminar(${index})" title="Eliminar producto">
-                    🗑️
-                </button>
+                <button class="btn-icon-sm btn-danger" onclick="productosManager.eliminar(${index})" title="Eliminar producto" aria-label="Eliminar ${p.nombre}">🗑️</button>
             </div>
         `).join('');
     }
