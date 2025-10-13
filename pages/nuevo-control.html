@@ -509,8 +509,6 @@
                 // Esperar a que auth.js se inicialice completamente
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                console.log('🚀 Iniciando aplicación...');
-                
                 // Verificar que authUtils esté disponible
                 if (!window.authUtils) {
                     console.error('❌ authUtils no está disponible');
@@ -518,24 +516,18 @@
                     return;
                 }
                 
-                console.log('✅ Dependencias cargadas correctamente');
-                
                 // Verificar autenticación
                 workerProfile = await window.authUtils.getWorkerProfile();
                 
                 if (!workerProfile) {
-                    console.warn('⚠️ Usuario no autenticado');
                     alert('❌ Debes iniciar sesión primero');
                     window.location.href = 'login.html';
                     return;
                 }
                 
-                console.log('✅ Usuario autenticado:', workerProfile);
-                
                 // Inicializar IndexedDB
                 dbManager = new IndexedDBManager();
                 await dbManager.init();
-                console.log('✅ IndexedDB inicializada');
                 
                 // Detectar modo edición (Supabase) o draft (IndexedDB)
                 const urlParams = new URLSearchParams(window.location.search);
@@ -546,11 +538,9 @@
                 draftMode = !!draftId;
                 
                 if (editMode) {
-                    console.log('📝 Modo edición - Control ID:', currentControlId);
                     document.getElementById('pageTitle').textContent = '✏️ Editar Control de Plagas';
                     document.getElementById('btnCompletarText').textContent = '💾 Actualizar Control';
                 } else if (draftMode) {
-                    console.log('📄 Modo borrador - Draft ID:', draftId);
                     localControlId = parseInt(draftId);
                     document.getElementById('pageTitle').textContent = '📄 Continuar Control';
                 }
@@ -587,8 +577,6 @@
                 puntosManager = new PuntosManager();
                 controlManager = new ControlManager(supabase, workerProfile);
                 
-                console.log('✅ Managers inicializados');
-                
                 // Cargar datos iniciales
                 await inicializarFormulario();
                 
@@ -603,8 +591,6 @@
                 
                 // Configurar event listeners
                 configurarEventListeners();
-                
-                console.log('✅ Aplicación lista');
                 
             } catch (error) {
                 console.error('❌ Error en inicialización:', error);
@@ -632,8 +618,6 @@
                 // Establecer fecha actual
                 document.getElementById('fechaControl').valueAsDate = new Date();
                 
-                console.log('✅ Formulario inicializado');
-                
             } catch (error) {
                 console.error('❌ Error inicializando formulario:', error);
                 throw error;
@@ -645,11 +629,8 @@
          */
         async function cargarControlExistente(controlId) {
             try {
-                console.log('📥 Cargando control existente:', controlId);
-                
                 // Activar modo edición
                 editMode = true;
-                console.log('✅ Modo edición activado');
                 
                 // 1. Cargar datos del control
                 const { data: control, error: controlError } = await supabase
@@ -665,8 +646,6 @@
                 
                 if (controlError) throw controlError;
                 if (!control) throw new Error('Control no encontrado');
-                
-                console.log('✅ Control cargado:', control);
                 
                 // 2. Pre-llenar formulario (DESPUÉS de que dataLoader haya cargado los selects)
                 // Esperar a que los selects estén poblados verificando que tengan opciones
@@ -694,15 +673,6 @@
                 document.getElementById('tipoControl').value = control.tipo_control;
                 document.getElementById('observaciones').value = control.observaciones || '';
                 document.getElementById('tecnicoId').value = control.tecnico_id;
-                
-                console.log('📝 Valores asignados al formulario:', {
-                    cliente_id: control.cliente_id,
-                    fecha: control.fecha_control.split('T')[0],
-                    tipo: control.tipo_control,
-                    tecnico: control.tecnico_id,
-                    clienteSelect_value: document.getElementById('clienteId').value,
-                    tecnicoSelect_value: document.getElementById('tecnicoId').value
-                });
                 
                 // Cargar plantas del cliente seleccionado
                 if (control.cliente_id) {
@@ -850,16 +820,12 @@
          */
         async function cargarControlDraft(localId) {
             try {
-                console.log('📥 Cargando control draft desde IndexedDB:', localId);
-                
                 // 1. Cargar datos del control
                 const control = await dbManager.obtenerControl(localId);
                 
                 if (!control) {
                     throw new Error('Control draft no encontrado en IndexedDB');
                 }
-                
-                console.log('✅ Control draft cargado:', control);
                 
                 // Guardar datos del control actual
                 currentControlData = control;
@@ -951,13 +917,6 @@
                 const fechaControl = document.getElementById('fechaControl').value;
                 const tipoControl = document.getElementById('tipoControl').value;
                 
-                console.log('📋 Valores del formulario:', {
-                    clienteId,
-                    plantaId,
-                    tecnicoId,
-                    fechaControl,
-                    tipoControl
-                });
                 
                 if (!clienteId || clienteId === '') {
                     alert('⚠️ Debe seleccionar un cliente');
@@ -1302,8 +1261,6 @@
                         consumo: consumo,
                         reposicion: reposicion
                     };
-                    
-                    console.log('✅ Punto creado para roedores:', punto);
                 }
                 
                 puntosManager.agregar(punto);
@@ -1311,8 +1268,6 @@
                 // Guardar en IndexedDB si estamos en modo draft
                 if (localControlId && !editMode) {
                     await dbManager.sincronizarPuntos(localControlId, puntosManager.getAll());
-                    console.log('✅ Puntos guardados en IndexedDB');
-                    console.log(`📊 Total de puntos en borrador: ${puntosManager.getAll().length}`);
                     
                     // Mostrar notificación
                     const tipoNombre = {
@@ -1810,31 +1765,13 @@
             try {
                 // Siempre recopilar datos del formulario (funciona para edición y nuevos)
                 const formData = controlManager.recopilarDatosFormulario();
-                console.log('📋 Datos recopilados del formulario:', formData);
-                console.log('🔍 Valores individuales:', {
-                    cliente_id: formData.cliente_id,
-                    cliente_id_type: typeof formData.cliente_id,
-                    cliente_id_isNaN: isNaN(formData.cliente_id),
-                    tecnico_id: formData.tecnico_id,
-                    tecnico_id_type: typeof formData.tecnico_id,
-                    fecha_control: formData.fecha_control,
-                    tipo_control: formData.tipo_control
-                });
                 
                 // Validar que hay datos mínimos
                 if (!formData.cliente_id || !formData.tecnico_id || !formData.fecha_control || !formData.tipo_control) {
-                    console.error('❌ Validación fallida. Valores:', {
-                        cliente_id: formData.cliente_id,
-                        tecnico_id: formData.tecnico_id,
-                        fecha_control: formData.fecha_control,
-                        tipo_control: formData.tipo_control
-                    });
                     alert('⚠️ Complete la información básica del control en el Paso 1');
                     wizard.goToStep(1);
                     return;
                 }
-                
-                console.log(editMode ? '💾 Actualizando control en Supabase...' : '💾 Completando control y subiendo a Supabase...');
                 
                 // Obtener productos y puntos
                 const productos = productosManager.getAll();
@@ -1920,7 +1857,6 @@
                         puntosPreparados,
                         selloUrl
                     );
-                    console.log('✅ Control actualizado en Supabase con ID:', control.control_id);
                     alert('✅ Control actualizado exitosamente');
                 } else {
                     // Modo nuevo: subir a Supabase
@@ -1930,12 +1866,10 @@
                         puntosPreparados,
                         selloUrl
                     );
-                    console.log('✅ Control completado y subido a Supabase con ID:', control.control_id);
                     
                     // Eliminar draft de IndexedDB si existe
                     if (localControlId) {
                         await dbManager.eliminarControl(localControlId);
-                        console.log('✅ Borrador eliminado de IndexedDB');
                     }
                     
                     alert('✅ Control completado exitosamente');

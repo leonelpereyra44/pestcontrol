@@ -40,7 +40,6 @@ class PuntosManager {
             actividad_detectada: punto.estado === 'con_actividad'
         });
         
-        console.log(`✅ Punto #${numeroFinal} agregado con campos:`, Object.keys(punto));
         this.renderizar();
     }
 
@@ -49,8 +48,7 @@ class PuntosManager {
      */
     eliminar(index) {
         if (index >= 0 && index < this.puntos.length) {
-            const eliminado = this.puntos.splice(index, 1)[0];
-            console.log(`🗑️ Punto #${eliminado.numero} eliminado`);
+            this.puntos.splice(index, 1);
             this.renderizar();
         }
     }

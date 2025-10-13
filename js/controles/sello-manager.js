@@ -15,8 +15,6 @@ class SelloManager {
      */
     async cargarSello(tecnicoId) {
         try {
-            console.log('🔍 Cargando sello del técnico:', tecnicoId);
-            
             if (!tecnicoId) {
                 this.mostrarPlaceholder('Seleccione un técnico');
                 return null;
@@ -24,7 +22,6 @@ class SelloManager {
 
             // Listar archivos en: workers/{worker_id}/sello/
             const selloFolder = `${tecnicoId}/sello`;
-            console.log(`� Buscando en: bucket='workers', carpeta='${selloFolder}'`);
             
             const { data: files, error: listError } = await this.supabase.storage
                 .from('workers')
@@ -36,17 +33,13 @@ class SelloManager {
                 return null;
             }
             
-            console.log('📁 Archivos encontrados:', files);
-            
             if (!files || files.length === 0) {
-                console.warn('⚠️ No se encontró sello para este técnico');
                 this.mostrarError('Este técnico no tiene sello cargado');
                 return null;
             }
             
             // Usar el primer archivo encontrado
             const selloPath = `${tecnicoId}/sello/${files[0].name}`;
-            console.log('🎯 Ruta del sello:', selloPath);
             
             // Obtener URL firmada (válida por 1 hora)
             const { data: urlData, error: urlError } = await this.supabase.storage
@@ -59,15 +52,12 @@ class SelloManager {
                 return null;
             }
             
-            console.log('🌐 URL firmada generada:', urlData.signedUrl);
-            
             // Guardar ruta para uso posterior
             this.selloUrl = selloPath;
             
             // Mostrar imagen
             this.mostrarImagen(urlData.signedUrl);
             
-            console.log('✅ Sello cargado exitosamente');
             return selloPath;
             
         } catch (error) {
@@ -81,28 +71,15 @@ class SelloManager {
      * Mostrar la imagen del sello en el DOM
      */
     mostrarImagen(url) {
-        console.log('🖼️ mostrarImagen() llamado con URL:', url);
-        
         // Actualizar en el paso 5 (final)
         const img = document.getElementById('selloTecnicoImg');
         const placeholder = document.getElementById('selloTecnicoPlaceholder');
         
-        console.log('🔍 Elementos encontrados:', {
-            img: img ? 'SÍ' : 'NO',
-            placeholder: placeholder ? 'SÍ' : 'NO'
-        });
-        
         if (img && placeholder) {
             img.src = url;
             img.style.display = 'block';
-            img.classList.remove('hidden'); // Remover clase hidden
+            img.classList.remove('hidden');
             placeholder.style.display = 'none';
-            console.log('✅ Imagen del sello actualizada en paso 5');
-            console.log('📸 URL de la imagen:', img.src);
-            console.log('🎨 Display de imagen:', img.style.display);
-            console.log('🎨 Classes de imagen:', img.className);
-        } else {
-            console.warn('⚠️ No se encontraron elementos del sello en paso 5');
         }
         
         // Actualizar preview en el paso 1
@@ -110,21 +87,12 @@ class SelloManager {
         const previewPlaceholder = document.getElementById('selloPreviewPlaceholder');
         const previewContainer = document.getElementById('selloPreviewContainer');
         
-        console.log('🔍 Elementos preview encontrados:', {
-            previewImg: previewImg ? 'SÍ' : 'NO',
-            previewPlaceholder: previewPlaceholder ? 'SÍ' : 'NO',
-            previewContainer: previewContainer ? 'SÍ' : 'NO'
-        });
-        
         if (previewImg && previewPlaceholder && previewContainer) {
             previewImg.src = url;
             previewImg.style.display = 'block';
             previewImg.classList.remove('hidden');
             previewPlaceholder.style.display = 'none';
             previewContainer.style.display = 'block';
-            console.log('✅ Preview del sello actualizado en paso 1');
-        } else {
-            console.warn('⚠️ No se encontraron elementos del preview del sello');
         }
     }
 

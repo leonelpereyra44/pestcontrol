@@ -13,12 +13,6 @@ class ControlManager {
      */
     async guardar(formData, productos, puntos, selloUrl) {
         try {
-            console.log('💾 Iniciando guardado de control...');
-            console.log('📋 Datos del formulario:', formData);
-            console.log('🧪 Productos:', productos.length);
-            console.log('📍 Puntos:', puntos.length);
-            console.log('🔖 Sello:', selloUrl);
-            
             // Validar datos obligatorios
             if (!formData.cliente_id || !formData.tecnico_id) {
                 throw new Error('Faltan datos obligatorios');
@@ -38,7 +32,6 @@ class ControlManager {
                 completed_at: new Date().toISOString()
             };
             
-            console.log('📝 Insertando control...');
             const { data: control, error: controlError } = await this.supabase
                 .from('controles')
                 .insert([controlData])
@@ -50,13 +43,8 @@ class ControlManager {
                 throw controlError;
             }
             
-            console.log('✅ Control creado con ID:', control.control_id);
-            
             // 2. Guardar productos si hay
             if (productos.length > 0) {
-                console.log('📦 Guardando productos...');
-                
-                // Asignar el control_id real a cada producto
                 const productosConId = productos.map(p => ({
                     ...p,
                     control_id: control.control_id
@@ -70,15 +58,10 @@ class ControlManager {
                     console.error('❌ Error guardando productos:', prodError);
                     throw prodError;
                 }
-                
-                console.log(`✅ ${productos.length} productos guardados`);
             }
             
             // 3. Guardar puntos si hay
             if (puntos.length > 0) {
-                console.log('📍 Guardando puntos de control...');
-                
-                // Asignar el control_id real a cada punto
                 const puntosConId = puntos.map(p => ({
                     ...p,
                     control_id: control.control_id
@@ -92,11 +75,8 @@ class ControlManager {
                     console.error('❌ Error guardando puntos:', puntosError);
                     throw puntosError;
                 }
-                
-                console.log(`✅ ${puntos.length} puntos guardados`);
             }
             
-            console.log('🎉 Control guardado exitosamente');
             return control;
             
         } catch (error) {
@@ -116,17 +96,8 @@ class ControlManager {
         const tipoValue = document.getElementById('tipoControl')?.value;
         const observacionesValue = document.querySelector('textarea[placeholder*="observaciones"]')?.value || '';
         
-        console.log('📋 Recopilando datos del formulario:', {
-            clienteValue,
-            plantaValue,
-            tecnicoValue,
-            fechaValue,
-            tipoValue,
-            observacionesValue
-        });
-        
         // NOTA: No usar parseInt() porque son UUIDs, no integers
-        const formData = {
+        return {
             cliente_id: clienteValue,
             planta_id: plantaValue || null,
             tecnico_id: tecnicoValue,
@@ -134,10 +105,6 @@ class ControlManager {
             tipo_control: tipoValue,
             observaciones: observacionesValue
         };
-        
-        console.log('✅ Datos recopilados (UUIDs preservados):', formData);
-        
-        return formData;
     }
 
     /**
@@ -145,13 +112,6 @@ class ControlManager {
      */
     async actualizar(controlId, formData, productos, puntos, selloUrl) {
         try {
-            console.log('💾 Iniciando actualización de control...');
-            console.log('📋 Control ID:', controlId);
-            console.log('📋 Datos del formulario:', formData);
-            console.log('🧪 Productos:', productos.length);
-            console.log('📍 Puntos:', puntos.length);
-            console.log('🔖 Sello:', selloUrl);
-            
             // Validar datos obligatorios
             if (!formData.cliente_id || !formData.tecnico_id) {
                 throw new Error('Faltan datos obligatorios');
@@ -170,7 +130,6 @@ class ControlManager {
                 completed_at: new Date().toISOString()
             };
             
-            console.log('📝 Actualizando control...');
             const { data: control, error: controlError } = await this.supabase
                 .from('controles')
                 .update(controlData)
@@ -183,11 +142,7 @@ class ControlManager {
                 throw controlError;
             }
             
-            console.log('✅ Control actualizado');
-            
             // 2. Eliminar productos y puntos existentes
-            console.log('🗑️ Eliminando productos y puntos existentes...');
-            
             const { data: deletedProds, error: deleteProdError } = await this.supabase
                 .from('control_productos')
                 .delete()
@@ -198,8 +153,6 @@ class ControlManager {
                 console.error('❌ Error eliminando productos:', deleteProdError);
                 throw deleteProdError;
             }
-            
-            console.log(`✅ ${deletedProds?.length || 0} productos eliminados`);
             
             const { data: deletedPuntos, error: deletePuntosError } = await this.supabase
                 .from('control_puntos')
@@ -212,12 +165,8 @@ class ControlManager {
                 throw deletePuntosError;
             }
             
-            console.log(`✅ ${deletedPuntos?.length || 0} puntos eliminados`);
-            
             // 3. Insertar nuevos productos si hay
             if (productos.length > 0) {
-                console.log('📦 Guardando productos...');
-                
                 // Excluir explícitamente el campo 'id' para evitar duplicados
                 const productosConId = productos.map(p => ({
                     control_id: controlId,
@@ -226,25 +175,18 @@ class ControlManager {
                     unidad: p.unidad
                 }));
                 
-                console.log('📋 Productos a insertar:', JSON.stringify(productosConId, null, 2));
-                
                 const { error: prodError } = await this.supabase
                     .from('control_productos')
                     .insert(productosConId);
                 
                 if (prodError) {
                     console.error('❌ Error guardando productos:', prodError);
-                    console.error('❌ Detalle del error:', JSON.stringify(prodError, null, 2));
                     throw prodError;
                 }
-                
-                console.log(`✅ ${productos.length} productos guardados`);
             }
             
             // 4. Insertar nuevos puntos si hay
             if (puntos.length > 0) {
-                console.log('📍 Guardando puntos de control...');
-                
                 // Excluir explícitamente el campo 'id' para evitar duplicados
                 const puntosConId = puntos.map(p => ({
                     control_id: controlId,
@@ -266,15 +208,12 @@ class ControlManager {
                     console.error('❌ Error guardando puntos:', puntosError);
                     throw puntosError;
                 }
-                
-                console.log(`✅ ${puntos.length} puntos guardados`);
             }
             
-            console.log('🎉 Control actualizado exitosamente');
             return control;
             
         } catch (error) {
-            console.error('❌ Error en actualizarControl:', error);
+            console.error('❌ Error actualizando control:', error);
             throw error;
         }
     }

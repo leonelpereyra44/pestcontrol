@@ -28,7 +28,6 @@ class ProductosManager {
             unidad: producto.unidad
         });
         
-        console.log('✅ Producto agregado:', producto.nombre);
         this.renderizar();
     }
 
@@ -37,8 +36,7 @@ class ProductosManager {
      */
     eliminar(index) {
         if (index >= 0 && index < this.productos.length) {
-            const eliminado = this.productos.splice(index, 1)[0];
-            console.log('🗑️ Producto eliminado:', eliminado.nombre);
+            this.productos.splice(index, 1);
             this.renderizar();
         }
     }
