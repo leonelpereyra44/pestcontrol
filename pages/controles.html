@@ -136,11 +136,14 @@
 
     <script src="../js/controles/indexeddb-manager.js"></script>
     <script>
-        // Usar el cliente de Supabase del auth.js
-        const supabase = window.supabaseClient || supabase.createClient(
-            'https://rrgxvwttarkcxqfekfeb.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ'
-        );
+        // Usar el cliente de Supabase del auth.js o crear con APP_CONFIG
+        const supabase = window.supabaseClient || (function() {
+            const { SUPABASE_URL, SUPABASE_ANON_KEY } = (window.APP_CONFIG || {})
+            if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+                throw new Error('Falta configuración de Supabase. Carga ts/config.js antes de usar Supabase.')
+            }
+            return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        })();
 
         let controles = [];
         let clientes = [];
