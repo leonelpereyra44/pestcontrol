@@ -647,6 +647,10 @@
             try {
                 console.log('📥 Cargando control existente:', controlId);
                 
+                // Activar modo edición
+                editMode = true;
+                console.log('✅ Modo edición activado');
+                
                 // 1. Cargar datos del control
                 const { data: control, error: controlError } = await supabase
                     .from('controles')
@@ -755,7 +759,7 @@
                         producto:productos!control_productos_producto_id_fkey(
                             producto_id,
                             nombre,
-                            tipo,
+                            tipo_producto,
                             unidad_medida
                         )
                     `)
@@ -769,7 +773,7 @@
                         productosManager.agregar({
                             producto_id: p.producto_id,
                             nombre: p.producto?.nombre,
-                            tipo: p.producto?.tipo_producto || p.producto?.tipo,
+                            tipo: p.producto?.tipo_producto,
                             cantidad: p.cantidad_usada,
                             unidad: p.unidad
                         });

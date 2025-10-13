@@ -188,36 +188,45 @@ class ControlManager {
             // 2. Eliminar productos y puntos existentes
             console.log('🗑️ Eliminando productos y puntos existentes...');
             
-            const { error: deleteProdError } = await this.supabase
+            const { data: deletedProds, error: deleteProdError } = await this.supabase
                 .from('control_productos')
                 .delete()
-                .eq('control_id', controlId);
+                .eq('control_id', controlId)
+                .select();
             
             if (deleteProdError) {
                 console.error('❌ Error eliminando productos:', deleteProdError);
                 throw deleteProdError;
             }
             
-            const { error: deletePuntosError } = await this.supabase
+            console.log(`✅ ${deletedProds?.length || 0} productos eliminados`);
+            
+            const { data: deletedPuntos, error: deletePuntosError } = await this.supabase
                 .from('control_puntos')
                 .delete()
-                .eq('control_id', controlId);
+                .eq('control_id', controlId)
+                .select();
             
             if (deletePuntosError) {
                 console.error('❌ Error eliminando puntos:', deletePuntosError);
                 throw deletePuntosError;
             }
             
-            console.log('✅ Productos y puntos eliminados');
+            console.log(`✅ ${deletedPuntos?.length || 0} puntos eliminados`);
             
             // 3. Insertar nuevos productos si hay
             if (productos.length > 0) {
                 console.log('📦 Guardando productos...');
                 
+                // Excluir explícitamente el campo 'id' para evitar duplicados
                 const productosConId = productos.map(p => ({
-                    ...p,
-                    control_id: controlId
+                    control_id: controlId,
+                    producto_id: p.producto_id,
+                    cantidad_usada: p.cantidad_usada || p.cantidad,
+                    unidad: p.unidad
                 }));
+                
+                console.log('📋 Productos a insertar:', JSON.stringify(productosConId, null, 2));
                 
                 const { error: prodError } = await this.supabase
                     .from('control_productos')
@@ -225,6 +234,7 @@ class ControlManager {
                 
                 if (prodError) {
                     console.error('❌ Error guardando productos:', prodError);
+                    console.error('❌ Detalle del error:', JSON.stringify(prodError, null, 2));
                     throw prodError;
                 }
                 
@@ -235,9 +245,17 @@ class ControlManager {
             if (puntos.length > 0) {
                 console.log('📍 Guardando puntos de control...');
                 
+                // Excluir explícitamente el campo 'id' para evitar duplicados
                 const puntosConId = puntos.map(p => ({
-                    ...p,
-                    control_id: controlId
+                    control_id: controlId,
+                    numero_punto: p.numero_punto,
+                    tipo_plaga: p.tipo_plaga,
+                    tipo_dispositivo: p.tipo_dispositivo,
+                    ubicacion: p.ubicacion,
+                    estado: p.estado,
+                    actividad_detectada: p.actividad_detectada,
+                    descripcion_actividad: p.descripcion_actividad,
+                    accion_realizada: p.accion_realizada
                 }));
                 
                 const { error: puntosError } = await this.supabase

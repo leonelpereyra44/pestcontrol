@@ -15,6 +15,12 @@ class ProductosManager {
             throw new Error('Datos de producto inválidos');
         }
         
+        // Validar que no exista el mismo producto ya agregado
+        const yaExiste = this.productos.some(p => p.producto_id === producto.producto_id);
+        if (yaExiste) {
+            throw new Error(`El producto "${producto.nombre}" ya está agregado. Si desea cambiar la cantidad, elimínelo primero.`);
+        }
+        
         this.productos.push({
             producto_id: producto.producto_id,
             nombre: producto.nombre,
