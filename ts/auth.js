@@ -1,7 +1,9 @@
 // Configuración de Supabase
 console.log('🔧 Loading auth.js...')
-const SUPABASE_URL = "https://rrgxvwttarkcxqfekfeb.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZ3h2d3R0YXJrY3hxZmVrZmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTE1MjUsImV4cCI6MjA3NDkyNzUyNX0.xYEQV8ZkW9h99psdqTU2XpGicDGHs7q6M8V7lq35ryQ"
+const { SUPABASE_URL, SUPABASE_ANON_KEY } = (window.APP_CONFIG || {})
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('❌ Missing Supabase config. Asegúrate de cargar ts/config.js antes de auth.js o generar ts/config.js en build.')
+}
 
 // Crear cliente de Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
